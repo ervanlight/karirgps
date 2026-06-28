@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       const errData = await response.json().catch(() => ({}))
       console.error('Midtrans error:', errData)
       return NextResponse.json(
-        { error: 'Gagal membuat transaksi pembayaran', detail: errData, status: response.status },
+        { error: 'Gagal membuat transaksi pembayaran' },
         { status: 500 }
       )
     }
