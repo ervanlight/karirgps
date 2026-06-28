@@ -26,13 +26,31 @@ Alur lengkap sudah berhasil divalidasi: Register/Login (wajib) → isi tes D1-D4
 11. `maxDuration` di route yang panggil Claude harus besar: `app/api/webhook/midtrans/route.ts` = 290s, `app/api/laporan/route.ts` = 290s. Total proses (laporan siswa + laporan ortu + simpan DB + kirim email) bisa 150-220 detik.
 12. Insert/update row `reports` di webhook WAJIB isi `user_id` — kalau kosong, RLS policy `"Users can view own reports" using (auth.uid() = user_id)` tidak akan pernah match, dan user tidak bisa baca laporannya sendiri dari browser.
 
-## Fase 1 (DevPlan) — Task 1.1 Web Report Rendering: SELESAI
-Dibuat halaman `/laporan/[id]` yang membaca `test_sessions` + `reports` langsung dari Supabase (RLS by `user_id`) — tidak bergantung pada Zustand/localStorage. Jadi laporan bisa diakses kapan saja, dari device manapun, selama user login dengan akun yang sama.
+## FASE 1 (DevPlan) — SELESAI (semua 8 kriteria checklist terpenuhi)
+Dikerjakan dalam satu rangkaian sesi, deployed ke production (`https://karirgps-ervans-projects-5bd9c2a5.vercel.app`), dan diverifikasi end-to-end langsung di production (bukan hanya build check).
+
+**Task 1.1 — Web Report Rendering.** Halaman baru `/laporan/[id]` membaca `test_sessions` + `reports` langsung dari Supabase (RLS by `user_id`) — TIDAK bergantung Zustand/localStorage lagi. Laporan bisa diakses kapan saja, dari device manapun, selama login dengan akun yang sama.
 - Logika rekomendasi gratis (PROFIL_TEXT, JURUSAN_MAP, PROFESI_MAP, ScoreBar) diekstrak ke `lib/rekomendasi-gratis.tsx` — dipakai bersama oleh `/hasil` dan `/laporan/[id]`.
 - Callback Midtrans (`app/api/bayar/route.ts`) sekarang redirect ke `/laporan/{session_id}?status=...` bukan `/hasil?...`.
-- `/hasil` tetap dipakai untuk flow tes selesai → preview gratis → bayar (sebelum session benar2 "paid"); begitu bayar sukses, redirect ke `/laporan/[id]` untuk akses permanen.
+- `/hasil` tetap dipakai untuk flow tes selesai → preview gratis → bayar (sebelum session "paid"); begitu bayar sukses, redirect ke `/laporan/[id]` untuk akses permanen.
 - `middleware.ts` sudah menambahkan `/laporan` ke auth gate.
-- Belum dikerjakan dari Task 1.1: tombol "Kirim Ulang ke Email" (opsional — devplan tulis "Download PDF *atau* Kirim Ulang", Download PDF sudah ada).
+- Belum dikerjakan: tombol "Kirim Ulang ke Email" (opsional — devplan tulis "Download PDF *atau* Kirim Ulang", Download PDF sudah ada).
+
+**Task 1.2 — Mobile UX Polish.** Semua touch target dinaikkan ke minimal 44px (`SkalaItem`, `SkenarioCard`, tombol nav `TesLayout`, form auth). Progress counter per-blok (Blok A/Blok B) ditambahkan di D1-D3. Teks transisi antar dimensi diganti dengan copy resmi dari devplan (persis, bukan paraphrase) di intro D2/D3/D4. Loading state generate laporan pakai copy brand voice resmi. Diverifikasi visual via screenshot mobile 375px (landing, register, D1-D4) — tidak ada overflow, semua tampil rapi.
+
+**Task 1.3 — Error Handling Robust.** `/api/bayar` dan `/api/laporan` sekarang wajib login (`lib/supabase-server.ts` — cookie-aware server client) + verifikasi ownership session, supaya tidak bisa di-spam orang lain (boros Claude API/Midtrans). Polling laporan di `/hasil` dan `/laporan/[id]` sekarang punya state timeout eksplisit (>5 menit) dengan pesan manusiawi + tombol "Muat ulang halaman" alih-alih diam tanpa keterangan. Idempotency webhook **sudah diverifikasi langsung di production**: kirim webhook 2x dengan session sama → kedua kalinya `action: "already_paid"`, tidak ada laporan dobel atau panggilan Claude API dobel.
+
+**Task 1.4 — Production Midtrans Switch.** Sudah ada sejak sebelumnya (`MIDTRANS_IS_PRODUCTION` / `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION`, tidak pakai `NODE_ENV`) — diverifikasi ulang, sudah aman, didokumentasikan di `.env.example`. Belum diaktifkan (masih `false` / sandbox) — itu memang keputusan bisnis terpisah, bukan blocker Fase 1.
+
+**Task 1.5 — Landing Page & SEO.** `app/layout.tsx` diubah dari client component jadi server component supaya bisa pakai Next.js Metadata API (title, description, keywords, Open Graph, Twitter card). `app/page.tsx` juga jadi server component (lebih ringan — bundle JS landing page turun dari ~2KB ke 175B) dengan metadata spesifik + section FAQ baru (4 pertanyaan: durasi, harga, isi laporan, bukan pengganti psikolog).
+
+### Verifikasi E2E yang sudah dijalankan (bukan asumsi)
+1. `npm run build` sukses di setiap tahap.
+2. Screenshot mobile 375px untuk landing, register, D1, D2 (cek teks transisi), D3 (cek teks transisi), D4.
+3. Signup + isi sebagian tes via browser preview — konfirmasi UI jalan, lalu data test dihapus dari Supabase.
+4. **Simulasi pembayaran sungguhan di production**: insert `test_sessions` dengan `profil_data` lengkap → panggil `/api/webhook/midtrans` dengan signature SHA512 valid → laporan AI ter-generate (3 jurusan, 5 profesi) dan tersimpan dengan `payment_status: 'paid'` dan `user_id` terisi benar.
+5. **Tes idempotency sungguhan**: webhook dipanggil ulang untuk session yang sama → `action: "already_paid"`, tidak generate ulang.
+6. Semua data test (user, session, report) dihapus lagi setelah verifikasi — tidak ada sisa data QA di production.
 
 ## Yang BELUM beres / perlu dilanjutkan
 1. **Email via Resend belum konfirmasi terkirim** — laporan sudah tampil di web (jalur utama jalan), tapi email belum masuk ke inbox user di test terakhir. Perlu didiagnosis:
@@ -43,7 +61,7 @@ Dibuat halaman `/laporan/[id]` yang membaca `test_sessions` + `reports` langsung
 2. **Midtrans masih sandbox** — belum siap terima pembayaran asli. Untuk go-live: ganti `MIDTRANS_SERVER_KEY`/`NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` ke production key, set `MIDTRANS_IS_PRODUCTION=true` & `NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION=true`, lalu setel ulang Payment Notification URL di dashboard PRODUCTION Midtrans (https://dashboard.midtrans.com, beda dari sandbox).
 3. **Belum ada domain custom** — masih pakai `karirgps-ervans-projects-5bd9c2a5.vercel.app`. Kalau user sudah punya domain `karirgps.id`, perlu dipasang di Vercel + update `NEXT_PUBLIC_BASE_URL`.
 4. **`/api/laporan` (mode `full`) sekarang cuma untuk regenerasi manual** — tidak lagi dipanggil di jalur utama. Bisa dihapus kalau memang tidak dipakai, atau dibiarkan untuk keperluan admin/debug.
-5. Belum ada testing untuk skenario: pembayaran pending/gagal, user retry bayar untuk session yang sama, atau laporan yang gagal di-generate (perlu cek apakah ada fallback/retry yang baik kalau Claude API down).
+5. Webhook idempotency **sudah diverifikasi langsung** (lihat Fase 1 di atas). Yang masih belum: skenario pembayaran pending/gagal lewat Snap UI sungguhan (belum ada akses Chrome extension untuk drive browser saat sesi ini berjalan), dan skenario Claude API benar-benar down (sudah ada UI timeout-nya, tapi belum disimulasikan live).
 6. File `test_profiles.py` di root project belum pernah dijalankan ulang untuk validasi kualitas laporan AI (lihat `DEPLOY.md` — target skor rata-rata ≥85% sebelum launch sungguhan).
 
 ## File-file kunci untuk dibaca duluan kalau lanjut development
