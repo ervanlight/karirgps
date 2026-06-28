@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase'
 import { kirimLaporan } from '@/lib/email'
-import type { LaporanSiswa, LaporanOrangTua, RiasecCode, MICode, WorkValueCode } from '@/types'
+import { generateLaporanLengkap } from '@/lib/laporan'
+import type { ProfilData, RiasecCode, MICode, WorkValueCode } from '@/types'
 
 // ============================================================
 // MIDTRANS PAYMENT WEBHOOK
 // Docs: https://docs.midtrans.com/reference/handling-notifications
+//
+// Laporan AI lengkap (2x panggilan Claude, ~60-90 detik) sengaja
+// di-generate DI SINI — bukan saat user klik "Bayar" — karena ini
+// berjalan server-to-server tanpa user menunggu di browser.
 // ============================================================
+
+export const maxDuration = 180
 
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY!
 
@@ -61,23 +68,53 @@ export async function POST(request: NextRequest) {
 
     // 3. Hanya proses jika settlement atau capture (pembayaran berhasil)
     if (transaction_status === 'settlement' || transaction_status === 'capture') {
-      
-      // Update report status
-      const { data: reportData, error: reportError } = await supabase
+
+      // Idempotency — Midtrans bisa mengirim notifikasi yang sama berkali-kali.
+      // Kalau sudah pernah diproses sebagai 'paid', jangan generate ulang & kirim email dobel.
+      const { data: existingReport } = await supabase
         .from('reports')
-        .update({
-          payment_status: 'paid',
-          payment_id: transaction_id,
-          payment_method: payment_type,
-          paid_at: new Date().toISOString(),
-        })
+        .select('id, payment_status')
         .eq('session_id', sessionId)
-        .select('laporan_siswa, laporan_ortu, session_id')
+        .maybeSingle()
+
+      if (existingReport?.payment_status === 'paid') {
+        return NextResponse.json({ status: 'ok', action: 'already_paid' })
+      }
+
+      // Ambil profil_data yang disimpan saat user menyelesaikan tes
+      const { data: sessionData, error: sessionError } = await supabase
+        .from('test_sessions')
+        .select('user_id, profil_data')
+        .eq('id', sessionId)
         .single()
 
+      if (sessionError || !sessionData?.profil_data) {
+        console.error('Session/profil tidak ditemukan untuk sessionId:', sessionId, sessionError)
+        return NextResponse.json({ error: 'Session tidak ditemukan' }, { status: 404 })
+      }
+
+      const profil = sessionData.profil_data as ProfilData
+
+      // 4. Generate laporan AI lengkap (siswa + orang tua) — proses lambat (~60-90s),
+      //    aman dilakukan di sini karena ini server-to-server, bukan menunggu klik user.
+      const { laporanSiswa, laporanOrtu } = await generateLaporanLengkap(profil)
+
+      const reportPayload = {
+        laporan_siswa: laporanSiswa,
+        laporan_ortu: laporanOrtu,
+        payment_status: 'paid' as const,
+        payment_id: transaction_id,
+        payment_method: payment_type,
+        paid_at: new Date().toISOString(),
+      }
+
+      const reportError = existingReport
+        ? (await supabase.from('reports').update(reportPayload).eq('id', existingReport.id)).error
+        : (await supabase.from('reports').insert({ session_id: sessionId, ...reportPayload })).error
+
       if (reportError) {
-        console.error('Report update error:', reportError)
-        return NextResponse.json({ error: 'Report update failed' }, { status: 500 })
+        console.error('Report save error:', reportError)
+        return NextResponse.json({ error: 'Report save failed' }, { status: 500 })
       }
 
       // Update session status
@@ -86,27 +123,20 @@ export async function POST(request: NextRequest) {
         .update({ status: 'paid' })
         .eq('id', sessionId)
 
-      // 4. Ambil user email + profil data untuk pengiriman laporan
-      const { data: sessionData } = await supabase
-        .from('test_sessions')
-        .select('user_id, profil_data')
-        .eq('id', sessionId)
-        .single()
-
-      if (sessionData?.user_id) {
+      // 5. Kirim email laporan ke user
+      if (sessionData.user_id) {
         const { data: userData } = await supabase.auth.admin.getUserById(sessionData.user_id)
         const email = userData?.user?.email
 
-        if (email && reportData?.laporan_siswa && reportData?.laporan_ortu) {
-          const profil = sessionData.profil_data
-          const hollandCode = profil?.d1_riasec?.holland_code || []
-          const miProfile = profil?.d2_mi?.mi_profile || []
-          const wvProfile = profil?.d3_workvalues?.values_profile || []
+        if (email) {
+          const hollandCode = profil.d1_riasec?.holland_code || []
+          const miProfile = profil.d2_mi?.mi_profile || []
+          const wvProfile = profil.d3_workvalues?.values_profile || []
 
           const emailResult = await kirimLaporan({
             toEmail: email,
-            laporan: reportData.laporan_siswa as LaporanSiswa,
-            laporanOrtu: reportData.laporan_ortu as LaporanOrangTua,
+            laporan: laporanSiswa,
+            laporanOrtu,
             hollandCode: hollandCode as RiasecCode[],
             miProfile: miProfile as MICode[],
             wvProfile: wvProfile as WorkValueCode[],

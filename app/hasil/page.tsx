@@ -1,6 +1,6 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
 import { createClient } from '@/lib/supabase'
@@ -95,7 +95,17 @@ const FITUR_PAID = [
 ]
 
 export default function HasilPage() {
+  return (
+    <Suspense fallback={null}>
+      <HasilContent />
+    </Suspense>
+  )
+}
+
+function HasilContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const paymentStatus = searchParams.get('status')
   const store = useTesStore()
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState('')
@@ -182,20 +192,9 @@ export default function HasilPage() {
     setPayError('')
 
     try {
-      // 1. Generate & simpan laporan lengkap (status: belum dibayar) SEBELUM membuka pembayaran,
-      //    supaya tidak ada skenario "sudah bayar tapi laporan tidak pernah dibuat".
-      setPayStep('Menyiapkan laporan lengkapmu...')
-      const laporanRes = await fetch('/api/laporan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profil, mode: 'full', session_id: store.session_id }),
-      })
-      if (!laporanRes.ok) {
-        const err = await laporanRes.json().catch(() => ({}))
-        throw new Error(err.error || 'Gagal menyiapkan laporan. Coba lagi.')
-      }
-
-      // 2. Buat transaksi Midtrans
+      // Buat transaksi Midtrans. Laporan AI lengkap baru di-generate oleh webhook
+      // SETELAH pembayaran terkonfirmasi — bukan di sini — supaya tidak menunggu
+      // proses AI (60-90 detik) sebelum sempat bayar.
       setPayStep('Membuka pembayaran...')
       const bayarRes = await fetch('/api/bayar', {
         method: 'POST',
@@ -260,6 +259,23 @@ export default function HasilPage() {
       </nav>
 
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px 80px' }}>
+
+        {/* STATUS PEMBAYARAN (redirect dari Midtrans) */}
+        {paymentStatus === 'paid' && (
+          <div style={{ background: '#E1F5EE', border: '0.5px solid #9FE1CB', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#0F6E56', lineHeight: 1.6 }}>
+            <strong>Pembayaran berhasil.</strong> Laporan lengkapmu sedang disiapkan oleh AI (biasanya 1-2 menit) dan akan dikirim ke emailmu begitu selesai. Tidak perlu menunggu di halaman ini.
+          </div>
+        )}
+        {paymentStatus === 'pending' && (
+          <div style={{ background: '#FAEEDA', border: '0.5px solid #E8C98A', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#633806', lineHeight: 1.6 }}>
+            <strong>Pembayaran masih pending.</strong> Begitu pembayaran terkonfirmasi, laporan lengkap otomatis dikirim ke emailmu.
+          </div>
+        )}
+        {paymentStatus === 'error' && (
+          <div style={{ background: '#FCEBEB', border: '0.5px solid #F7C1C1', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#A32D2D', lineHeight: 1.6 }}>
+            <strong>Pembayaran gagal.</strong> Coba klik tombol bayar di bawah lagi.
+          </div>
+        )}
 
         {/* HEADER */}
         <div style={{ textAlign: 'center', marginBottom: 32, paddingBottom: 24, borderBottom: '0.5px solid rgba(44,44,42,0.12)' }}>
@@ -395,7 +411,7 @@ export default function HasilPage() {
                 width: '100%', transition: 'background 0.15s',
               }}
             >
-              {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka laporan lengkap' : 'Menyiapkan sesi...')}
+              {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Bayar Rp 59.000' : 'Menyiapkan sesi...')}
             </button>
             {payError && (
               <div style={{ background: '#FCEBEB', border: '0.5px solid #F7C1C1', borderRadius: 7, padding: '10px 12px', fontSize: 13, color: '#A32D2D', marginTop: 12, textAlign: 'left' }}>

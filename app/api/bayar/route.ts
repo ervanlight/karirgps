@@ -26,17 +26,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'session_id diperlukan' }, { status: 400 })
     }
 
-    // Laporan harus sudah ada (di-generate via /api/laporan) sebelum transaksi dibuat,
-    // agar tidak ada kondisi "sudah bayar tapi laporan tidak ada untuk dikirim".
+    // Pastikan sesi tes benar-benar ada dan sudah punya profil_data — laporan AI
+    // sendiri akan di-generate oleh webhook SETELAH pembayaran terkonfirmasi.
     const supabase = createAdminClient()
-    const { data: report } = await supabase
-      .from('reports')
-      .select('id')
-      .eq('session_id', session_id)
+    const { data: session } = await supabase
+      .from('test_sessions')
+      .select('id, profil_data')
+      .eq('id', session_id)
       .maybeSingle()
 
-    if (!report) {
-      return NextResponse.json({ error: 'Laporan belum dibuat untuk sesi ini' }, { status: 400 })
+    if (!session || !session.profil_data) {
+      return NextResponse.json({ error: 'Sesi tes tidak ditemukan. Coba muat ulang halaman hasil.' }, { status: 400 })
     }
 
     // Parameter transaksi Midtrans
