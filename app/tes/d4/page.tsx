@@ -72,7 +72,7 @@ export default function TesD4Page() {
                 {p.opsi.map((o) => {
                   let isSelected = false
                   if (isMultiple && Array.isArray(currentVal)) {
-                    isSelected = currentVal.includes(o.kode)
+                    isSelected = (currentVal as string[]).includes(o.kode)
                   } else {
                     isSelected = currentVal === o.kode
                   }
@@ -83,9 +83,9 @@ export default function TesD4Page() {
                       onClick={() => {
                         if (isMultiple) {
                           const arr = Array.isArray(currentVal) ? [...currentVal] : []
-                          const idx = arr.indexOf(o.kode)
+                          const idx = arr.indexOf(o.kode as any)
                           if (idx > -1) arr.splice(idx, 1)
-                          else arr.push(o.kode)
+                          else arr.push(o.kode as any)
                           setD4(p.id as keyof KonteksPersonal, arr)
                         } else {
                           setD4(p.id as keyof KonteksPersonal, o.kode)

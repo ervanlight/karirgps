@@ -53,7 +53,7 @@ function parseJSON<T>(text: string): T {
 
 function validateLaporan(l: LaporanSiswa): string[] {
   const required = ['profil_singkat','pembuka','profil_kepribadian','nilai_kerja','jurusan','profesi','kekuatan','perlu_diwaspadai','langkah_selanjutnya','penutup']
-  const missing = required.filter(k => !(l as Record<string,unknown>)[k])
+  const missing = required.filter(k => !(l as unknown as Record<string, unknown>)[k])
   if (l.jurusan?.length !== 3) missing.push('jurusan harus tepat 3')
   if (l.profesi?.length !== 5) missing.push('profesi harus tepat 5')
   return missing
