@@ -11,7 +11,10 @@ import { createAdminClient } from '@/lib/supabase'
 // ============================================================
 
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY!
-const MIDTRANS_IS_PRODUCTION = process.env.NODE_ENV === 'production'
+// PENTING: jangan pakai NODE_ENV di sini -- NODE_ENV selalu 'production' di Vercel
+// untuk SEMUA deployment, termasuk yang masih pakai Midtrans sandbox key.
+// Mode sandbox/production Midtrans dikontrol terpisah lewat MIDTRANS_IS_PRODUCTION.
+const MIDTRANS_IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === 'true'
 const MIDTRANS_BASE_URL = MIDTRANS_IS_PRODUCTION
   ? 'https://app.midtrans.com/snap/v1/transactions'
   : 'https://app.sandbox.midtrans.com/snap/v1/transactions'
