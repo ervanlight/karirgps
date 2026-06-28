@@ -43,9 +43,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Parameter transaksi Midtrans
+    // order_id Midtrans dibatasi maksimal 50 karakter. Format:
+    // "KG-" (3) + UUID session (36) + "-" (1) + timestamp detik (10) = 50 char persis.
+    // JANGAN pakai prefix "KARIRGPS-" + Date.now() ms -- itu 59 char dan selalu ditolak Midtrans.
+    const orderId = `KG-${session_id}-${Math.floor(Date.now() / 1000)}`
     const transactionParams = {
       transaction_details: {
-        order_id: `KARIRGPS-${session_id}-${Date.now()}`,
+        order_id: orderId,
         gross_amount: 59000, // Rp 59.000
       },
       customer_details: {

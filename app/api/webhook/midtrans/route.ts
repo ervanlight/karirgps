@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 2. Ambil session_id dari order_id format: KARIRGPS-{session_id}-{timestamp}
+    // 2. Ambil session_id dari order_id format: KG-{session_id}-{timestamp}
     // Log original order_id untuk debugging di Vercel Logs
     console.log('Original order_id from Midtrans:', order_id)
 
