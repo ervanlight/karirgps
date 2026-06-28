@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { ambilKandidatJurusan, ambilKandidatProfesi } from '@/lib/db-knowledge'
 import type { ProfilData, LaporanSiswa, LaporanOrangTua } from '@/types'
 
 // ============================================================
@@ -75,14 +76,31 @@ function tryParseLaporan(text: string): { laporan?: LaporanSiswa; missing: strin
   }
 }
 
+// Query database jurusan/profesi (kalau ada & cocok dengan profil) untuk "grounding" --
+// AI memilih dari kandidat nyata yang sudah dikurasi, bukan menebak dari memori model.
+// Kalau tabel belum ada/kosong, ambilKandidat* return null dan prompt tetap berjalan seperti biasa.
+async function buildGroundingContext(profil: ProfilData): Promise<string> {
+  const [jurusanKandidat, profesiKandidat] = await Promise.all([
+    ambilKandidatJurusan(profil),
+    ambilKandidatProfesi(profil),
+  ])
+  if (!jurusanKandidat && !profesiKandidat) return ''
+
+  const parts: string[] = []
+  if (jurusanKandidat) parts.push(`KANDIDAT JURUSAN TERKURASI (prioritaskan pilih 3 dari sini kalau cocok dengan profil & konteks D4, boleh sesuaikan kampus_rekomendasi pakai kampus yang disebut di sini):\n${jurusanKandidat}`)
+  if (profesiKandidat) parts.push(`KANDIDAT PROFESI TERKURASI (prioritaskan pilih 5 dari sini kalau cocok):\n${profesiKandidat}`)
+  return `\n\n${parts.join('\n\n')}\n\nKalau kandidat di atas tidak cukup relevan untuk profil ini, boleh tambahkan pilihan lain di luar daftar.`
+}
+
 export async function generateLaporanLengkap(profil: ProfilData): Promise<{ laporanSiswa: LaporanSiswa; laporanOrtu: LaporanOrangTua }> {
-  let siswaText = await callClaude(SYSTEM_PROMPT_SISWA, `Tulis laporan lengkap untuk profil berikut:\n\n${JSON.stringify(profil, null, 2)}`, MAX_TOKENS_SISWA)
+  const grounding = await buildGroundingContext(profil)
+  let siswaText = await callClaude(SYSTEM_PROMPT_SISWA, `Tulis laporan lengkap untuk profil berikut:\n\n${JSON.stringify(profil, null, 2)}${grounding}`, MAX_TOKENS_SISWA)
   let { laporan: laporanSiswa, missing } = tryParseLaporan(siswaText)
 
   if (!laporanSiswa || missing.length > 0) {
     siswaText = await callClaude(
       SYSTEM_PROMPT_SISWA + '\n\nKRITIS: Output HARUS valid JSON dengan semua key. jurusan harus tepat 3 item, profesi tepat 5 item.',
-      `Tulis laporan lengkap:\n\n${JSON.stringify(profil, null, 2)}`, MAX_TOKENS_SISWA
+      `Tulis laporan lengkap:\n\n${JSON.stringify(profil, null, 2)}${grounding}`, MAX_TOKENS_SISWA
     )
     const retry = tryParseLaporan(siswaText)
     if (!retry.laporan || retry.missing.length > 0) {
