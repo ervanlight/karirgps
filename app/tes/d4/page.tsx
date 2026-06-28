@@ -1,130 +1,147 @@
 'use client'
-import { useRouter } from 'next/navigation'
-import TesLayout from '@/components/tes/TesLayout'
-import { D4_PERTANYAAN } from '@/lib/soal-d4'
-import { useTesStore } from '@/lib/store'
-import type { KonteksPersonal } from '@/types'
+import Link from 'next/link'
 
-export default function TesD4Page() {
-  const router = useRouter()
-  const { d4_konteks, setD4, hitungSemua } = useTesStore()
-
-  // Count answered (jalur is array, others are string)
-  const answered = Object.keys(d4_konteks).filter(k => {
-    const v = d4_konteks[k as keyof typeof d4_konteks]
-    return v !== undefined && (Array.isArray(v) ? v.length > 0 : true)
-  }).length
-  const canProceed = answered >= 5 // minimal 5 dari 7
-
-  function handleSelesai() {
-    hitungSemua()
-    router.push('/hasil')
-  }
-
+export default function LandingPage() {
   return (
-    <TesLayout
-      dimensi={4}
-      judul="Kondisimu Sekarang"
-      subjudul="Tujuh pertanyaan terakhir ini berbeda dari sebelumnya — tidak ada yang diukur. Kami hanya ingin tahu kondisimu sekarang, supaya rekomendasinya bisa benar-benar relevan untukmu."
-      intro="Bagian ini bukan tentang siapa kamu — tapi tentang kondisimu sekarang. Jawab apa adanya, karena inilah yang akan membuat rekomendasimu terasa relevan dan bisa kamu jalani, bukan sekadar teori."
-      hrefBack="/tes/d3"
-      hrefNext="/hasil"
-      labelNext={canProceed ? 'Lihat hasilku →' : `Jawab minimal 5 pertanyaan (${answered}/7)`}
-      onNext={handleSelesai}
-      canProceed={canProceed}
-    >
-      <div style={{ marginBottom: 8 }}>
-        {D4_PERTANYAAN.map((p, idx) => {
-          const isMultiple = p.multiple
-          const currentVal = d4_konteks[p.id as keyof KonteksPersonal]
+    <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
+      {/* NAV */}
+      <nav style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 32px', background: '#fff',
+        borderBottom: '0.5px solid rgba(44,44,42,0.12)',
+        position: 'sticky', top: 0, zIndex: 50,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 28, height: 28, background: '#1D9E75', borderRadius: 7,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="white">
+              <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
+            </svg>
+          </div>
+          <span style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', letterSpacing: '-0.3px' }}>
+            KarirGPS
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <Link href="/auth/login" style={{
+            background: 'none', border: '0.5px solid rgba(44,44,42,0.12)',
+            borderRadius: 6, padding: '6px 14px', fontSize: 13, color: '#2C2C2A',
+            textDecoration: 'none',
+          }}>Masuk</Link>
+          <Link href="/tes/d1" style={{
+            background: '#1D9E75', color: 'white', borderRadius: 6,
+            padding: '7px 16px', fontSize: 13, fontWeight: 500, textDecoration: 'none',
+          }}>Mulai tes gratis</Link>
+        </div>
+      </nav>
 
-          return (
-            <div key={p.id} style={{ marginBottom: 28 }}>
-              {/* Privacy reminder before biaya question */}
-              {p.id === 'kondisi_biaya' && (
-                <div style={{
-                  background: '#F8F7F4', border: '0.5px solid rgba(44,44,42,0.1)',
-                  borderRadius: 8, padding: '10px 14px', marginBottom: 14,
-                  fontSize: 12, color: '#888780', lineHeight: 1.6,
-                }}>
-                  🔒 Jawaban ini tidak pernah kami tampilkan ke siapapun. Ini hanya untuk menyesuaikan rekomendasimu.
-                </div>
-              )}
+      {/* HERO */}
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '72px 32px 56px' }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: '#E1F5EE', borderRadius: 20, padding: '4px 12px',
+          fontSize: 12, color: '#0F6E56', fontWeight: 500, marginBottom: 24,
+        }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1D9E75', display: 'inline-block' }}/>
+          Gratis untuk dicoba · ~20 menit
+        </div>
 
-              <div style={{ fontSize: 11, fontWeight: 500, color: '#888780', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>
-                Pertanyaan {idx + 1} dari {D4_PERTANYAAN.length}
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', marginBottom: 6, lineHeight: 1.5 }}>
-                {p.label}
-              </div>
-              {p.hint && (
-                <div style={{ fontSize: 13, color: '#888780', marginBottom: 12, lineHeight: 1.6, fontStyle: 'italic' }}>
-                  {p.hint}
-                </div>
-              )}
-              {isMultiple && (
-                <div style={{ fontSize: 12, color: '#1D9E75', marginBottom: 10 }}>
-                  Bisa pilih lebih dari satu
-                </div>
-              )}
+        <h1 style={{
+          fontSize: 40, fontWeight: 500, lineHeight: 1.18, letterSpacing: '-0.9px',
+          color: '#2C2C2A', marginBottom: 20,
+        }}>
+          Bukan sekadar tes bakat.<br />
+          <span style={{ color: '#1D9E75' }}>Peta perjalananmu.</span>
+        </h1>
 
-              <div style={{ display: 'grid', gap: 7 }}>
-                {p.opsi.map((o) => {
-                  let isSelected = false
-                  if (isMultiple && Array.isArray(currentVal)) {
-                    isSelected = (currentVal as string[]).includes(o.kode)
-                  } else {
-                    isSelected = currentVal === o.kode
-                  }
+        <p style={{ fontSize: 16, lineHeight: 1.7, color: '#888780', marginBottom: 32, maxWidth: 520 }}>
+          Kelas 12 dan masih belum tahu mau ambil apa — itu lebih normal dari yang kamu kira.
+          KarirGPS membaca cara kamu berpikir, apa yang memotivasimu, dan kondisi nyatamu — lalu
+          menulis laporan yang terasa seperti dari konselor yang benar-benar mengenalmu.
+        </p>
 
-                  return (
-                    <button
-                      key={o.kode}
-                      onClick={() => {
-                        if (isMultiple) {
-                          const arr = Array.isArray(currentVal) ? [...currentVal] : []
-                          const idx = arr.indexOf(o.kode as any)
-                          if (idx > -1) arr.splice(idx, 1)
-                          else arr.push(o.kode as any)
-                          setD4(p.id as keyof KonteksPersonal, arr)
-                        } else {
-                          setD4(p.id as keyof KonteksPersonal, o.kode)
-                        }
-                      }}
-                      style={{
-                        width: '100%', textAlign: 'left',
-                        background: isSelected ? '#E1F5EE' : '#fff',
-                        border: `0.5px solid ${isSelected ? '#1D9E75' : 'rgba(44,44,42,0.12)'}`,
-                        borderRadius: 9, padding: '11px 14px',
-                        cursor: 'pointer', transition: 'all 0.12s',
-                      }}
-                    >
-                      <div style={{ fontSize: 14, fontWeight: 500, color: isSelected ? '#0F6E56' : '#2C2C2A' }}>
-                        {isSelected && <span style={{ marginRight: 6 }}>✓</span>}
-                        {o.label}
-                      </div>
-                      {o.deskripsi && (
-                        <div style={{ fontSize: 12, color: '#888780', marginTop: 2, lineHeight: 1.5 }}>
-                          {o.deskripsi}
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link href="/tes/d1" style={{
+            background: '#1D9E75', color: 'white', borderRadius: 9,
+            padding: '13px 26px', fontSize: 15, fontWeight: 500, textDecoration: 'none',
+            display: 'inline-block',
+          }}>
+            Mulai tes — gratis, ~20 menit
+          </Link>
+          <Link href="/auth/login" style={{
+            background: 'none', border: '0.5px solid rgba(44,44,42,0.15)',
+            borderRadius: 9, padding: '12px 20px', fontSize: 14, color: '#2C2C2A',
+            textDecoration: 'none',
+          }}>
+            Sudah punya akun
+          </Link>
+        </div>
+
+        <p style={{ fontSize: 12, color: '#888780', marginTop: 14 }}>
+          87% mahasiswa Indonesia merasa salah jurusan. KarirGPS hadir supaya kamu tidak masuk statistik itu.
+        </p>
+
+        {/* STATS */}
+        <div style={{
+          display: 'flex', gap: 40, marginTop: 48, paddingTop: 32,
+          borderTop: '0.5px solid rgba(44,44,42,0.12)',
+        }}>
+          {[
+            { val: '4 dimensi', label: 'Minat, cara berpikir,\nnilai kerja, konteks nyata' },
+            { val: '~20 menit', label: 'Waktu pengerjaan\ntotal keseluruhan' },
+            { val: 'Rp 59rb', label: 'Laporan lengkap\n+ versi untuk orang tua' },
+          ].map(s => (
+            <div key={s.val}>
+              <div style={{ fontSize: 22, fontWeight: 500, color: '#2C2C2A' }}>{s.val}</div>
+              <div style={{ fontSize: 12, color: '#888780', marginTop: 3, lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+                {s.label}
               </div>
             </div>
-          )
-        })}
+          ))}
+        </div>
       </div>
 
-      {/* Loading state note */}
-      <div style={{
-        background: '#E1F5EE', borderRadius: 10, padding: '14px 16px',
-        fontSize: 13, color: '#0F6E56', lineHeight: 1.6,
-      }}>
-        Setelah kamu klik "Lihat hasilku", kami akan membaca semua yang kamu jawab tadi.
-        Ini butuh sedikit waktu karena kami tidak pakai template — hasilnya ditulis khusus untuk kamu.
+      {/* HOW IT WORKS */}
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 32px 80px' }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
+          Cara kerjanya
+        </div>
+        <div style={{ display: 'grid', gap: 12 }}>
+          {[
+            { n: '1', title: 'Kerjakan 4 dimensi tes', desc: 'Minat (RIASEC), cara berpikir (Multiple Intelligences), nilai kerja, dan form konteks personal. Bukan ujian — tidak ada jawaban benar atau salah.' },
+            { n: '2', title: 'Lihat ringkasan gratis', desc: 'Profil singkat dan top 2 jurusan + 3 profesi yang cocok langsung bisa dilihat, gratis, tanpa perlu bayar.' },
+            { n: '3', title: 'Buka laporan lengkap (Rp 59rb)', desc: 'Laporan naratif 5–7 halaman yang terasa seperti ditulis khusus untukmu — plus versi terpisah untuk orang tua. Dikirim ke emailmu.' },
+          ].map(s => (
+            <div key={s.n} style={{
+              display: 'flex', gap: 16, padding: '18px 20px',
+              background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)',
+              borderRadius: 12,
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: '50%', background: '#E1F5EE',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 500, color: '#0F6E56', flexShrink: 0,
+              }}>{s.n}</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 4 }}>{s.title}</div>
+                <div style={{ fontSize: 13, color: '#888780', lineHeight: 1.6 }}>{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 32, textAlign: 'center' }}>
+          <Link href="/tes/d1" style={{
+            background: '#1D9E75', color: 'white', borderRadius: 9,
+            padding: '13px 32px', fontSize: 15, fontWeight: 500, textDecoration: 'none',
+            display: 'inline-block',
+          }}>
+            Mulai sekarang — gratis
+          </Link>
+        </div>
       </div>
-    </TesLayout>
+    </div>
   )
 }
