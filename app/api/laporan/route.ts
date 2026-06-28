@@ -11,7 +11,7 @@ import type { ProfilData } from '@/types'
 // Endpoint ini disisakan untuk regenerasi manual / ringkasan gratis.
 // ============================================================
 
-export const maxDuration = 120
+export const maxDuration = 290
 
 export async function POST(request: NextRequest) {
   try {

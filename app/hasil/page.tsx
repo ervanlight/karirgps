@@ -176,7 +176,7 @@ function HasilContent() {
     if (!sessionReady || !store.session_id) return
     let active = true
     let attempts = 0
-    const maxAttempts = paymentStatus === 'paid' ? 40 : 1 // ~3 menit kalau baru bayar, sekali kalau cuma mampir
+    const maxAttempts = paymentStatus === 'paid' ? 70 : 1 // ~5 menit kalau baru bayar (laporan AI bisa >2 menit), sekali kalau cuma mampir
 
     async function checkLaporan() {
       const supabase = createClient()
@@ -317,7 +317,7 @@ function HasilContent() {
         {/* STATUS PEMBAYARAN (redirect dari Midtrans) */}
         {paymentStatus === 'paid' && !laporanLengkap && (
           <div style={{ background: '#E1F5EE', border: '0.5px solid #9FE1CB', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#0F6E56', lineHeight: 1.6 }}>
-            <strong>Pembayaran berhasil.</strong> Laporan lengkapmu sedang disiapkan oleh AI (biasanya 1-2 menit). Halaman ini otomatis menampilkan laporannya begitu selesai — sekaligus dikirim ke emailmu juga.
+            <strong>Pembayaran berhasil.</strong> Laporan lengkapmu sedang disiapkan oleh AI (biasanya 2-4 menit). Halaman ini otomatis menampilkan laporannya begitu selesai — sekaligus dikirim ke emailmu juga.
           </div>
         )}
         {paymentStatus === 'pending' && (

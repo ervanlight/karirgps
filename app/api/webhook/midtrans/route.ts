@@ -14,7 +14,9 @@ import type { ProfilData, RiasecCode, MICode, WorkValueCode } from '@/types'
 // berjalan server-to-server tanpa user menunggu di browser.
 // ============================================================
 
-export const maxDuration = 180
+// 1 panggilan Claude untuk laporan siswa saja sudah ~130s (output bisa >6000 token),
+// + laporan ortu + overhead DB. 180s terlalu pendek dan memotong proses di tengah jalan.
+export const maxDuration = 290
 
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY!
 
