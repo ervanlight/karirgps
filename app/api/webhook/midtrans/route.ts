@@ -1,17 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import crypto from 'crypto'
+import { createAdminClient } from '@/lib/supabase'
 import { kirimLaporan } from '@/lib/email'
 import type { LaporanSiswa, LaporanOrangTua, RiasecCode, MICode, WorkValueCode } from '@/types'
 
 // ============================================================
-// MIDTRANS PAYMENT WEBHOOK — Updated
+// MIDTRANS PAYMENT WEBHOOK
+// Docs: https://docs.midtrans.com/reference/handling-notifications
 // ============================================================
+
+const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY!
+
+function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string): boolean {
+  const expected = crypto
+    .createHash('sha512')
+    .update(orderId + statusCode + grossAmount + MIDTRANS_SERVER_KEY)
+    .digest('hex')
+  return expected === signatureKey
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
       order_id,
+      status_code,
       transaction_status,
       payment_type,
       transaction_id,
@@ -19,9 +32,9 @@ export async function POST(request: NextRequest) {
       gross_amount,
     } = body
 
-    // 1. Validasi signature (production)
-    if (process.env.NODE_ENV === 'production' && !signature_key) {
-      console.error('Missing signature_key from Midtrans')
+    // 1. Validasi signature — wajib cocok, baik sandbox maupun production.
+    if (!signature_key || !verifySignature(order_id, status_code, gross_amount, signature_key)) {
+      console.error('Invalid Midtrans signature for order_id:', order_id)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -44,7 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid sessionId' }, { status: 400 })
     }
 
-    const supabase = createClient()
+    const supabase = createAdminClient()
 
     // 3. Hanya proses jika settlement atau capture (pembayaran berhasil)
     if (transaction_status === 'settlement' || transaction_status === 'capture') {

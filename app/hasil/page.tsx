@@ -1,7 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
+import { createClient } from '@/lib/supabase'
 import { buildProfil, RIASEC_LABELS, MI_LABELS, WV_LABELS, persen } from '@/lib/scoring'
 import type { RiasecCode, MICode, WorkValueCode } from '@/types'
 
@@ -93,14 +95,67 @@ const FITUR_PAID = [
 ]
 
 export default function HasilPage() {
+  const router = useRouter()
   const store = useTesStore()
   const [paying, setPaying] = useState(false)
+  const [payError, setPayError] = useState('')
+  const [payStep, setPayStep] = useState('')
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [sessionReady, setSessionReady] = useState(false)
+  const creatingSession = useRef(false)
 
   // Build profil from store
   const profil = buildProfil({
     ...store,
     d4_konteks: store.d4_konteks as Required<typeof store.d4_konteks>,
   } as Parameters<typeof buildProfil>[0])
+
+  // Pastikan ada akun + sesi tersimpan di Supabase sebelum apapun bisa dibayar.
+  // session_id WAJIB berupa UUID asli dari tabel test_sessions — bukan placeholder.
+  useEffect(() => {
+    let active = true
+    async function ensureSession() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/auth/register?next=/hasil')
+        return
+      }
+      if (!active) return
+      setUserEmail(user.email ?? null)
+
+      if (store.session_id) {
+        setSessionReady(true)
+        return
+      }
+      if (creatingSession.current) return
+      creatingSession.current = true
+
+      const { data, error } = await supabase
+        .from('test_sessions')
+        .insert({
+          user_id: user.id,
+          session_token: crypto.randomUUID(),
+          profil_data: profil,
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (!active) return
+      if (error || !data) {
+        setPayError('Gagal menyimpan sesi tesmu. Coba muat ulang halaman ini.')
+        return
+      }
+      store.setSessionId(data.id)
+      setSessionReady(true)
+    }
+    ensureSession()
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const hollandCode = profil.d1_riasec.holland_code
   const miProfile = profil.d2_mi.mi_profile
@@ -119,30 +174,59 @@ export default function HasilPage() {
     .sort((a, b) => b[1] - a[1])
 
   async function handleBayar() {
+    if (!store.session_id) {
+      setPayError('Sesi belum siap. Coba muat ulang halaman ini sebentar lagi.')
+      return
+    }
     setPaying(true)
+    setPayError('')
+
     try {
-      // Midtrans Snap popup
-      const res = await fetch('/api/bayar', {
+      // 1. Generate & simpan laporan lengkap (status: belum dibayar) SEBELUM membuka pembayaran,
+      //    supaya tidak ada skenario "sudah bayar tapi laporan tidak pernah dibuat".
+      setPayStep('Menyiapkan laporan lengkapmu...')
+      const laporanRes = await fetch('/api/laporan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: store.session_id || 'demo-' + Date.now(),
-          profil,
-        }),
+        body: JSON.stringify({ profil, mode: 'full', session_id: store.session_id }),
       })
-      const data = await res.json()
-      if (data.token && typeof window !== 'undefined') {
-        // @ts-expect-error Midtrans Snap global
-        window.snap?.pay(data.token, {
-          onSuccess: () => window.location.href = '/hasil?status=paid',
-          onPending: () => alert('Pembayaran pending — cek emailmu untuk konfirmasi.'),
-          onError: () => { setPaying(false); alert('Pembayaran gagal. Coba lagi.') },
-          onClose: () => setPaying(false),
-        })
+      if (!laporanRes.ok) {
+        const err = await laporanRes.json().catch(() => ({}))
+        throw new Error(err.error || 'Gagal menyiapkan laporan. Coba lagi.')
       }
-    } catch {
+
+      // 2. Buat transaksi Midtrans
+      setPayStep('Membuka pembayaran...')
+      const bayarRes = await fetch('/api/bayar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: store.session_id, email: userEmail }),
+      })
+      const data = await bayarRes.json()
+      if (!bayarRes.ok || !data.token) {
+        throw new Error(data.error || 'Gagal membuka pembayaran. Coba lagi.')
+      }
+
+      // 3. Tampilkan Midtrans Snap popup
+      // @ts-expect-error Midtrans Snap global
+      window.snap?.pay(data.token, {
+        onSuccess: () => { window.location.href = '/hasil?status=paid' },
+        onPending: () => {
+          setPaying(false)
+          setPayStep('')
+          setPayError('Pembayaran pending — cek emailmu untuk konfirmasi setelah selesai dibayar.')
+        },
+        onError: () => {
+          setPaying(false)
+          setPayStep('')
+          setPayError('Pembayaran gagal. Coba lagi.')
+        },
+        onClose: () => { setPaying(false); setPayStep('') },
+      })
+    } catch (err) {
       setPaying(false)
-      alert('Terjadi kesalahan. Coba lagi.')
+      setPayStep('')
+      setPayError(err instanceof Error ? err.message : 'Terjadi kesalahan. Coba lagi.')
     }
   }
 
@@ -302,17 +386,22 @@ export default function HasilPage() {
             <div style={{ fontSize: 13, color: '#888780', marginBottom: 18 }}>Satu kali bayar · dikirim ke emailmu · bisa diakses kapan saja</div>
             <button
               onClick={handleBayar}
-              disabled={paying}
+              disabled={paying || !sessionReady}
               style={{
-                background: paying ? '#9FE1CB' : '#1D9E75',
+                background: (paying || !sessionReady) ? '#9FE1CB' : '#1D9E75',
                 color: 'white', border: 'none', borderRadius: 10,
                 padding: '14px 0', fontSize: 16, fontWeight: 500,
-                cursor: paying ? 'not-allowed' : 'pointer',
+                cursor: (paying || !sessionReady) ? 'not-allowed' : 'pointer',
                 width: '100%', transition: 'background 0.15s',
               }}
             >
-              {paying ? 'Membuka pembayaran...' : 'Buka laporan lengkap'}
+              {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka laporan lengkap' : 'Menyiapkan sesi...')}
             </button>
+            {payError && (
+              <div style={{ background: '#FCEBEB', border: '0.5px solid #F7C1C1', borderRadius: 7, padding: '10px 12px', fontSize: 13, color: '#A32D2D', marginTop: 12, textAlign: 'left' }}>
+                {payError}
+              </div>
+            )}
             <div style={{ fontSize: 12, color: '#888780', marginTop: 10 }}>
               QRIS · Transfer bank · GoPay · OVO · Dana · ShopeePay
             </div>

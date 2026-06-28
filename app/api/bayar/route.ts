@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase'
 
 // ============================================================
 // MIDTRANS PAYMENT API
 // Docs: https://docs.midtrans.com/reference/snap-api
+//
+// Notifikasi pembayaran (webhook) ditangani di /api/webhook/midtrans,
+// BUKAN di handler PUT lawas — itu sudah dihapus agar tidak ada dua
+// jalur penanganan webhook yang berbeda.
 // ============================================================
 
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY!
@@ -19,6 +24,19 @@ export async function POST(request: NextRequest) {
 
     if (!session_id) {
       return NextResponse.json({ error: 'session_id diperlukan' }, { status: 400 })
+    }
+
+    // Laporan harus sudah ada (di-generate via /api/laporan) sebelum transaksi dibuat,
+    // agar tidak ada kondisi "sudah bayar tapi laporan tidak ada untuk dikirim".
+    const supabase = createAdminClient()
+    const { data: report } = await supabase
+      .from('reports')
+      .select('id')
+      .eq('session_id', session_id)
+      .maybeSingle()
+
+    if (!report) {
+      return NextResponse.json({ error: 'Laporan belum dibuat untuk sesi ini' }, { status: 400 })
     }
 
     // Parameter transaksi Midtrans
@@ -97,50 +115,5 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Payment route error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-// Midtrans payment notification webhook
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const {
-      order_id,
-      transaction_status,
-      payment_type,
-      transaction_id,
-    } = body
-
-    // Verifikasi dari Midtrans (validasi signature_key)
-    // Di production: verifikasi hash SHA512
-    // Lihat: https://docs.midtrans.com/reference/handling-notifications
-
-    const sessionId = order_id?.split('-')[1] // KARIRGPS-{session_id}-{timestamp}
-
-    if (transaction_status === 'settlement' || transaction_status === 'capture') {
-      // Payment sukses — update Supabase
-      const { createClient } = await import('@/lib/supabase')
-      const supabase = createClient()
-
-      await supabase
-        .from('reports')
-        .update({
-          payment_status: 'paid',
-          payment_id: transaction_id,
-          payment_method: payment_type,
-          paid_at: new Date().toISOString(),
-        })
-        .eq('session_id', sessionId)
-
-      await supabase
-        .from('test_sessions')
-        .update({ status: 'paid' })
-        .eq('id', sessionId)
-    }
-
-    return NextResponse.json({ status: 'ok' })
-  } catch (error) {
-    console.error('Webhook error:', error)
-    return NextResponse.json({ error: 'Webhook error' }, { status: 500 })
   }
 }

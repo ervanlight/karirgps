@@ -1,11 +1,20 @@
 'use client'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,7 +32,7 @@ export default function LoginPage() {
       setError('Email atau password salah. Coba lagi.')
       setLoading(false)
     } else {
-      router.push('/tes/d1')
+      router.push(searchParams.get('next') || '/tes/d1')
     }
   }
 
@@ -77,11 +86,6 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', fontSize: 13, color: '#888780', marginTop: 16 }}>
           Belum punya akun?{' '}
           <Link href="/auth/register" style={{ color: '#1D9E75', textDecoration: 'none' }}>Daftar</Link>
-        </div>
-        <div style={{ textAlign: 'center', fontSize: 13, marginTop: 8 }}>
-          <Link href="/tes/d1" style={{ color: '#888780', textDecoration: 'none' }}>
-            Lanjut tanpa akun →
-          </Link>
         </div>
       </div>
     </div>

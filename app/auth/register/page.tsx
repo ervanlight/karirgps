@@ -1,11 +1,20 @@
 'use client'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
+  )
+}
+
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,17 +26,18 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
+    const next = searchParams.get('next') || '/tes/d1'
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { emailRedirectTo: `${window.location.origin}/tes/d1` },
+      options: { emailRedirectTo: `${window.location.origin}${next}` },
     })
 
     if (error) {
       setError(error.message || 'Gagal mendaftar. Coba lagi.')
       setLoading(false)
     } else {
-      router.push('/tes/d1')
+      router.push(next)
     }
   }
 

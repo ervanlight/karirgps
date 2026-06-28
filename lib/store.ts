@@ -31,6 +31,7 @@ interface TesStore extends TesSession {
   // Compute & navigate
   hitungSemua: () => void
   setStep: (step: TesSession['current_step']) => void
+  setSessionId: (id: string) => void
   reset: () => void
 }
 
@@ -131,6 +132,8 @@ export const useTesStore = create<TesStore>()(
       },
 
       setStep: (step) => set({ current_step: step }),
+
+      setSessionId: (id) => set({ session_id: id }),
 
       reset: () => set(initialState),
     }),

@@ -30,7 +30,7 @@ export default function LandingPage() {
             borderRadius: 6, padding: '6px 14px', fontSize: 13, color: '#2C2C2A',
             textDecoration: 'none',
           }}>Masuk</Link>
-          <Link href="/tes/d1" style={{
+          <Link href="/auth/register" style={{
             background: '#1D9E75', color: 'white', borderRadius: 6,
             padding: '7px 16px', fontSize: 13, fontWeight: 500, textDecoration: 'none',
           }}>Mulai tes gratis</Link>
@@ -63,7 +63,7 @@ export default function LandingPage() {
         </p>
 
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/tes/d1" style={{
+          <Link href="/auth/register" style={{
             background: '#1D9E75', color: 'white', borderRadius: 9,
             padding: '13px 26px', fontSize: 15, fontWeight: 500, textDecoration: 'none',
             display: 'inline-block',
@@ -133,7 +133,7 @@ export default function LandingPage() {
         </div>
 
         <div style={{ marginTop: 32, textAlign: 'center' }}>
-          <Link href="/tes/d1" style={{
+          <Link href="/auth/register" style={{
             background: '#1D9E75', color: 'white', borderRadius: 9,
             padding: '13px 32px', fontSize: 15, fontWeight: 500, textDecoration: 'none',
             display: 'inline-block',

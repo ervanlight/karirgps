@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@/lib/supabase'
-import { kirimLaporan } from '@/lib/email'
-import type { ProfilData, LaporanSiswa, LaporanOrangTua, RiasecCode, MICode, WorkValueCode } from '@/types'
+import { createAdminClient } from '@/lib/supabase'
+import type { ProfilData, LaporanSiswa, LaporanOrangTua } from '@/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
@@ -62,8 +61,8 @@ function validateLaporan(l: LaporanSiswa): string[] {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { profil, mode, session_id, email } = body as {
-      profil: ProfilData; mode: 'ringkasan' | 'full'; session_id?: string; email?: string
+    const { profil, mode, session_id } = body as {
+      profil: ProfilData; mode: 'ringkasan' | 'full'; session_id?: string
     }
 
     if (!profil) return NextResponse.json({ error: 'profil diperlukan' }, { status: 400 })
@@ -101,22 +100,32 @@ export async function POST(request: NextRequest) {
       )
       const laporanOrtu = parseJSON<{ untuk_orang_tua: LaporanOrangTua }>(ortuText).untuk_orang_tua
 
-      // Simpan ke Supabase
-      if (session_id) {
-        const supabase = createClient()
-        await supabase.from('reports').upsert({ session_id, laporan_siswa: laporanSiswa, laporan_ortu: laporanOrtu, payment_status: 'paid' })
-        await supabase.from('test_sessions').update({ status: 'paid', profil_data: profil }).eq('id', session_id)
+      // Simpan ke Supabase sebagai laporan BELUM dibayar.
+      // Email baru dikirim oleh webhook Midtrans setelah pembayaran benar-benar dikonfirmasi.
+      if (!session_id) {
+        return NextResponse.json({ error: 'session_id diperlukan untuk mode full' }, { status: 400 })
       }
+      const supabase = createAdminClient()
+      const { data: existing } = await supabase
+        .from('reports')
+        .select('id')
+        .eq('session_id', session_id)
+        .maybeSingle()
 
-      // Kirim email (fire-and-forget)
-      if (email) {
-        kirimLaporan({
-          toEmail: email, laporan: laporanSiswa, laporanOrtu,
-          hollandCode: profil.d1_riasec.holland_code as RiasecCode[],
-          miProfile: profil.d2_mi.mi_profile as MICode[],
-          wvProfile: profil.d3_workvalues.values_profile as WorkValueCode[],
-        }).catch(err => console.error('Email error:', err))
+      const reportError = existing
+        ? (await supabase
+            .from('reports')
+            .update({ laporan_siswa: laporanSiswa, laporan_ortu: laporanOrtu })
+            .eq('id', existing.id)).error
+        : (await supabase
+            .from('reports')
+            .insert({ session_id, laporan_siswa: laporanSiswa, laporan_ortu: laporanOrtu, payment_status: 'unpaid' })).error
+
+      if (reportError) {
+        console.error('Report save error:', reportError)
+        return NextResponse.json({ error: 'Gagal menyimpan laporan' }, { status: 500 })
       }
+      await supabase.from('test_sessions').update({ status: 'completed', profil_data: profil }).eq('id', session_id)
 
       return NextResponse.json({ laporan_siswa: laporanSiswa, laporan_orang_tua: laporanOrtu })
     }
