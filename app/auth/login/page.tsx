@@ -32,7 +32,7 @@ function LoginForm() {
       setError('Email atau password salah. Coba lagi.')
       setLoading(false)
     } else {
-      router.push(searchParams.get('next') || '/tes/d1')
+      router.push(searchParams.get('next') || '/dashboard')
     }
   }
 

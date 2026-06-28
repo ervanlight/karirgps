@@ -74,7 +74,7 @@ export default function TesLayout({
           </div>
         </div>
 
-        <div style={{ fontSize: 12, color: '#888780' }}>{meta.waktu}</div>
+        <Link href="/dashboard" style={{ fontSize: 12, color: '#888780', textDecoration: 'none' }}>Dashboard</Link>
       </nav>
 
       {/* CONTENT */}
