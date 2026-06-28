@@ -52,6 +52,21 @@ Dikerjakan dalam satu rangkaian sesi, deployed ke production (`https://karirgps-
 5. **Tes idempotency sungguhan**: webhook dipanggil ulang untuk session yang sama → `action: "already_paid"`, tidak generate ulang.
 6. Semua data test (user, session, report) dihapus lagi setelah verifikasi — tidak ada sisa data QA di production.
 
+## FASE 2 (DevPlan) — Sedang berjalan
+
+**Task 2.1 — User Dashboard: SELESAI.** `/app/dashboard/page.tsx` — daftar tes (gratis/dibayar) + CTA buka/beli laporan + ganti nama/email/password. Ditambahkan ke auth gate.
+
+**Task 2.2 — Database Jurusan/Profesi/Kampus: SEBAGIAN BESAR SELESAI, kontennya kuat tapi jumlah di bawah target devplan (50 jurusan/30 kampus/50 profesi).**
+- Skema baru: `jurusan`, `kampus`, `kampus_jurusan`, `profesi`, `beasiswa` (lihat `supabase-migration-002-jurusan-profesi.sql`).
+- **10 jurusan** diimpor dari knowledge object berkualitas tinggi yang sudah dibuat user (`assets/knowledge/majors/*.md`) via `scripts/import-jurusan.mjs` — idempotent, bisa rerun kalau ada file baru.
+- **20 profesi** + **20 kampus** PTN/PTS ternama via `scripts/seed-profesi-kampus.mjs`.
+- `lib/db-knowledge.ts` — query kandidat jurusan/profesi yang match holland/MI/work-values profil user (skor overlap), graceful null kalau data kurang relevan.
+- `lib/laporan.ts` — AI Report Engine sekarang **di-ground ke database** sebelum panggil Claude. **Diverifikasi end-to-end di production**: profil uji match kuat ke Teknik Informatika → AI benar-benar memilih Teknik Informatika/Teknik Sipil/Teknik Industri (3 teratas hasil scoring kita) dengan kampus nyata (ITB/UI/ITS/UGM/UNDIP) dan 5 profesi tepat dari tabel kita. Tidak lagi menebak dari memori model.
+- **Belum selesai**: jumlah jurusan/kampus/profesi masih jauh di bawah target devplan (50/30/50). User punya pipeline ChatGPT yang sudah menghasilkan 10 major knowledge object berkualitas tinggi (`assets/knowledge/majors/`) — kalau user generate lebih banyak dengan format yang sama, tinggal jalankan ulang `scripts/import-jurusan.mjs` (idempotent by slug). Profesi/kampus tambahan butuh ditulis manual mengikuti pola di `scripts/seed-profesi-kampus.mjs`.
+- **Catatan penting**: user juga upload dokumen spesifikasi "Knowledge Operating System" yang sangat besar (ontology, generator framework, Neo4j graph engine, dst — lihat `assets/knowledge/`, `architecture/`) dari sesi ChatGPT terpisah. **Keputusan yang diambil**: konten pengetahuannya (knowledge object jurusan) dipakai, tapi infrastrukturnya (Neo4j/Fastify/microservices) TIDAK diimplementasikan sebagai rebuild — akan membongkar produk Next.js+Supabase yang sudah live tanpa manfaat jelas untuk app tes SMA ini. Kalau sesi baru menemukan dokumen serupa lagi, pertimbangkan dengan logika yang sama: ambil kontennya, jangan rebuild infrastrukturnya.
+
+**Task 2.3 — Referral System: BELUM dikerjakan.**
+
 ## Yang BELUM beres / perlu dilanjutkan
 1. **Email via Resend belum konfirmasi terkirim** — laporan sudah tampil di web (jalur utama jalan), tapi email belum masuk ke inbox user di test terakhir. Perlu didiagnosis:
    - Cek Resend dashboard (https://resend.com/emails) apakah ada log percobaan kirim & statusnya (delivered/bounced/dll)
