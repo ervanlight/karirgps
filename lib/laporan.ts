@@ -61,22 +61,36 @@ function validateLaporan(l: LaporanSiswa): string[] {
   return missing
 }
 
-export async function generateLaporanLengkap(profil: ProfilData): Promise<{ laporanSiswa: LaporanSiswa; laporanOrtu: LaporanOrangTua }> {
-  let siswaText = await callClaude(SYSTEM_PROMPT_SISWA, `Tulis laporan lengkap untuk profil berikut:\n\n${JSON.stringify(profil, null, 2)}`, 4000)
-  let laporanSiswa = parseJSON<LaporanSiswa>(siswaText)
+// max_tokens 4000 terlalu kecil -- laporan lengkap (3 jurusan + 5 profesi + narasi panjang)
+// rutin terpotong di tengah JSON sebelum selesai (stop_reason: 'max_tokens'), bikin parse
+// SELALU gagal, bukan cuma kadang-kadang. 8000 memberi ruang aman.
+const MAX_TOKENS_SISWA = 8000
 
-  const missing = validateLaporan(laporanSiswa)
-  if (missing.length > 0) {
+function tryParseLaporan(text: string): { laporan?: LaporanSiswa; missing: string[] } {
+  try {
+    const laporan = parseJSON<LaporanSiswa>(text)
+    return { laporan, missing: validateLaporan(laporan) }
+  } catch {
+    return { missing: ['JSON tidak valid / kemungkinan terpotong'] }
+  }
+}
+
+export async function generateLaporanLengkap(profil: ProfilData): Promise<{ laporanSiswa: LaporanSiswa; laporanOrtu: LaporanOrangTua }> {
+  let siswaText = await callClaude(SYSTEM_PROMPT_SISWA, `Tulis laporan lengkap untuk profil berikut:\n\n${JSON.stringify(profil, null, 2)}`, MAX_TOKENS_SISWA)
+  let { laporan: laporanSiswa, missing } = tryParseLaporan(siswaText)
+
+  if (!laporanSiswa || missing.length > 0) {
     siswaText = await callClaude(
       SYSTEM_PROMPT_SISWA + '\n\nKRITIS: Output HARUS valid JSON dengan semua key. jurusan harus tepat 3 item, profesi tepat 5 item.',
-      `Tulis laporan lengkap:\n\n${JSON.stringify(profil, null, 2)}`, 4000
+      `Tulis laporan lengkap:\n\n${JSON.stringify(profil, null, 2)}`, MAX_TOKENS_SISWA
     )
-    laporanSiswa = parseJSON<LaporanSiswa>(siswaText)
-    const retryMissing = validateLaporan(laporanSiswa)
-    if (retryMissing.length > 0) {
-      throw new Error(`Report validation failed: ${retryMissing.join(', ')}`)
+    const retry = tryParseLaporan(siswaText)
+    if (!retry.laporan || retry.missing.length > 0) {
+      throw new Error(`Report validation failed: ${retry.missing.join(', ')}`)
     }
+    laporanSiswa = retry.laporan
   }
+  if (!laporanSiswa) throw new Error('Report validation failed: laporan kosong')
 
   const ortuText = await callClaude(
     SYSTEM_PROMPT_ORTU,

@@ -106,8 +106,11 @@ export async function POST(request: NextRequest) {
         payment_id: transaction_id,
         payment_method: payment_type,
         paid_at: new Date().toISOString(),
+        user_id: sessionData.user_id,
       }
 
+      // user_id WAJIB diisi -- RLS policy "Users can view own reports" mensyaratkan
+      // auth.uid() = user_id agar user bisa baca laporannya sendiri lewat browser client.
       const reportError = existingReport
         ? (await supabase.from('reports').update(reportPayload).eq('id', existingReport.id)).error
         : (await supabase.from('reports').insert({ session_id: sessionId, ...reportPayload })).error

@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
 import { createClient } from '@/lib/supabase'
 import { buildProfil, RIASEC_LABELS, MI_LABELS, WV_LABELS, persen } from '@/lib/scoring'
-import type { RiasecCode, MICode, WorkValueCode } from '@/types'
+import LaporanLengkap from '@/components/hasil/LaporanLengkap'
+import type { RiasecCode, MICode, WorkValueCode, LaporanSiswa, LaporanOrangTua } from '@/types'
 
 // ── colour per tipe ──────────────────────────────────────────
 const RIASEC_COLOR: Record<RiasecCode, string> = {
@@ -113,6 +114,8 @@ function HasilContent() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [sessionReady, setSessionReady] = useState(false)
   const creatingSession = useRef(false)
+  const [laporanLengkap, setLaporanLengkap] = useState<{ siswa: LaporanSiswa; ortu: LaporanOrangTua } | null>(null)
+  const [checkingLaporan, setCheckingLaporan] = useState(false)
 
   // Build profil from store
   const profil = buildProfil({
@@ -166,6 +169,47 @@ function HasilContent() {
     return () => { active = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Cek apakah laporan lengkap sudah jadi & dibayar. Kalau baru selesai bayar
+  // (?status=paid), polling beberapa kali karena AI butuh ~1-2 menit di webhook.
+  useEffect(() => {
+    if (!sessionReady || !store.session_id) return
+    let active = true
+    let attempts = 0
+    const maxAttempts = paymentStatus === 'paid' ? 40 : 1 // ~3 menit kalau baru bayar, sekali kalau cuma mampir
+
+    async function checkLaporan() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('reports')
+        .select('payment_status, laporan_siswa, laporan_ortu')
+        .eq('session_id', store.session_id as string)
+        .maybeSingle()
+
+      if (!active) return
+
+      if (data?.payment_status === 'paid' && data.laporan_siswa && data.laporan_ortu) {
+        setLaporanLengkap({ siswa: data.laporan_siswa as LaporanSiswa, ortu: data.laporan_ortu as LaporanOrangTua })
+        setCheckingLaporan(false)
+        return
+      }
+
+      attempts += 1
+      if (attempts >= maxAttempts) {
+        setCheckingLaporan(false)
+        return
+      }
+      setCheckingLaporan(true)
+      setTimeout(checkLaporan, 4500)
+    }
+    checkLaporan()
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionReady, store.session_id, paymentStatus])
+
+  function handleDownloadPdf() {
+    window.print()
+  }
 
   const hollandCode = profil.d1_riasec.holland_code
   const miProfile = profil.d2_mi.mi_profile
@@ -231,6 +275,16 @@ function HasilContent() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
+      {/* Print isolation -- saat "Download PDF" diklik, hanya #laporan-print-area yang tercetak */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #laporan-print-area, #laporan-print-area * { visibility: visible; }
+          #laporan-print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
+
       {/* Midtrans Snap script */}
       <script
         type="text/javascript"
@@ -261,9 +315,9 @@ function HasilContent() {
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px 80px' }}>
 
         {/* STATUS PEMBAYARAN (redirect dari Midtrans) */}
-        {paymentStatus === 'paid' && (
+        {paymentStatus === 'paid' && !laporanLengkap && (
           <div style={{ background: '#E1F5EE', border: '0.5px solid #9FE1CB', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#0F6E56', lineHeight: 1.6 }}>
-            <strong>Pembayaran berhasil.</strong> Laporan lengkapmu sedang disiapkan oleh AI (biasanya 1-2 menit) dan akan dikirim ke emailmu begitu selesai. Tidak perlu menunggu di halaman ini.
+            <strong>Pembayaran berhasil.</strong> Laporan lengkapmu sedang disiapkan oleh AI (biasanya 1-2 menit). Halaman ini otomatis menampilkan laporannya begitu selesai — sekaligus dikirim ke emailmu juga.
           </div>
         )}
         {paymentStatus === 'pending' && (
@@ -376,7 +430,30 @@ function HasilContent() {
           </div>
         </div>
 
+        {/* LAPORAN LENGKAP (kalau sudah dibayar & selesai diproses) */}
+        {laporanLengkap && (
+          <>
+            <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 10 }}>
+              <div style={{ fontSize: 13, color: '#0F6E56', fontWeight: 500 }}>✓ Laporan lengkapmu sudah siap</div>
+              <button
+                onClick={handleDownloadPdf}
+                style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: '#2C2C2A', cursor: 'pointer' }}
+              >
+                ↓ Download PDF
+              </button>
+            </div>
+            <LaporanLengkap laporan={laporanLengkap.siswa} laporanOrtu={laporanLengkap.ortu} />
+          </>
+        )}
+
+        {checkingLaporan && !laporanLengkap && (
+          <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 13, color: '#888780' }}>
+            Memeriksa status laporan...
+          </div>
+        )}
+
         {/* PAYWALL */}
+        {!laporanLengkap && (
         <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, marginTop: 4 }}>
           <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 6 }}>
             Laporan lengkap
@@ -423,6 +500,7 @@ function HasilContent() {
             </div>
           </div>
         </div>
+        )}
 
         {/* RESTART */}
         <div style={{ textAlign: 'center', marginTop: 24 }}>
