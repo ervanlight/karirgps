@@ -26,7 +26,7 @@ export default function SkalaItem({ id, pernyataan, nilai, onSelect }: SkalaItem
             key={n}
             onClick={() => onSelect(id, n)}
             style={{
-              flex: 1, height: 38, border: `0.5px solid ${nilai === n ? '#1D9E75' : 'rgba(44,44,42,0.15)'}`,
+              flex: 1, height: 44, border: `0.5px solid ${nilai === n ? '#1D9E75' : 'rgba(44,44,42,0.15)'}`,
               borderRadius: 7, fontSize: 13, fontWeight: 500,
               background: nilai === n ? '#1D9E75' : '#fff',
               color: nilai === n ? '#fff' : '#888780',

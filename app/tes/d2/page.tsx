@@ -9,7 +9,9 @@ import type { MICode } from '@/types'
 export default function TesD2Page() {
   const { d2_skenario, d2_skala, setD2Skenario, setD2Skala } = useTesStore()
 
-  const totalAnswered = Object.keys(d2_skenario).length + Object.keys(d2_skala).length
+  const skenarioAnswered = Object.keys(d2_skenario).length
+  const skalaAnswered = Object.keys(d2_skala).length
+  const totalAnswered = skenarioAnswered + skalaAnswered
   const totalSoal = D2_SKENARIO.length + D2_SKALA.length
 
   return (
@@ -17,15 +19,18 @@ export default function TesD2Page() {
       dimensi={2}
       judul="Cara Berpikirmu"
       subjudul="Bukan apa yang kamu minati — tapi bagaimana kamu memproses dan memahami dunia. Ini yang membedakan dua orang dengan minat sama ke jalur karir yang berbeda."
-      intro="Bayangkan setiap situasi ini benar-benar terjadi. Pilih satu jawaban yang paling jujur mencerminkan kamu — bukan yang terasa paling 'pintar' atau 'benar'."
+      intro="Bagian pertama sudah selesai. Sekarang kita lihat sesuatu yang sedikit berbeda — bukan apa yang kamu minati, tapi bagaimana cara kamu berpikir."
       hrefBack="/tes/d1"
       hrefNext="/tes/d3"
       labelNext={`Lanjut ke Dimensi 3 → ${totalAnswered > 0 ? `(${totalAnswered}/${totalSoal} dijawab)` : ''}`}
     >
       {/* BLOK A: SKENARIO */}
       <div style={{ marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-          Blok A — Pilih satu yang paling mencerminkan kamu
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Blok A — Pilih satu yang paling mencerminkan kamu
+          </div>
+          <div style={{ fontSize: 11, color: '#888780' }}>{skenarioAnswered}/{D2_SKENARIO.length}</div>
         </div>
         {D2_SKENARIO.map((soal, i) => (
           <SkenarioCard
@@ -54,8 +59,11 @@ export default function TesD2Page() {
 
       {/* BLOK B: SKALA — tampilkan dalam 4 grup × 4 soal */}
       <div>
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-          Blok B — Pilih angka yang paling jujur mencerminkan dirimu sehari-hari, bukan versi idealmu
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Blok B — Pilih angka yang paling jujur mencerminkan dirimu sehari-hari, bukan versi idealmu
+          </div>
+          <div style={{ fontSize: 11, color: '#888780' }}>{skalaAnswered}/{D2_SKALA.length}</div>
         </div>
         {D2_SKALA.map((soal) => (
           <SkalaItem

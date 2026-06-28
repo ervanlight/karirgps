@@ -1,5 +1,17 @@
-'use client'
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Tes Minat Bakat & Rekomendasi Jurusan untuk Siswa SMA',
+  description: '87% mahasiswa Indonesia merasa salah jurusan. KarirGPS membaca cara kamu berpikir, apa yang memotivasimu, dan kondisi nyatamu lewat tes 4 dimensi — lalu menulis rekomendasi jurusan dan profesi yang relevan, bukan template.',
+}
+
+const FAQ = [
+  { q: 'Berapa lama tesnya?', a: 'Sekitar 20 menit total untuk 4 dimensi: minat (RIASEC), cara berpikir (Multiple Intelligences), nilai kerja, dan konteks personal. Bisa dikerjakan santai, tidak ada batas waktu per soal.' },
+  { q: 'Berapa harganya?', a: 'Tes dan ringkasan awal gratis. Laporan lengkap — naratif 5–7 halaman plus versi untuk orang tua — Rp 59.000, sekali bayar.' },
+  { q: 'Laporan lengkap dapat apa?', a: 'Profil kepribadian naratif, 3 kluster jurusan dengan reasoning dan kampus realistis, 5 profesi dengan gambaran kerja nyata di Indonesia, kekuatan dan hal yang perlu diwaspadai, langkah selanjutnya, dan versi terpisah untuk orang tua.' },
+  { q: 'Apakah ini menggantikan tes psikologi profesional?', a: 'Tidak. KarirGPS adalah alat bantu eksplorasi diri, bukan diagnosis klinis. Untuk kebutuhan psikologis yang lebih dalam, tetap disarankan konsultasi dengan psikolog atau konselor BK.' },
+]
 
 export default function LandingPage() {
   return (
@@ -140,6 +152,24 @@ export default function LandingPage() {
           }}>
             Mulai sekarang — gratis
           </Link>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 32px 88px' }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
+          Pertanyaan umum
+        </div>
+        <div style={{ display: 'grid', gap: 10 }}>
+          {FAQ.map(f => (
+            <div key={f.q} style={{
+              background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)',
+              borderRadius: 12, padding: '18px 20px',
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 6 }}>{f.q}</div>
+              <div style={{ fontSize: 13, color: '#888780', lineHeight: 1.65 }}>{f.a}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

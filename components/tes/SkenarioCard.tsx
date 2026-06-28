@@ -40,7 +40,7 @@ export default function SkenarioCard({
             key={o.kode}
             onClick={() => onSelect(o.kode)}
             style={{
-              width: '100%', textAlign: 'left',
+              width: '100%', textAlign: 'left', minHeight: 44,
               background: selected === o.kode ? '#E1F5EE' : '#fff',
               border: `0.5px solid ${selected === o.kode ? '#1D9E75' : 'rgba(44,44,42,0.12)'}`,
               borderRadius: 10, padding: '14px 16px',

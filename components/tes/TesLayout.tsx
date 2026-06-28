@@ -114,8 +114,9 @@ export default function TesLayout({
         }}>
           <Link href={hrefBack} style={{
             background: 'none', border: '0.5px solid rgba(44,44,42,0.15)',
-            borderRadius: 8, padding: '10px 18px', fontSize: 14,
+            borderRadius: 8, padding: '10px 18px', fontSize: 14, minHeight: 44,
             color: '#888780', textDecoration: 'none',
+            display: 'flex', alignItems: 'center',
           }}>
             ← Kembali
           </Link>
@@ -125,7 +126,7 @@ export default function TesLayout({
             style={{
               background: canProceed ? '#1D9E75' : '#9FE1CB',
               color: 'white', border: 'none', borderRadius: 8,
-              padding: '10px 24px', fontSize: 14, fontWeight: 500,
+              padding: '10px 24px', fontSize: 14, fontWeight: 500, minHeight: 44,
               cursor: canProceed ? 'pointer' : 'not-allowed', flex: 1,
             }}
           >

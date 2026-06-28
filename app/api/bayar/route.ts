@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { getAuthenticatedUser } from '@/lib/supabase-server'
 
 // ============================================================
 // MIDTRANS PAYMENT API
@@ -29,17 +30,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'session_id diperlukan' }, { status: 400 })
     }
 
-    // Pastikan sesi tes benar-benar ada dan sudah punya profil_data — laporan AI
-    // sendiri akan di-generate oleh webhook SETELAH pembayaran terkonfirmasi.
+    // Wajib login — mencegah siapapun membuat transaksi Midtrans untuk session orang lain
+    // atau men-spam endpoint ini (boros kuota Midtrans).
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Sesi login tidak ditemukan. Coba muat ulang halaman ini.' }, { status: 401 })
+    }
+
+    // Pastikan sesi tes benar-benar ada, milik user yang login, dan sudah punya
+    // profil_data — laporan AI sendiri akan di-generate oleh webhook SETELAH
+    // pembayaran terkonfirmasi.
     const supabase = createAdminClient()
     const { data: session } = await supabase
       .from('test_sessions')
-      .select('id, profil_data')
+      .select('id, profil_data, user_id')
       .eq('id', session_id)
       .maybeSingle()
 
     if (!session || !session.profil_data) {
       return NextResponse.json({ error: 'Sesi tes tidak ditemukan. Coba muat ulang halaman hasil.' }, { status: 400 })
+    }
+    if (session.user_id !== user.id) {
+      return NextResponse.json({ error: 'Sesi ini bukan milikmu.' }, { status: 403 })
     }
 
     // Parameter transaksi Midtrans
@@ -81,9 +93,9 @@ export async function POST(request: NextRequest) {
         'akulaku',
       ],
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/hasil?session=${session_id}&status=paid`,
-        error: `${process.env.NEXT_PUBLIC_BASE_URL}/hasil?session=${session_id}&status=error`,
-        pending: `${process.env.NEXT_PUBLIC_BASE_URL}/hasil?session=${session_id}&status=pending`,
+        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/laporan/${session_id}?status=paid`,
+        error: `${process.env.NEXT_PUBLIC_BASE_URL}/laporan/${session_id}?status=error`,
+        pending: `${process.env.NEXT_PUBLIC_BASE_URL}/laporan/${session_id}?status=pending`,
       },
       // Expiry: 24 jam
       expiry: {

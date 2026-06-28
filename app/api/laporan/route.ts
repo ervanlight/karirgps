@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
+import { getAuthenticatedUser } from '@/lib/supabase-server'
 import { generateLaporanLengkap, generateRingkasan } from '@/lib/laporan'
 import type { ProfilData } from '@/types'
 
@@ -22,6 +23,13 @@ export async function POST(request: NextRequest) {
 
     if (!profil) return NextResponse.json({ error: 'profil diperlukan' }, { status: 400 })
 
+    // Endpoint ini bisa memicu panggilan Claude API yang mahal -- wajib login
+    // supaya tidak bisa di-spam siapapun.
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Sesi login tidak ditemukan.' }, { status: 401 })
+    }
+
     if (mode === 'ringkasan') {
       const ringkasan = await generateRingkasan(profil)
       return NextResponse.json({ ringkasan })
@@ -31,9 +39,20 @@ export async function POST(request: NextRequest) {
       if (!session_id) {
         return NextResponse.json({ error: 'session_id diperlukan untuk mode full' }, { status: 400 })
       }
-      const { laporanSiswa, laporanOrtu } = await generateLaporanLengkap(profil)
 
       const supabase = createAdminClient()
+      const { data: ownerCheck } = await supabase
+        .from('test_sessions')
+        .select('user_id')
+        .eq('id', session_id)
+        .maybeSingle()
+
+      if (!ownerCheck || ownerCheck.user_id !== user.id) {
+        return NextResponse.json({ error: 'Sesi ini bukan milikmu.' }, { status: 403 })
+      }
+
+      const { laporanSiswa, laporanOrtu } = await generateLaporanLengkap(profil)
+
       const { data: existing } = await supabase
         .from('reports')
         .select('id')

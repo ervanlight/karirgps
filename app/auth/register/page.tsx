@@ -62,7 +62,7 @@ function RegisterForm() {
             <input
               type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="nama@email.com" required
-              style={{ width: '100%', border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', background: 'white' }}
+              style={{ width: '100%', border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', background: 'white', minHeight: 44, boxSizing: 'border-box' }}
             />
           </div>
           <div style={{ marginBottom: 6 }}>
@@ -70,7 +70,7 @@ function RegisterForm() {
             <input
               type="password" value={password} onChange={e => setPassword(e.target.value)}
               placeholder="Minimal 8 karakter" required
-              style={{ width: '100%', border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', background: 'white' }}
+              style={{ width: '100%', border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', background: 'white', minHeight: 44, boxSizing: 'border-box' }}
             />
           </div>
 
@@ -82,7 +82,7 @@ function RegisterForm() {
 
           <button
             type="submit" disabled={loading}
-            style={{ width: '100%', background: loading ? '#9FE1CB' : '#1D9E75', color: 'white', border: 'none', borderRadius: 8, padding: '11px', fontSize: 14, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}
+            style={{ width: '100%', background: loading ? '#9FE1CB' : '#1D9E75', color: 'white', border: 'none', borderRadius: 8, padding: '11px', fontSize: 14, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8, minHeight: 44 }}
           >
             {loading ? 'Mendaftar...' : 'Buat akun & mulai tes'}
           </button>

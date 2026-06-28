@@ -28,8 +28,11 @@ export default function TesD1Page() {
     >
       {/* BLOK A: SKENARIO */}
       <div style={{ marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-          Blok A — Pilih satu yang paling mencerminkan kamu
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Blok A — Pilih satu yang paling mencerminkan kamu
+          </div>
+          <div style={{ fontSize: 11, color: '#888780' }}>{skenarioAnswered}/{D1_SKENARIO.length}</div>
         </div>
         {D1_SKENARIO.map((soal, i) => (
           <SkenarioCard
@@ -58,8 +61,11 @@ export default function TesD1Page() {
 
       {/* BLOK B: SKALA */}
       <div>
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-          Blok B — Pilih angka yang paling jujur mencerminkan dirimu
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Blok B — Pilih angka yang paling jujur mencerminkan dirimu
+          </div>
+          <div style={{ fontSize: 11, color: '#888780' }}>{skalaAnswered}/{D1_SKALA.length}</div>
         </div>
         {D1_SKALA.map((soal) => (
           <SkalaItem

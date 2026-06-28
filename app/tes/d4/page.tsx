@@ -38,7 +38,7 @@ export default function TesD4Page() {
       dimensi={4}
       judul="Konteks Personal"
       subjudul="Bagian terakhir — bukan psikometri, tapi penting agar rekomendasi yang kamu terima realistis sesuai kondisimu."
-      intro="Tidak ada jawaban yang lebih baik atau lebih buruk di sini. Ini membantu kami menyesuaikan rekomendasi — bukan menilai kamu."
+      intro="Hampir selesai. Tujuh pertanyaan terakhir ini berbeda dari sebelumnya — tidak ada yang diukur. Kami hanya ingin tahu kondisimu sekarang, supaya rekomendasinya bisa benar-benar relevan untukmu."
       hrefBack="/tes/d3"
       hrefNext="/hasil"
       labelNext={`Lihat hasilku → ${totalAnswered > 0 ? `(${totalAnswered}/${totalSoal} dijawab)` : ''}`}
@@ -73,7 +73,7 @@ export default function TesD4Page() {
                     key={o.kode}
                     onClick={() => handleSelect(p.id, o.kode, !!p.multiple)}
                     style={{
-                      width: '100%', textAlign: 'left',
+                      width: '100%', textAlign: 'left', minHeight: 44,
                       background: selected ? '#E1F5EE' : '#fff',
                       border: `0.5px solid ${selected ? '#1D9E75' : 'rgba(44,44,42,0.12)'}`,
                       borderRadius: 10, padding: '14px 16px',

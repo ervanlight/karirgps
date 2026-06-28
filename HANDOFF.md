@@ -26,6 +26,14 @@ Alur lengkap sudah berhasil divalidasi: Register/Login (wajib) → isi tes D1-D4
 11. `maxDuration` di route yang panggil Claude harus besar: `app/api/webhook/midtrans/route.ts` = 290s, `app/api/laporan/route.ts` = 290s. Total proses (laporan siswa + laporan ortu + simpan DB + kirim email) bisa 150-220 detik.
 12. Insert/update row `reports` di webhook WAJIB isi `user_id` — kalau kosong, RLS policy `"Users can view own reports" using (auth.uid() = user_id)` tidak akan pernah match, dan user tidak bisa baca laporannya sendiri dari browser.
 
+## Fase 1 (DevPlan) — Task 1.1 Web Report Rendering: SELESAI
+Dibuat halaman `/laporan/[id]` yang membaca `test_sessions` + `reports` langsung dari Supabase (RLS by `user_id`) — tidak bergantung pada Zustand/localStorage. Jadi laporan bisa diakses kapan saja, dari device manapun, selama user login dengan akun yang sama.
+- Logika rekomendasi gratis (PROFIL_TEXT, JURUSAN_MAP, PROFESI_MAP, ScoreBar) diekstrak ke `lib/rekomendasi-gratis.tsx` — dipakai bersama oleh `/hasil` dan `/laporan/[id]`.
+- Callback Midtrans (`app/api/bayar/route.ts`) sekarang redirect ke `/laporan/{session_id}?status=...` bukan `/hasil?...`.
+- `/hasil` tetap dipakai untuk flow tes selesai → preview gratis → bayar (sebelum session benar2 "paid"); begitu bayar sukses, redirect ke `/laporan/[id]` untuk akses permanen.
+- `middleware.ts` sudah menambahkan `/laporan` ke auth gate.
+- Belum dikerjakan dari Task 1.1: tombol "Kirim Ulang ke Email" (opsional — devplan tulis "Download PDF *atau* Kirim Ulang", Download PDF sudah ada).
+
 ## Yang BELUM beres / perlu dilanjutkan
 1. **Email via Resend belum konfirmasi terkirim** — laporan sudah tampil di web (jalur utama jalan), tapi email belum masuk ke inbox user di test terakhir. Perlu didiagnosis:
    - Cek Resend dashboard (https://resend.com/emails) apakah ada log percobaan kirim & statusnya (delivered/bounced/dll)
