@@ -1,13 +1,11 @@
-import './globals.css' // Penting: Ini yang membuat tampilan Anda muncul!
+import './globals.css'
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body style={{ margin: 0, padding: 0 }}>
+        {children}
+      </body>
     </html>
   )
 }
