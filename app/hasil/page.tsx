@@ -223,8 +223,8 @@ function HasilContent() {
           </div>
           <span style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A' }}>KarirGPS</span>
         </Link>
-        <Link href="/tes/d1" style={{ fontSize: 13, color: '#888780', textDecoration: 'none' }}>
-          Ulangi tes
+        <Link href="/dashboard" style={{ fontSize: 13, color: '#888780', textDecoration: 'none' }}>
+          Dashboard
         </Link>
       </nav>
 

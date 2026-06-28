@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 // (gratis, tapi akun diperlukan agar progres & laporan tersimpan)
 // ============================================================
 
-const PROTECTED_PREFIXES = ['/tes', '/hasil', '/laporan']
+const PROTECTED_PREFIXES = ['/tes', '/hasil', '/laporan', '/dashboard']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -46,5 +46,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/tes/:path*', '/hasil/:path*', '/laporan/:path*'],
+  matcher: ['/tes/:path*', '/hasil/:path*', '/laporan/:path*', '/dashboard/:path*'],
 }
