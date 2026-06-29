@@ -9,33 +9,33 @@ interface SkalaItemProps {
 
 export default function SkalaItem({ id, pernyataan, nilai, onSelect }: SkalaItemProps) {
   return (
-    <div style={{
-      background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)',
-      borderRadius: 10, padding: '16px 18px', marginBottom: 12,
-    }}>
-      <div style={{ fontSize: 14, color: '#2C2C2A', lineHeight: 1.65, marginBottom: 14 }}>
+    <div className="bg-white border border-surface-200 rounded-2xl p-6 md:p-8 mb-6 shadow-sm hover:shadow-soft transition-shadow">
+      <div className="text-base md:text-lg text-ink font-medium leading-relaxed mb-6">
         "{pernyataan}"
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#888780', marginBottom: 7 }}>
+      
+      <div className="flex justify-between text-xs font-semibold text-ink-light uppercase tracking-wider mb-3">
         <span>Sangat tidak setuju</span>
         <span>Sangat setuju</span>
       </div>
-      <div style={{ display: 'flex', gap: 6 }}>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button
-            key={n}
-            onClick={() => onSelect(id, n)}
-            style={{
-              flex: 1, height: 44, border: `0.5px solid ${nilai === n ? '#1D9E75' : 'rgba(44,44,42,0.15)'}`,
-              borderRadius: 7, fontSize: 13, fontWeight: 500,
-              background: nilai === n ? '#1D9E75' : '#fff',
-              color: nilai === n ? '#fff' : '#888780',
-              cursor: 'pointer', transition: 'all 0.12s',
-            }}
-          >
-            {n}
-          </button>
-        ))}
+      
+      <div className="flex gap-2 md:gap-4">
+        {[1, 2, 3, 4, 5].map((n) => {
+          const isSelected = nilai === n
+          return (
+            <button
+              key={n}
+              onClick={() => onSelect(id, n)}
+              className={`flex-1 h-12 md:h-14 rounded-xl text-sm md:text-base font-bold transition-all duration-200 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
+                isSelected
+                  ? 'bg-brand-600 text-white shadow-md -translate-y-1'
+                  : 'bg-surface-50 text-ink-light border border-surface-200 hover:bg-surface-100 hover:text-ink hover:border-surface-300'
+              }`}
+            >
+              {n}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

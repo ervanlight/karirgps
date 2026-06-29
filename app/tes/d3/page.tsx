@@ -17,21 +17,24 @@ export default function TesD3Page() {
   return (
     <TesLayout
       dimensi={3}
-      judul="Apa yang Paling Penting Bagimu"
-      subjudul="Dari sekian karir yang cocok denganmu — versi yang mana yang akan membuatmu benar-benar puas? Ini yang Dimensi 3 coba jawab."
-      intro="Hampir selesai. Bagian terakhir ini sedikit berbeda dari sebelumnya — tidak ada jawaban yang bisa terasa benar secara otomatis, karena semua pilihannya memang bagus. Yang kami cari adalah prioritasmu."
+      judul="Prioritas Karir"
+      subjudul="Dari sekian karir yang cocok denganmu — versi yang mana yang akan membuatmu benar-benar puas? Inilah yang ingin kita cari tahu."
+      intro="Bagian ini sedikit berbeda. Semua pilihan mungkin terasa bagus, tapi kami ingin tahu apa yang paling kamu prioritaskan."
       hrefBack="/tes/d2"
       hrefNext="/tes/d4"
-      labelNext={`Lanjut ke bagian terakhir → ${totalAnswered > 0 ? `(${totalAnswered}/${totalSoal} dijawab)` : ''}`}
+      labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}
     >
-      {/* BLOK A: TRADE-OFF */}
-      <div style={{ marginBottom: 8 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Blok A — Semua pilihan terdengar bagus. Pilih yang paling kamu prioritaskan.
+      {/* BLOK A */}
+      <div className="mb-8">
+        <div className="flex justify-between items-baseline mb-6">
+          <div className="text-sm font-bold text-brand-600 uppercase tracking-widest">
+            Bagian A — Pilihan Prioritas
           </div>
-          <div style={{ fontSize: 11, color: '#888780' }}>{tradeoffAnswered}/{D3_TRADEOFF.length}</div>
+          <div className="text-sm font-medium text-ink-light bg-surface-100 px-3 py-1 rounded-full">
+            {tradeoffAnswered} / {D3_TRADEOFF.length}
+          </div>
         </div>
+        
         {D3_TRADEOFF.map((soal, i) => (
           <SkenarioCard
             key={soal.id}
@@ -47,24 +50,25 @@ export default function TesD3Page() {
       </div>
 
       {/* DIVIDER */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 28px',
-      }}>
-        <div style={{ flex: 1, height: '0.5px', background: 'rgba(44,44,42,0.12)' }}/>
-        <span style={{ fontSize: 12, color: '#888780', fontStyle: 'italic' }}>
-          Beberapa pernyataan terakhir. Jawab sesuai kondisimu sekarang.
+      <div className="flex items-center gap-4 my-14">
+        <div className="flex-1 h-px bg-surface-200"></div>
+        <span className="text-sm font-medium text-ink-light italic">
+          Beberapa pernyataan singkat terakhir
         </span>
-        <div style={{ flex: 1, height: '0.5px', background: 'rgba(44,44,42,0.12)' }}/>
+        <div className="flex-1 h-px bg-surface-200"></div>
       </div>
 
-      {/* BLOK B: SKALA */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Blok B — Jawab sesuai kenyataan, bukan siapa yang ingin kamu jadi
+      {/* BLOK B */}
+      <div className="mb-8">
+        <div className="flex justify-between items-baseline mb-6">
+          <div className="text-sm font-bold text-brand-600 uppercase tracking-widest">
+            Bagian B — Skala Setuju
           </div>
-          <div style={{ fontSize: 11, color: '#888780' }}>{skalaAnswered}/{D3_SKALA.length}</div>
+          <div className="text-sm font-medium text-ink-light bg-surface-100 px-3 py-1 rounded-full">
+            {skalaAnswered} / {D3_SKALA.length}
+          </div>
         </div>
+        
         {D3_SKALA.map((soal) => (
           <SkalaItem
             key={soal.id}

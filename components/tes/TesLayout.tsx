@@ -16,15 +16,15 @@ interface TesLayoutProps {
 }
 
 const DIMENSI_META = [
-  { label: 'RIASEC', waktu: '~5 menit', soal: '18 soal' },
-  { label: 'Multiple Intelligences', waktu: '~8 menit', soal: '24 soal' },
-  { label: 'Nilai Kerja', waktu: '~5 menit', soal: '18 soal' },
-  { label: 'Konteks Personal', waktu: '~3 menit', soal: '7 pertanyaan' },
+  { label: 'Minat & Ketertarikan', waktu: '~5 menit', soal: '18 soal' },
+  { label: 'Cara Berpikir', waktu: '~8 menit', soal: '24 soal' },
+  { label: 'Prioritas Karir', waktu: '~5 menit', soal: '18 soal' },
+  { label: 'Kondisi Nyata', waktu: '~3 menit', soal: '7 pertanyaan' },
 ]
 
 export default function TesLayout({
   children, dimensi, judul, subjudul, intro,
-  hrefBack, hrefNext, labelNext = 'Lanjut →',
+  hrefBack, hrefNext, labelNext = 'Lanjutkan',
   onNext, canProceed = true,
 }: TesLayoutProps) {
   const router = useRouter()
@@ -37,103 +37,87 @@ export default function TesLayout({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
-      {/* TOP NAV */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 24px', background: '#fff',
-        borderBottom: '0.5px solid rgba(44,44,42,0.12)',
-        position: 'sticky', top: 0, zIndex: 50,
-      }}>
-        <Link href="/" style={{
-          display: 'flex', alignItems: 'center', gap: 7, textDecoration: 'none',
-        }}>
-          <div style={{
-            width: 26, height: 26, background: '#1D9E75', borderRadius: 6,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="white">
-              <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
-            </svg>
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A' }}>KarirGPS</span>
-        </Link>
+    <div className="min-h-screen bg-surface-50 text-ink font-sans selection:bg-brand-500 selection:text-white pb-24">
+      {/* Top Navbar */}
+      <nav className="sticky top-0 z-50 glass border-b border-surface-200">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group outline-none">
+            <div className="w-8 h-8 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-xl flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="white">
+                <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
+              </svg>
+            </div>
+            <span className="hidden sm:block text-lg font-bold tracking-tight text-ink">KarirGPS</span>
+          </Link>
 
-        {/* Progress track */}
-        <div style={{ flex: 1, maxWidth: 240, margin: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#888780', marginBottom: 5 }}>
-            <span>Dimensi {dimensi} dari 4</span>
-            <span>{Math.round(progress)}%</span>
+          {/* Progress Bar */}
+          <div className="flex-1 max-w-xs mx-4">
+            <div className="flex justify-between text-xs font-medium text-ink-light mb-2">
+              <span>Langkah {dimensi} dari 4</span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+            <div className="h-2 bg-surface-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-brand-500 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
-          <div style={{ height: 3, background: 'rgba(44,44,42,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${progress}%`,
-              background: '#1D9E75', borderRadius: 2,
-              transition: 'width 0.5s ease',
-            }}/>
-          </div>
+
+          <Link href="/dashboard" className="text-sm font-medium text-ink-light hover:text-ink transition-colors outline-none">
+            Tutup
+          </Link>
         </div>
-
-        <Link href="/dashboard" style={{ fontSize: 12, color: '#888780', textDecoration: 'none' }}>Dashboard</Link>
       </nav>
 
-      {/* CONTENT */}
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px 80px' }}>
-        {/* Dimension header */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            background: '#E1F5EE', borderRadius: 20, padding: '3px 10px',
-            fontSize: 11, color: '#0F6E56', fontWeight: 500, marginBottom: 10,
-          }}>
-            Dimensi {dimensi} — {meta.label} · {meta.soal}
+      {/* Main Content */}
+      <main className="max-w-2xl mx-auto px-6 mt-12 animate-fade-up">
+        {/* Header */}
+        <header className="mb-10">
+          <div className="inline-flex items-center gap-2 bg-brand-50 text-brand-600 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider mb-4 border border-brand-100">
+            {meta.label} · {meta.soal}
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 500, color: '#2C2C2A', marginBottom: 6, letterSpacing: '-0.4px' }}>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight mb-3">
             {judul}
           </h1>
-          <p style={{ fontSize: 14, color: '#888780', lineHeight: 1.6 }}>{subjudul}</p>
+          <p className="text-lg text-ink-light leading-relaxed">
+            {subjudul}
+          </p>
+        </header>
+
+        {/* Intro Alert */}
+        <div className="bg-white border border-surface-200 border-l-4 border-l-brand-500 rounded-r-xl p-5 mb-10 shadow-sm text-sm text-ink leading-relaxed">
+          {intro}
         </div>
 
-        {/* Instructor note */}
-        <div style={{
-          background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)',
-          borderLeft: '2.5px solid #1D9E75', borderRadius: '0 10px 10px 0',
-          padding: '13px 16px', marginBottom: 28,
-          fontSize: 13, color: '#888780', lineHeight: 1.65, fontStyle: 'italic',
-        }}>
-          "{intro}"
+        {/* Children / Questions */}
+        <div className="space-y-6">
+          {children}
         </div>
 
-        {/* Questions */}
-        {children}
-
-        {/* Navigation buttons */}
-        <div style={{
-          display: 'flex', gap: 10, marginTop: 36,
-          paddingTop: 20, borderTop: '0.5px solid rgba(44,44,42,0.12)',
-        }}>
-          <Link href={hrefBack} style={{
-            background: 'none', border: '0.5px solid rgba(44,44,42,0.15)',
-            borderRadius: 8, padding: '10px 18px', fontSize: 14, minHeight: 44,
-            color: '#888780', textDecoration: 'none',
-            display: 'flex', alignItems: 'center',
-          }}>
-            ← Kembali
-          </Link>
+        {/* Navigation Buttons */}
+        <div className="flex gap-4 mt-12 pt-8 border-t border-surface-200">
+          {hrefBack !== '/' && (
+            <Link 
+              href={hrefBack} 
+              className="px-6 py-4 rounded-xl text-sm font-semibold text-ink-light border border-surface-200 bg-white hover:bg-surface-50 hover:text-ink transition-all flex items-center justify-center outline-none focus:ring-2 focus:ring-brand-500"
+            >
+              Sebelumnya
+            </Link>
+          )}
           <button
             onClick={handleNext}
             disabled={!canProceed}
-            style={{
-              background: canProceed ? '#1D9E75' : '#9FE1CB',
-              color: 'white', border: 'none', borderRadius: 8,
-              padding: '10px 24px', fontSize: 14, fontWeight: 500, minHeight: 44,
-              cursor: canProceed ? 'pointer' : 'not-allowed', flex: 1,
-            }}
+            className={`flex-1 px-6 py-4 rounded-xl text-sm font-bold transition-all outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-surface-50 ${
+              canProceed 
+                ? 'bg-brand-600 text-white hover:bg-brand-700 shadow-soft hover:shadow-float hover:-translate-y-0.5' 
+                : 'bg-surface-200 text-ink-light cursor-not-allowed'
+            }`}
           >
             {labelNext}
           </button>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

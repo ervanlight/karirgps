@@ -90,45 +90,29 @@ export interface ProfilData {
   d4_konteks: KonteksPersonal
 }
 
-// --- LAPORAN OUTPUT ---
-export interface JurusanItem {
+// --- LAPORAN OUTPUT (MVP) ---
+export interface KarirItem {
   nama: string
-  reasoning: string
-  kampus_rekomendasi: string
-  keketatan: string
-}
-
-export interface ProfesiItem {
-  nama: string
-  gambaran_nyata: string
+  deskripsi: string
   jalur_masuk: string
-  catatan?: string
 }
 
-export interface LaporanSiswa {
-  profil_singkat: string
-  pembuka: string
-  profil_kepribadian: string
-  nilai_kerja: string
-  jurusan: JurusanItem[]
-  profesi: ProfesiItem[]
-  kekuatan: string[]
-  perlu_diwaspadai: string[]
-  langkah_selanjutnya: string
-  penutup: string
+export interface RoadmapItem {
+  fase: string
+  kegiatan: string
 }
 
-export interface LaporanOrangTua {
-  cara_berpikir_anak: string
-  apa_yang_memotivasi: string
-  dukungan_yang_dibutuhkan: string
-  cara_berdiskusi: string
-  hal_terpenting: string
+export interface RisikoItem {
+  risiko: string
+  solusi: string
 }
 
-export interface LaporanLengkap {
-  siswa: LaporanSiswa
-  orang_tua: LaporanOrangTua
+export interface MVPDecision {
+  rekomendasi_utama: 'Kuliah' | 'Kerja' | 'Hybrid'
+  alasan: string
+  karir: KarirItem[]
+  roadmap: RoadmapItem[]
+  risiko_antisipasi: RisikoItem[]
 }
 
 // --- DATABASE TYPES (Supabase) ---
@@ -152,8 +136,8 @@ export interface DbReport {
   id: string
   session_id: string
   user_id: string | null
-  laporan_siswa: LaporanSiswa
-  laporan_orang_tua: LaporanOrangTua
+  laporan_siswa: MVPDecision
+  laporan_orang_tua: null // deprecated for MVP
   payment_status: 'unpaid' | 'paid'
   payment_id: string | null
   created_at: string

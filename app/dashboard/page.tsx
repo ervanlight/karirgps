@@ -87,7 +87,9 @@ export default function DashboardPage() {
     if (!user) return
     const { error } = await supabase.from('profiles').update({ nama, updated_at: new Date().toISOString() }).eq('id', user.id)
     setSavingNama(false)
-    setNamaMsg(error ? 'Gagal menyimpan nama.' : 'Tersimpan.')
+    setNamaMsg(error ? 'Gagal menyimpan nama.' : 'Berhasil disimpan.')
+    
+    if (!error) setTimeout(() => setNamaMsg(''), 3000)
   }
 
   async function handleChangeEmail(e: React.FormEvent) {
@@ -102,156 +104,185 @@ export default function DashboardPage() {
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault()
-    if (newPassword.length < 8) { setPasswordMsg('Password minimal 8 karakter.'); return }
+    if (newPassword.length < 8) { setPasswordMsg('Kata sandi minimal 8 karakter.'); return }
     setSavingPassword(true)
     setPasswordMsg('')
     const supabase = createClient()
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setSavingPassword(false)
-    setPasswordMsg(error ? (error.message || 'Gagal mengganti password.') : 'Password berhasil diganti.')
-    if (!error) setNewPassword('')
+    setPasswordMsg(error ? (error.message || 'Gagal mengubah kata sandi.') : 'Kata sandi berhasil diperbarui.')
+    if (!error) {
+      setNewPassword('')
+      setTimeout(() => setPasswordMsg(''), 3000)
+    }
+  }
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
   }
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: 13, color: '#888780' }}>Memuat dashboard...</div>
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 rounded-full bg-brand-500 animate-pulse"></div>
+          <div className="text-sm font-medium text-ink-light">Menyiapkan ruang kerja...</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 24px', background: '#fff',
-        borderBottom: '0.5px solid rgba(44,44,42,0.12)',
-      }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 7, textDecoration: 'none' }}>
-          <div style={{ width: 26, height: 26, background: '#1D9E75', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="white"><path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/></svg>
+    <div className="min-h-screen bg-surface-50 text-ink font-sans selection:bg-brand-500 selection:text-white">
+      
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-brand-100/50 to-transparent pointer-events-none -z-10"></div>
+
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 glass border-b border-surface-200">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-xl flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="white">
+                <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
+              </svg>
+            </div>
+            <span className="text-lg font-bold tracking-tight text-ink">KarirGPS</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-ink-light hidden sm:block">{email}</span>
+            <button onClick={handleLogout} className="text-sm font-medium text-ink hover:text-brand-600 transition-colors">
+              Keluar
+            </button>
           </div>
-          <span style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A' }}>KarirGPS</span>
-        </Link>
-        <span style={{ fontSize: 13, color: '#888780' }}>{email}</span>
+        </div>
       </nav>
 
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px 80px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: '#2C2C2A', marginBottom: 24 }}>Dashboard</h1>
+      {/* Main Content */}
+      <main className="max-w-3xl mx-auto px-6 py-12 pb-24">
+        
+        <header className="mb-10 animate-fade-up">
+          <h1 className="text-3xl font-bold text-ink tracking-tight mb-2">Halo, {nama || 'Penjelajah'}! 👋</h1>
+          <p className="text-ink-light">Selamat datang di ruang kerjamu. Lanjutkan perjalanan karirmu di sini.</p>
+        </header>
 
-        {/* DAFTAR TES */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>
-            Tes yang pernah kamu kerjakan
+        {/* Daftar Tes Section */}
+        <section className="mb-14 animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest">Riwayat Tes</h2>
+            {sessions.length > 0 && (
+              <Link href="/tes/d1" className="text-sm font-semibold text-brand-600 hover:text-brand-700 hover:underline">
+                + Tes Baru
+              </Link>
+            )}
           </div>
 
-          {sessions.length === 0 && (
-            <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, textAlign: 'center' }}>
-              <p style={{ fontSize: 14, color: '#888780', marginBottom: 14 }}>Kamu belum pernah mengerjakan tes.</p>
-              <Link href="/tes/d1" style={{ background: '#1D9E75', color: 'white', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 500, textDecoration: 'none', display: 'inline-block' }}>
-                Mulai tes pertamamu
+          {sessions.length === 0 ? (
+            <div className="bg-white border border-surface-200 rounded-3xl p-10 text-center shadow-sm">
+              <div className="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                🧭
+              </div>
+              <h3 className="text-lg font-bold text-ink mb-2">Belum ada aktivitas tes</h3>
+              <p className="text-ink-light mb-6">Mulai tes pertama untuk memetakan potensimu.</p>
+              <Link href="/tes/d1" className="inline-block bg-brand-600 text-white rounded-full px-8 py-3 text-sm font-semibold hover:bg-brand-700 hover:-translate-y-0.5 transition-all shadow-soft">
+                Mulai Tes Sekarang
               </Link>
             </div>
-          )}
-
-          <div style={{ display: 'grid', gap: 10 }}>
-            {sessions.map((s) => (
-              <div key={s.id} style={{
-                background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 12,
-                padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-              }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 4 }}>
-                    {new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+          ) : (
+            <div className="grid gap-4">
+              {sessions.map((s) => (
+                <div key={s.id} className="group bg-white border border-surface-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-soft transition-all duration-300">
+                  <div>
+                    <div className="text-base font-bold text-ink mb-1.5 group-hover:text-brand-600 transition-colors">
+                      {new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                    {s.paid ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-semibold border border-brand-100">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Laporan Lengkap
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-100 text-ink-light text-xs font-semibold border border-surface-200">
+                        Versi Gratis
+                      </span>
+                    )}
                   </div>
-                  <span style={{
-                    fontSize: 11, fontWeight: 500, padding: '2px 10px', borderRadius: 20,
-                    background: s.paid ? '#E1F5EE' : '#F8F7F4',
-                    color: s.paid ? '#0F6E56' : '#888780',
-                  }}>
-                    {s.paid ? 'Laporan lengkap' : 'Gratis'}
-                  </span>
+                  
+                  <Link href={`/laporan/${s.id}`} className={`w-full sm:w-auto text-center px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    s.paid 
+                      ? 'bg-surface-50 text-ink border border-surface-200 hover:bg-white hover:border-surface-300 hover:shadow-sm' 
+                      : 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-soft hover:-translate-y-0.5'
+                  }`}>
+                    {s.paid ? 'Buka Laporan' : 'Beli Laporan'}
+                  </Link>
                 </div>
-                <Link href={`/laporan/${s.id}`} style={{
-                  background: s.paid ? 'none' : '#1D9E75',
-                  border: s.paid ? '0.5px solid rgba(44,44,42,0.15)' : 'none',
-                  color: s.paid ? '#2C2C2A' : 'white',
-                  borderRadius: 8, padding: '0 16px', fontSize: 13, fontWeight: 500,
-                  textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-                  display: 'flex', alignItems: 'center', minHeight: 44, boxSizing: 'border-box',
-                }}>
-                  {s.paid ? 'Buka laporan' : 'Beli laporan'}
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          {sessions.length > 0 && (
-            <div style={{ marginTop: 14 }}>
-              <Link href="/tes/d1" style={{ fontSize: 13, color: '#1D9E75', textDecoration: 'none' }}>
-                + Kerjakan tes baru
-              </Link>
+              ))}
             </div>
           )}
-        </div>
+        </section>
 
-        {/* PROFILE SETTINGS */}
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>
-            Pengaturan profil
-          </div>
+        {/* Pengaturan Profil */}
+        <section className="animate-fade-up" style={{ animationDelay: '0.2s' }}>
+          <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest mb-6">Pengaturan Profil</h2>
 
-          <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 22, marginBottom: 10 }}>
-            <form onSubmit={handleSaveNama}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#2C2C2A', marginBottom: 6 }}>Nama</label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input
-                  type="text" value={nama} onChange={(e) => setNama(e.target.value)}
-                  placeholder="Nama lengkapmu"
-                  style={{ flex: 1, border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', minHeight: 44, boxSizing: 'border-box' }}
-                />
-                <button type="submit" disabled={savingNama} style={{ background: '#1D9E75', color: 'white', border: 'none', borderRadius: 7, padding: '0 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 44 }}>
-                  {savingNama ? '...' : 'Simpan'}
-                </button>
-              </div>
-              {namaMsg && <div style={{ fontSize: 12, color: '#1D9E75', marginTop: 8 }}>{namaMsg}</div>}
-            </form>
-          </div>
+          <div className="grid gap-5">
+            {/* Nama */}
+            <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+              <form onSubmit={handleSaveNama}>
+                <label className="block text-sm font-semibold text-ink mb-3">Nama Lengkap</label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text" value={nama} onChange={(e) => setNama(e.target.value)}
+                    placeholder="Masukkan namamu"
+                    className="flex-1 border border-surface-200 bg-surface-50 rounded-xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
+                  />
+                  <button type="submit" disabled={savingNama} className="bg-ink text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50">
+                    {savingNama ? 'Menyimpan...' : 'Simpan'}
+                  </button>
+                </div>
+                {namaMsg && <div className="text-sm font-medium text-brand-600 mt-3">{namaMsg}</div>}
+              </form>
+            </div>
 
-          <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 22, marginBottom: 10 }}>
-            <form onSubmit={handleChangeEmail}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#2C2C2A', marginBottom: 6 }}>Email</label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input
-                  type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required
-                  style={{ flex: 1, border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', minHeight: 44, boxSizing: 'border-box' }}
-                />
-                <button type="submit" disabled={savingEmail || newEmail === email} style={{ background: '#1D9E75', color: 'white', border: 'none', borderRadius: 7, padding: '0 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 44, opacity: newEmail === email ? 0.5 : 1 }}>
-                  {savingEmail ? '...' : 'Ganti'}
-                </button>
-              </div>
-              {emailMsg && <div style={{ fontSize: 12, color: '#1D9E75', marginTop: 8 }}>{emailMsg}</div>}
-            </form>
-          </div>
+            {/* Email */}
+            <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+              <form onSubmit={handleChangeEmail}>
+                <label className="block text-sm font-semibold text-ink mb-3">Alamat Email</label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required
+                    className="flex-1 border border-surface-200 bg-surface-50 rounded-xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
+                  />
+                  <button type="submit" disabled={savingEmail || newEmail === email} className="bg-ink text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50">
+                    {savingEmail ? 'Memproses...' : 'Perbarui Email'}
+                  </button>
+                </div>
+                {emailMsg && <div className="text-sm font-medium text-brand-600 mt-3">{emailMsg}</div>}
+              </form>
+            </div>
 
-          <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 22 }}>
-            <form onSubmit={handleChangePassword}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#2C2C2A', marginBottom: 6 }}>Password baru</label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input
-                  type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimal 8 karakter"
-                  style={{ flex: 1, border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 7, padding: '9px 12px', fontSize: 14, color: '#2C2C2A', outline: 'none', minHeight: 44, boxSizing: 'border-box' }}
-                />
-                <button type="submit" disabled={savingPassword || !newPassword} style={{ background: '#1D9E75', color: 'white', border: 'none', borderRadius: 7, padding: '0 18px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 44 }}>
-                  {savingPassword ? '...' : 'Ganti'}
-                </button>
-              </div>
-              {passwordMsg && <div style={{ fontSize: 12, color: '#1D9E75', marginTop: 8 }}>{passwordMsg}</div>}
-            </form>
+            {/* Kata Sandi */}
+            <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+              <form onSubmit={handleChangePassword}>
+                <label className="block text-sm font-semibold text-ink mb-3">Kata Sandi Baru</label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Minimal 8 karakter"
+                    className="flex-1 border border-surface-200 bg-surface-50 rounded-xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
+                  />
+                  <button type="submit" disabled={savingPassword || !newPassword} className="bg-ink text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50">
+                    {savingPassword ? 'Memproses...' : 'Perbarui Kata Sandi'}
+                  </button>
+                </div>
+                {passwordMsg && <div className="text-sm font-medium text-brand-600 mt-3">{passwordMsg}</div>}
+              </form>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+
+      </main>
     </div>
   )
 }

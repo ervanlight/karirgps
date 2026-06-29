@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase'
 import { buildProfil, RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
 import { RIASEC_COLOR, WV_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
-import type { RiasecCode, MICode, WorkValueCode, LaporanSiswa, LaporanOrangTua } from '@/types'
+import type { RiasecCode, MICode, WorkValueCode, MVPDecision } from '@/types'
 
 export default function HasilPage() {
   return (
@@ -22,15 +22,20 @@ function HasilContent() {
   const searchParams = useSearchParams()
   const paymentStatus = searchParams.get('status')
   const store = useTesStore()
+  
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState('')
   const [payStep, setPayStep] = useState('')
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [sessionReady, setSessionReady] = useState(false)
   const creatingSession = useRef(false)
-  const [laporanLengkap, setLaporanLengkap] = useState<{ siswa: LaporanSiswa; ortu: LaporanOrangTua } | null>(null)
+  
+  const [laporanLengkap, setLaporanLengkap] = useState<MVPDecision | null>(null)
   const [checkingLaporan, setCheckingLaporan] = useState(false)
   const [laporanTimedOut, setLaporanTimedOut] = useState(false)
+  
+  // TAB STATE
+  const [activeTab, setActiveTab] = useState<'awal' | 'lengkap'>('lengkap')
 
   // Build profil from store
   const profil = buildProfil({
@@ -38,8 +43,6 @@ function HasilContent() {
     d4_konteks: store.d4_konteks as Required<typeof store.d4_konteks>,
   } as Parameters<typeof buildProfil>[0])
 
-  // Pastikan ada akun + sesi tersimpan di Supabase sebelum apapun bisa dibayar.
-  // session_id WAJIB berupa UUID asli dari tabel test_sessions — bukan placeholder.
   useEffect(() => {
     let active = true
     async function ensureSession() {
@@ -74,7 +77,7 @@ function HasilContent() {
 
       if (!active) return
       if (error || !data) {
-        setPayError('Gagal menyimpan sesi tesmu. Coba muat ulang halaman ini.')
+        setPayError('Sesi tes gagal disimpan. Muat ulang halaman ini.')
         return
       }
       store.setSessionId(data.id)
@@ -85,26 +88,24 @@ function HasilContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Cek apakah laporan lengkap sudah jadi & dibayar. Kalau baru selesai bayar
-  // (?status=paid), polling beberapa kali karena AI butuh ~1-2 menit di webhook.
   useEffect(() => {
     if (!sessionReady || !store.session_id) return
     let active = true
     let attempts = 0
-    const maxAttempts = paymentStatus === 'paid' ? 70 : 1 // ~5 menit kalau baru bayar (laporan AI bisa >2 menit), sekali kalau cuma mampir
+    const maxAttempts = paymentStatus === 'paid' ? 70 : 1
 
     async function checkLaporan() {
       const supabase = createClient()
       const { data } = await supabase
         .from('reports')
-        .select('payment_status, laporan_siswa, laporan_ortu')
+        .select('payment_status, laporan_siswa')
         .eq('session_id', store.session_id as string)
         .maybeSingle()
 
       if (!active) return
 
-      if (data?.payment_status === 'paid' && data.laporan_siswa && data.laporan_ortu) {
-        setLaporanLengkap({ siswa: data.laporan_siswa as LaporanSiswa, ortu: data.laporan_ortu as LaporanOrangTua })
+      if (data?.payment_status === 'paid' && data.laporan_siswa) {
+        setLaporanLengkap(data.laporan_siswa as MVPDecision)
         setCheckingLaporan(false)
         return
       }
@@ -131,30 +132,23 @@ function HasilContent() {
   const miProfile = profil.d2_mi.mi_profile
   const wvProfile = profil.d3_workvalues.values_profile
   const riasecScores = profil.d1_riasec.skor
-  const miScores = profil.d2_mi.skor
   const wvScores = profil.d3_workvalues.skor
 
   const top2Holland = hollandCode.slice(0, 2) as RiasecCode[]
   const { jurusan, profesi } = getRekomendasi(top2Holland)
 
-  // Sorted scores for bars
-  const riasecSorted = (Object.entries(riasecScores) as [RiasecCode, number][])
-    .sort((a, b) => b[1] - a[1])
-  const wvSorted = (Object.entries(wvScores) as [WorkValueCode, number][])
-    .sort((a, b) => b[1] - a[1])
+  const riasecSorted = (Object.entries(riasecScores) as [RiasecCode, number][]).sort((a, b) => b[1] - a[1])
+  const wvSorted = (Object.entries(wvScores) as [WorkValueCode, number][]).sort((a, b) => b[1] - a[1])
 
   async function handleBayar() {
     if (!store.session_id) {
-      setPayError('Sesi belum siap. Coba muat ulang halaman ini sebentar lagi.')
+      setPayError('Sesi belum siap. Muat ulang halaman sebentar lagi.')
       return
     }
     setPaying(true)
     setPayError('')
 
     try {
-      // Buat transaksi Midtrans. Laporan AI lengkap baru di-generate oleh webhook
-      // SETELAH pembayaran terkonfirmasi — bukan di sini — supaya tidak menunggu
-      // proses AI (60-90 detik) sebelum sempat bayar.
       setPayStep('Membuka pembayaran...')
       const bayarRes = await fetch('/api/bayar', {
         method: 'POST',
@@ -166,14 +160,13 @@ function HasilContent() {
         throw new Error(data.error || 'Gagal membuka pembayaran. Coba lagi.')
       }
 
-      // 3. Tampilkan Midtrans Snap popup
       // @ts-expect-error Midtrans Snap global
       window.snap?.pay(data.token, {
         onSuccess: () => { window.location.href = `/laporan/${store.session_id}?status=paid` },
         onPending: () => {
           setPaying(false)
           setPayStep('')
-          setPayError('Pembayaran pending — cek emailmu untuk konfirmasi setelah selesai dibayar.')
+          setPayError('Pembayaran pending — cek emailmu untuk konfirmasi.')
         },
         onError: () => {
           setPaying(false)
@@ -185,13 +178,96 @@ function HasilContent() {
     } catch (err) {
       setPaying(false)
       setPayStep('')
-      setPayError(err instanceof Error ? err.message : 'Terjadi kesalahan. Coba lagi.')
+      setPayError(err instanceof Error ? err.message : 'Terjadi kendala. Coba lagi.')
     }
   }
 
+  const renderHasilAwal = () => (
+    <div className="space-y-4 animate-fade-up">
+      {/* PROFIL SINGKAT */}
+      <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+        <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-4">Profil Singkatmu</div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {top2Holland.map(c => (
+            <span key={c} className="bg-brand-50 text-brand-700 px-3 py-1 rounded-full text-xs font-semibold">
+              {RIASEC_LABELS[c]}
+            </span>
+          ))}
+          {miProfile.slice(0, 2).map(c => (
+            <span key={c} className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
+              {MI_LABELS[c as MICode]}
+            </span>
+          ))}
+          {wvProfile.slice(0, 2).map(c => (
+            <span key={c} className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold">
+              {WV_LABELS[c as WorkValueCode]}
+            </span>
+          ))}
+        </div>
+        <p className="text-sm text-ink leading-relaxed">
+          {getProfilText(top2Holland, RIASEC_LABELS)}
+        </p>
+      </div>
+
+      {/* GAMBARAN AWAL */}
+      <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+        <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-5">Gambaran Awal: Jurusan & Profesi</div>
+        
+        <div className="mb-6">
+          <div className="text-xs font-semibold text-ink mb-3">Top 3 Kluster Jurusan</div>
+          {jurusan.map(([nama, desc]) => (
+            <div key={nama} className="flex gap-3 mb-2.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-500 mt-2 shrink-0"/>
+              <div>
+                <span className="text-sm font-semibold text-ink">{nama}</span>
+                <span className="text-sm text-ink-light"> — {desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <div className="text-xs font-semibold text-ink mb-3">Top 5 Profesi</div>
+          <div className="flex flex-wrap gap-2">
+            {profesi.map(p => (
+              <span key={p} className="bg-surface-50 border border-surface-200 rounded-full px-3 py-1 text-xs text-ink font-medium">
+                {p}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* SCORE BARS */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-1">Dimensi 1: Minat</div>
+          <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
+            Diukur dengan <strong>Holland Code (RIASEC)</strong> — 6 tipe dasar yang menunjukkan lingkungan kerja dan tugas yang secara alami paling kamu nikmati.
+          </div>
+          <div className="space-y-3">
+            {riasecSorted.map(([k, v]) => (
+              <ScoreBar key={k} label={RIASEC_LABELS[k]} skor={v} warna={RIASEC_COLOR[k]} />
+            ))}
+          </div>
+        </div>
+        <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+          <div className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Dimensi 3: Nilai Kerja</div>
+          <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
+            Diukur dengan <strong>Work Values</strong> — prinsip dasar yang diam-diam mengendalikan keputusanmu. Ini yang membuatmu merasa betah (atau muak) di tempat kerja.
+          </div>
+          <div className="space-y-3">
+            {wvSorted.map(([k, v]) => (
+              <ScoreBar key={k} label={WV_LABELS[k as WorkValueCode]} skor={v} warna={WV_COLOR[k as WorkValueCode]} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
-      {/* Print isolation -- saat "Download PDF" diklik, hanya #laporan-print-area yang tercetak */}
+    <div className="min-h-screen bg-surface-50 selection:bg-brand-500 selection:text-white font-sans">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -201,7 +277,6 @@ function HasilContent() {
         }
       `}</style>
 
-      {/* Midtrans Snap script */}
       <script
         type="text/javascript"
         src={process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
@@ -211,234 +286,188 @@ function HasilContent() {
         async
       />
 
-      {/* NAV */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 24px', background: '#fff',
-        borderBottom: '0.5px solid rgba(44,44,42,0.12)',
-      }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 7, textDecoration: 'none' }}>
-          <div style={{ width: 26, height: 26, background: '#1D9E75', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="white"><path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/></svg>
+      {/* NAVBAR */}
+      <nav className="glass sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-surface-200 no-print">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-xl flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="white"><path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/></svg>
           </div>
-          <span style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A' }}>KarirGPS</span>
+          <span className="text-sm font-bold tracking-tight text-ink group-hover:text-brand-600 transition-colors">KarirGPS</span>
         </Link>
-        <Link href="/dashboard" style={{ fontSize: 13, color: '#888780', textDecoration: 'none' }}>
+        <Link href="/dashboard" className="text-sm font-medium text-ink-light hover:text-brand-600 transition-colors">
           Dashboard
         </Link>
       </nav>
 
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px 80px' }}>
+      <main className="max-w-3xl mx-auto px-6 py-12 pb-32">
 
-        {/* STATUS PEMBAYARAN (redirect dari Midtrans) */}
+        {/* STATUS ALERTS */}
         {paymentStatus === 'paid' && !laporanLengkap && (
-          <div style={{ background: '#E1F5EE', border: '0.5px solid #9FE1CB', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#0F6E56', lineHeight: 1.6 }}>
-            <strong>Pembayaran berhasil.</strong> Laporan lengkapmu sedang disiapkan oleh AI (biasanya 2-4 menit). Halaman ini otomatis menampilkan laporannya begitu selesai — sekaligus dikirim ke emailmu juga.
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-6 text-sm text-emerald-800 animate-fade-up">
+            <strong className="font-semibold block mb-1">Pembayaran berhasil.</strong> 
+            AI sedang menyiapkan laporan lengkapmu (sekitar 1-2 menit). Halaman ini otomatis memuat hasilnya setelah selesai.
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 p-3 bg-white/60 rounded-xl border border-emerald-200">
+                <span className="text-xs font-bold block mb-2 text-emerald-900">🛠️ [DEV MODE] Midtrans tidak bisa mengirim Webhook ke localhost. Klik tombol ini untuk simulasi Webhook:</span>
+                <button
+                  onClick={async () => {
+                    alert('Memulai simulasi webhook di background. Tunggu beberapa saat sampai AI selesai generate (liat terminal console).')
+                    await fetch('/api/webhook/midtrans', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        transaction_status: 'settlement',
+                        order_id: `KG-${store.session_id}-sim`,
+                        status_code: '200',
+                        dev_simulate: true
+                      })
+                    })
+                  }}
+                  className="bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-700"
+                >
+                  Simulasi Webhook Midtrans
+                </button>
+              </div>
+            )}
           </div>
         )}
         {paymentStatus === 'pending' && (
-          <div style={{ background: '#FAEEDA', border: '0.5px solid #E8C98A', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#633806', lineHeight: 1.6 }}>
-            <strong>Pembayaran masih pending.</strong> Begitu pembayaran terkonfirmasi, laporan lengkap otomatis dikirim ke emailmu.
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-sm text-amber-800 animate-fade-up">
+            <strong className="font-semibold block mb-1">Pembayaran tertunda.</strong> 
+            Selesaikan pembayaranmu. Laporan otomatis dikirim ke email setelah terkonfirmasi.
           </div>
         )}
         {paymentStatus === 'error' && (
-          <div style={{ background: '#FCEBEB', border: '0.5px solid #F7C1C1', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#A32D2D', lineHeight: 1.6 }}>
-            <strong>Pembayaran gagal.</strong> Coba klik tombol bayar di bawah lagi.
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 text-sm text-red-800 animate-fade-up">
+            <strong className="font-semibold block mb-1">Pembayaran gagal.</strong> 
+            Coba klik tombol bayar lagi di bawah.
           </div>
         )}
 
-        {/* HEADER */}
-        <div style={{ textAlign: 'center', marginBottom: 32, paddingBottom: 24, borderBottom: '0.5px solid rgba(44,44,42,0.12)' }}>
-          <h1 style={{ fontSize: 26, fontWeight: 500, color: '#2C2C2A', marginBottom: 10, letterSpacing: '-0.4px' }}>
-            Ini bukan vonis.
-          </h1>
-          <p style={{ fontSize: 14, color: '#888780', lineHeight: 1.7, maxWidth: 440, margin: '0 auto' }}>
-            Ini lebih seperti cermin — yang untuk pertama kalinya mungkin menunjukkan sesuatu yang sudah lama ada, tapi belum pernah kamu lihat dengan jelas.
-          </p>
-        </div>
-
-        {/* PROFIL SINGKAT */}
-        <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, marginBottom: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 12 }}>
-            Profil singkatmu
-          </div>
-          {/* Code pills */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-            {top2Holland.map(c => (
-              <span key={c} style={{ background: '#E1F5EE', color: '#0F6E56', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500 }}>
-                {RIASEC_LABELS[c]}
-              </span>
-            ))}
-            {miProfile.slice(0, 2).map(c => (
-              <span key={c} style={{ background: '#EEEDFE', color: '#3C3489', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500 }}>
-                {MI_LABELS[c as MICode]}
-              </span>
-            ))}
-            {wvProfile.slice(0, 2).map(c => (
-              <span key={c} style={{ background: '#FAEEDA', color: '#633806', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500 }}>
-                {WV_LABELS[c as WorkValueCode]}
-              </span>
-            ))}
-          </div>
-          <p style={{ fontSize: 14, color: '#2C2C2A', lineHeight: 1.75 }}>
-            {getProfilText(top2Holland, RIASEC_LABELS)}
-          </p>
-        </div>
-
-        {/* RIASEC SCORE BARS */}
-        <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, marginBottom: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 14 }}>
-            Skor dimensi 1 — minat
-          </div>
-          {riasecSorted.map(([k, v]) => (
-            <ScoreBar key={k} label={RIASEC_LABELS[k]} skor={v} warna={RIASEC_COLOR[k]} />
-          ))}
-          <div style={{ fontSize: 12, color: '#888780', marginTop: 10, lineHeight: 1.5 }}>
-            Skor tertinggi bukan berarti satu-satunya bidang yang cocok — Holland Code membaca kombinasi, bukan satu puncak tertinggi.
-          </div>
-        </div>
-
-        {/* NILAI KERJA BARS */}
-        <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, marginBottom: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#BA7517', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 14 }}>
-            Skor dimensi 3 — nilai kerja
-          </div>
-          {wvSorted.map(([k, v]) => (
-            <ScoreBar key={k} label={WV_LABELS[k as WorkValueCode]} skor={v} warna={WV_COLOR[k as WorkValueCode]} />
-          ))}
-          <div style={{ fontSize: 12, color: '#888780', marginTop: 10, lineHeight: 1.5 }}>
-            Nilai yang skornya rendah bukan berarti tidak penting — bisa jadi memang sudah cukup terpenuhi oleh bidang yang kamu pilih.
-          </div>
-        </div>
-
-        {/* FREE REKOMENDASI */}
-        <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, marginBottom: 14 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 16 }}>
-            Gambaran awal — jurusan & profesi
-          </div>
-
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 500, color: '#2C2C2A', marginBottom: 10 }}>Top 3 kluster jurusan</div>
-            {jurusan.map(([nama, desc]) => (
-              <div key={nama} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#1D9E75', marginTop: 7, flexShrink: 0 }}/>
-                <div>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A' }}>{nama}</span>
-                  {' '}<span style={{ fontSize: 13, color: '#888780' }}>— {desc}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: '#2C2C2A', marginBottom: 10 }}>Top 5 profesi</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {profesi.map(p => (
-                <span key={p} style={{ background: '#F8F7F4', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 20, padding: '5px 12px', fontSize: 13, color: '#2C2C2A' }}>
-                  {p}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ marginTop: 14, padding: '12px 14px', background: '#F8F7F4', borderRadius: 8, fontSize: 12, color: '#888780', lineHeight: 1.6 }}>
-            Ini hanya gambaran awal. Laporan lengkap menjabarkan reasoning di balik setiap rekomendasi dan menyesuaikannya dengan kondisi nyatamu — kampus yang realistis, jalur masuk yang konkret, dan langkah selanjutnya yang bisa kamu eksekusi sekarang.
-          </div>
-        </div>
-
-        {/* LAPORAN LENGKAP (kalau sudah dibayar & selesai diproses) */}
-        {laporanLengkap && (
-          <>
-            <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 10 }}>
-              <div style={{ fontSize: 13, color: '#0F6E56', fontWeight: 500 }}>✓ Laporan lengkapmu sudah siap</div>
-              <button
-                onClick={handleDownloadPdf}
-                style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.15)', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: '#2C2C2A', cursor: 'pointer' }}
-              >
-                ↓ Download PDF
-              </button>
-            </div>
-            <LaporanLengkap laporan={laporanLengkap.siswa} laporanOrtu={laporanLengkap.ortu} />
-          </>
+        {/* HEADER (Only show if not looking at Laporan Lengkap tabs to avoid clutter) */}
+        {(!laporanLengkap || activeTab === 'awal') && (
+          <header className="text-center mb-10 pb-8 border-b border-surface-200 animate-fade-up">
+            <h1 className="text-3xl font-extrabold text-ink mb-3 tracking-tight">Ini bukan vonis.</h1>
+            <p className="text-base text-ink-light leading-relaxed max-w-lg mx-auto">
+              Ini lebih seperti cermin — menunjukkan potensimu yang sebenarnya berdasarkan caramu berpikir dan prioritas hidupmu.
+            </p>
+          </header>
         )}
 
+        {/* LOADING STATE */}
         {checkingLaporan && !laporanLengkap && (
-          <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 13, color: '#888780', lineHeight: 1.6, maxWidth: 380, margin: '0 auto' }}>
-            Kami sedang membaca semua yang kamu jawab tadi. Ini butuh sedikit waktu karena kami tidak pakai template — hasilnya ditulis khusus untuk kamu.
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <div className="w-10 h-10 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+            <div className="text-sm font-medium text-ink-light text-center max-w-sm">
+              Menganalisis jawabanmu...<br/>
+              <span className="text-xs font-normal">Hasil ditulis khusus untukmu, bukan template.</span>
+            </div>
+          </div>
+        )}
+        
+        {/* TIMEOUT STATE */}
+        {laporanTimedOut && !laporanLengkap && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 text-sm text-amber-800 animate-fade-up flex flex-col sm:flex-row items-center gap-4 justify-between">
+            <div>
+              <strong className="font-semibold block mb-1">Laporan butuh waktu lebih lama.</strong> 
+              Pembayaran aman. AI masih memproses datamu di latar belakang.
+            </div>
+            <button onClick={() => window.location.reload()} className="bg-white border border-amber-300 text-amber-800 rounded-xl px-4 py-2 font-semibold hover:bg-amber-100 shrink-0 transition-colors">
+              Muat Ulang
+            </button>
           </div>
         )}
 
-        {laporanTimedOut && !laporanLengkap && (
-          <div style={{ background: '#FAEEDA', border: '0.5px solid #E8C98A', borderRadius: 12, padding: '16px 18px', marginBottom: 20, fontSize: 14, color: '#633806', lineHeight: 1.6 }}>
-            <strong>Laporanmu butuh waktu lebih lama dari biasanya.</strong> Pembayaranmu sudah kami terima — laporan sedang diproses di belakang dan akan otomatis dikirim ke emailmu begitu selesai. Coba muat ulang halaman ini dalam beberapa menit.
-            <div style={{ marginTop: 10 }}>
-              <button
-                onClick={() => window.location.reload()}
-                style={{ background: '#fff', border: '0.5px solid #E8C98A', borderRadius: 7, padding: '8px 14px', fontSize: 13, color: '#633806', cursor: 'pointer' }}
-              >
-                Muat ulang halaman
-              </button>
+        {/* JIKA BELUM BAYAR -> Tampilkan Hasil Awal + Paywall */}
+        {!laporanLengkap && !checkingLaporan && (
+          <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
+            {renderHasilAwal()}
+            
+            {/* PAYWALL */}
+            <div className="mt-8 bg-gradient-to-b from-brand-600 to-brand-700 rounded-3xl p-8 shadow-xl text-white">
+              <div className="text-brand-100 text-xs font-bold uppercase tracking-widest mb-2">Buka Laporan Lengkap</div>
+              <h2 className="text-2xl font-bold mb-3">Ini baru permukaannya.</h2>
+              <p className="text-brand-50 text-sm leading-relaxed mb-8 max-w-md">
+                Buka hasil analisis mendalam (Arah Kuliah/Kerja, Roadmap 6 Bulan, & Risiko Karier) yang ditulis AI secara personal khusus untukmu.
+              </p>
+
+              <div className="grid gap-3 mb-8">
+                {FITUR_PAID.map(f => (
+                  <div key={f} className="flex gap-3 items-start">
+                    <div className="w-5 h-5 rounded-full bg-brand-500/50 flex items-center justify-center shrink-0 mt-0.5 text-xs">✓</div>
+                    <span className="text-sm text-brand-50 font-medium">{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm border border-white/20 text-center">
+                <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
+                <div className="text-xs text-brand-100 mb-5">Sekali bayar · Dikirim ke email · Akses selamanya</div>
+                
+                <button
+                  onClick={handleBayar}
+                  disabled={paying || !sessionReady}
+                  className={`w-full py-4 rounded-xl text-base font-bold transition-all ${
+                    paying || !sessionReady 
+                    ? 'bg-brand-400/50 text-brand-100 cursor-not-allowed' 
+                    : 'bg-white text-brand-600 hover:bg-brand-50 hover:-translate-y-1 hover:shadow-float'
+                  }`}
+                >
+                  {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Laporan Lengkap' : 'Menyiapkan sesi...')}
+                </button>
+                {payError && <div className="mt-4 text-xs text-red-200 bg-red-500/20 p-2 rounded-lg">{payError}</div>}
+              </div>
             </div>
           </div>
         )}
 
-        {/* PAYWALL */}
-        {!laporanLengkap && (
-        <div style={{ background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)', borderRadius: 14, padding: 24, marginTop: 4 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 6 }}>
-            Laporan lengkap
-          </div>
-          <div style={{ fontSize: 16, fontWeight: 500, color: '#2C2C2A', marginBottom: 6 }}>
-            Semua yang ada di atas baru permukaannya.
-          </div>
-          <p style={{ fontSize: 14, color: '#888780', marginBottom: 18, lineHeight: 1.65 }}>
-            Laporan lengkap masuk jauh lebih dalam — ditulis seperti oleh konselor yang benar-benar mengenalmu, bukan template.
-          </p>
+        {/* JIKA SUDAH BAYAR -> Tampilkan Tabs */}
+        {laporanLengkap && (
+          <div className="animate-fade-up">
+            {/* TABS */}
+            <div className="flex bg-surface-200/50 p-1 rounded-2xl mb-8 no-print max-w-sm mx-auto shadow-inner">
+              <button
+                onClick={() => setActiveTab('awal')}
+                className={`flex-1 text-sm font-semibold py-2.5 rounded-xl transition-all ${activeTab === 'awal' ? 'bg-white text-ink shadow-sm' : 'text-ink-light hover:text-ink'}`}
+              >
+                Hasil Awal
+              </button>
+              <button
+                onClick={() => setActiveTab('lengkap')}
+                className={`flex-1 text-sm font-semibold py-2.5 rounded-xl transition-all ${activeTab === 'lengkap' ? 'bg-white text-brand-600 shadow-sm' : 'text-ink-light hover:text-ink'}`}
+              >
+                Hasil Lengkap
+              </button>
+            </div>
 
-          <div style={{ display: 'grid', gap: 8, marginBottom: 22 }}>
-            {FITUR_PAID.map(f => (
-              <div key={f} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: '#1D9E75', flexShrink: 0, fontSize: 15 }}>✓</span>
-                <span style={{ fontSize: 14, color: '#2C2C2A', lineHeight: 1.6 }}>{f}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center', padding: '20px 0 4px' }}>
-            <div style={{ fontSize: 30, fontWeight: 500, color: '#2C2C2A', marginBottom: 4 }}>Rp 59.000</div>
-            <div style={{ fontSize: 13, color: '#888780', marginBottom: 18 }}>Satu kali bayar · dikirim ke emailmu · bisa diakses kapan saja</div>
-            <button
-              onClick={handleBayar}
-              disabled={paying || !sessionReady}
-              style={{
-                background: (paying || !sessionReady) ? '#9FE1CB' : '#1D9E75',
-                color: 'white', border: 'none', borderRadius: 10,
-                padding: '14px 0', fontSize: 16, fontWeight: 500,
-                cursor: (paying || !sessionReady) ? 'not-allowed' : 'pointer',
-                width: '100%', transition: 'background 0.15s',
-              }}
-            >
-              {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Bayar Rp 59.000' : 'Menyiapkan sesi...')}
-            </button>
-            {payError && (
-              <div style={{ background: '#FCEBEB', border: '0.5px solid #F7C1C1', borderRadius: 7, padding: '10px 12px', fontSize: 13, color: '#A32D2D', marginTop: 12, textAlign: 'left' }}>
-                {payError}
+            {/* TAB CONTENT */}
+            {activeTab === 'awal' ? (
+              renderHasilAwal()
+            ) : (
+              <div id="laporan-print-area">
+                <div className="no-print flex items-center justify-between mb-6">
+                  <div className="text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full border border-brand-100">
+                    Mode Laporan Lengkap
+                  </div>
+                  <button onClick={handleDownloadPdf} className="text-sm font-semibold text-ink-light hover:text-ink transition-colors flex gap-2 items-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Simpan PDF
+                  </button>
+                </div>
+                <LaporanLengkap laporan={laporanLengkap} />
               </div>
             )}
-            <div style={{ fontSize: 12, color: '#888780', marginTop: 10 }}>
-              QRIS · Transfer bank · GoPay · OVO · Dana · ShopeePay
-            </div>
           </div>
-        </div>
         )}
 
         {/* RESTART */}
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <Link href="/tes/d1" style={{ fontSize: 13, color: '#888780', textDecoration: 'none' }}>
-            ← Ulangi tes dari awal
+        <div className="text-center mt-12 no-print">
+          <Link href="/tes/d1" className="text-sm font-semibold text-ink-light hover:text-ink transition-colors">
+            ← Ulangi Tes dari Awal
           </Link>
         </div>
-      </div>
+
+      </main>
     </div>
   )
 }

@@ -18,20 +18,23 @@ export default function TesD2Page() {
     <TesLayout
       dimensi={2}
       judul="Cara Berpikirmu"
-      subjudul="Bukan apa yang kamu minati — tapi bagaimana kamu memproses dan memahami dunia. Ini yang membedakan dua orang dengan minat sama ke jalur karir yang berbeda."
-      intro="Bagian pertama sudah selesai. Sekarang kita lihat sesuatu yang sedikit berbeda — bukan apa yang kamu minati, tapi bagaimana cara kamu berpikir."
+      subjudul="Ini bukan tentang apa yang kamu minati, tapi bagaimana kamu memproses dunia. Ini yang sering membedakan dua orang dengan minat sama ke arah karir yang berbeda."
+      intro="Bagian pertama sudah selesai. Sekarang kita lihat sesuatu yang sedikit berbeda — bagaimana cara kamu berpikir sehari-hari."
       hrefBack="/tes/d1"
       hrefNext="/tes/d3"
-      labelNext={`Lanjut ke Dimensi 3 → ${totalAnswered > 0 ? `(${totalAnswered}/${totalSoal} dijawab)` : ''}`}
+      labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}
     >
-      {/* BLOK A: SKENARIO */}
-      <div style={{ marginBottom: 8 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Blok A — Pilih satu yang paling mencerminkan kamu
+      {/* BLOK A */}
+      <div className="mb-8">
+        <div className="flex justify-between items-baseline mb-6">
+          <div className="text-sm font-bold text-brand-600 uppercase tracking-widest">
+            Bagian A — Skenario Pilihan
           </div>
-          <div style={{ fontSize: 11, color: '#888780' }}>{skenarioAnswered}/{D2_SKENARIO.length}</div>
+          <div className="text-sm font-medium text-ink-light bg-surface-100 px-3 py-1 rounded-full">
+            {skenarioAnswered} / {D2_SKENARIO.length}
+          </div>
         </div>
+        
         {D2_SKENARIO.map((soal, i) => (
           <SkenarioCard
             key={soal.id}
@@ -47,24 +50,25 @@ export default function TesD2Page() {
       </div>
 
       {/* DIVIDER */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 28px',
-      }}>
-        <div style={{ flex: 1, height: '0.5px', background: 'rgba(44,44,42,0.12)' }}/>
-        <span style={{ fontSize: 12, color: '#888780', fontStyle: 'italic' }}>
-          Hampir selesai untuk bagian ini. Beberapa pernyataan singkat terakhir.
+      <div className="flex items-center gap-4 my-14">
+        <div className="flex-1 h-px bg-surface-200"></div>
+        <span className="text-sm font-medium text-ink-light italic">
+          Beberapa pernyataan singkat terakhir untuk bagian ini
         </span>
-        <div style={{ flex: 1, height: '0.5px', background: 'rgba(44,44,42,0.12)' }}/>
+        <div className="flex-1 h-px bg-surface-200"></div>
       </div>
 
-      {/* BLOK B: SKALA — tampilkan dalam 4 grup × 4 soal */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Blok B — Pilih angka yang paling jujur mencerminkan dirimu sehari-hari, bukan versi idealmu
+      {/* BLOK B */}
+      <div className="mb-8">
+        <div className="flex justify-between items-baseline mb-6">
+          <div className="text-sm font-bold text-brand-600 uppercase tracking-widest">
+            Bagian B — Skala Setuju
           </div>
-          <div style={{ fontSize: 11, color: '#888780' }}>{skalaAnswered}/{D2_SKALA.length}</div>
+          <div className="text-sm font-medium text-ink-light bg-surface-100 px-3 py-1 rounded-full">
+            {skalaAnswered} / {D2_SKALA.length}
+          </div>
         </div>
+        
         {D2_SKALA.map((soal) => (
           <SkalaItem
             key={soal.id}

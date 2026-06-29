@@ -3,175 +3,155 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Tes Minat Bakat & Rekomendasi Jurusan untuk Siswa SMA',
-  description: '87% mahasiswa Indonesia merasa salah jurusan. KarirGPS membaca cara kamu berpikir, apa yang memotivasimu, dan kondisi nyatamu lewat tes 4 dimensi — lalu menulis rekomendasi jurusan dan profesi yang relevan, bukan template.',
+  description: 'KarirGPS membaca minat, cara berpikir, motivasi, dan kondisi nyatamu untuk merumuskan pilihan jurusan dan profesi paling realistis. Bukan sekadar hasil tes umum.',
 }
 
 const FAQ = [
-  { q: 'Berapa lama tesnya?', a: 'Sekitar 20 menit total untuk 4 dimensi: minat (RIASEC), cara berpikir (Multiple Intelligences), nilai kerja, dan konteks personal. Bisa dikerjakan santai, tidak ada batas waktu per soal.' },
-  { q: 'Berapa harganya?', a: 'Tes dan ringkasan awal gratis. Laporan lengkap — naratif 5–7 halaman plus versi untuk orang tua — Rp 59.000, sekali bayar.' },
-  { q: 'Laporan lengkap dapat apa?', a: 'Profil kepribadian naratif, 3 kluster jurusan dengan reasoning dan kampus realistis, 5 profesi dengan gambaran kerja nyata di Indonesia, kekuatan dan hal yang perlu diwaspadai, langkah selanjutnya, dan versi terpisah untuk orang tua.' },
-  { q: 'Apakah ini menggantikan tes psikologi profesional?', a: 'Tidak. KarirGPS adalah alat bantu eksplorasi diri, bukan diagnosis klinis. Untuk kebutuhan psikologis yang lebih dalam, tetap disarankan konsultasi dengan psikolog atau konselor BK.' },
+  { q: 'Berapa lama tesnya?', a: 'Sekitar 15-20 menit untuk 4 bagian: minat (RIASEC), kecerdasan (Multiple Intelligences), nilai kerja, dan kondisi personal. Kerjakan dengan santai, tidak ada batas waktu.' },
+  { q: 'Berapa harganya?', a: 'Tes awal dan ringkasan profil bisa diakses gratis. Untuk membuka roadmap lengkap dan rekomendasi strategis, biayanya Rp 59.000 (sekali bayar).' },
+  { q: 'Hasil lengkap isinya apa saja?', a: 'Kamu akan mendapat arah terbaik (Kuliah/Kerja), alasan di balik keputusan itu, 3 jalur karier spesifik, roadmap 6-12 bulan ke depan, serta risiko jika kamu salah ambil langkah.' },
+  { q: 'Apakah ini menggantikan tes psikologi?', a: 'Tidak. KarirGPS adalah alat bantu untuk memetakan arah karier secara cepat. Untuk kebutuhan psikologis yang mendalam, tetap disarankan ke konselor atau psikolog.' },
 ]
 
 export default function LandingPage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
-      {/* NAV */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 32px', background: '#fff',
-        borderBottom: '0.5px solid rgba(44,44,42,0.12)',
-        position: 'sticky', top: 0, zIndex: 50,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 28, height: 28, background: '#1D9E75', borderRadius: 7,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="white">
-              <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
-            </svg>
+    <div className="min-h-screen bg-surface-50 text-ink font-sans overflow-x-hidden relative selection:bg-brand-500 selection:text-white">
+      
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-300/30 rounded-full blur-[100px] animate-pulse-slow pointer-events-none -z-10"></div>
+      <div className="absolute top-[20%] right-[-10%] w-[40%] h-[40%] bg-accent-500/20 rounded-full blur-[100px] animate-pulse-slow pointer-events-none -z-10" style={{ animationDelay: '2s' }}></div>
+
+      {/* Navigation */}
+      <nav className="fixed w-full top-0 z-50 glass">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-9 h-9 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-xl flex items-center justify-center shadow-soft group-hover:shadow-float transition-all duration-300">
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="white">
+                <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
+              </svg>
+            </div>
+            <span className="text-xl font-bold tracking-tight text-ink group-hover:text-brand-600 transition-colors">KarirGPS</span>
+          </Link>
+          <div className="flex gap-4 items-center">
+            <Link href="/auth/login" className="hidden sm:block text-sm font-medium text-ink-light hover:text-brand-600 transition-colors">
+              Masuk
+            </Link>
+            <Link href="/auth/register" className="bg-ink text-white rounded-full px-6 py-2.5 text-sm font-medium hover:bg-brand-600 hover:-translate-y-0.5 transition-all duration-300 shadow-soft hover:shadow-float">
+              Mulai Tes Gratis
+            </Link>
           </div>
-          <span style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A', letterSpacing: '-0.3px' }}>
-            KarirGPS
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link href="/auth/login" style={{
-            background: 'none', border: '0.5px solid rgba(44,44,42,0.12)',
-            borderRadius: 6, padding: '6px 14px', fontSize: 13, color: '#2C2C2A',
-            textDecoration: 'none',
-          }}>Masuk</Link>
-          <Link href="/auth/register" style={{
-            background: '#1D9E75', color: 'white', borderRadius: 6,
-            padding: '7px 16px', fontSize: 13, fontWeight: 500, textDecoration: 'none',
-          }}>Mulai tes gratis</Link>
         </div>
       </nav>
 
-      {/* HERO */}
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '72px 32px 56px' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: '#E1F5EE', borderRadius: 20, padding: '4px 12px',
-          fontSize: 12, color: '#0F6E56', fontWeight: 500, marginBottom: 24,
-        }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1D9E75', display: 'inline-block' }}/>
-          Gratis untuk dicoba · ~20 menit
+      {/* Hero Section */}
+      <main className="pt-40 pb-24 px-6 max-w-5xl mx-auto relative z-10">
+        <div className="flex flex-col items-center text-center animate-fade-up">
+          <div className="inline-flex items-center gap-2 bg-brand-50 text-brand-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-8 border border-brand-100 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+            Gratis untuk dicoba · ~20 menit
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-ink mb-6 leading-[1.1]">
+            Bukan sekadar tes bakat.<br className="hidden md:block" />
+            <span className="text-gradient"> Peta perjalananmu.</span>
+          </h1>
+
+          <p className="text-lg md:text-xl text-ink-light mb-10 max-w-2xl leading-relaxed">
+            Belum yakin mau ambil jurusan apa setelah lulus? Itu wajar.
+            KarirGPS membantu memetakan cara berpikirmu, kondisi finansial, dan minat aslimu menjadi rekomendasi langkah paling logis untuk masa depanmu.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+            <Link href="/auth/register" className="w-full sm:w-auto bg-brand-600 text-white rounded-full px-8 py-4 text-base font-semibold hover:bg-brand-700 hover:-translate-y-1 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)]">
+              Mulai Tes Sekarang
+            </Link>
+            <Link href="/auth/login" className="w-full sm:w-auto bg-white border border-surface-200 text-ink rounded-full px-8 py-4 text-base font-medium hover:bg-surface-50 hover:border-surface-300 transition-all duration-300">
+              Masuk
+            </Link>
+          </div>
+          
+          <p className="text-sm text-ink-light/70 mt-6 font-medium">
+            87% mahasiswa Indonesia merasa salah jurusan. Jangan sampai itu kamu.
+          </p>
         </div>
 
-        <h1 style={{
-          fontSize: 40, fontWeight: 500, lineHeight: 1.18, letterSpacing: '-0.9px',
-          color: '#2C2C2A', marginBottom: 20,
-        }}>
-          Bukan sekadar tes bakat.<br />
-          <span style={{ color: '#1D9E75' }}>Peta perjalananmu.</span>
-        </h1>
-
-        <p style={{ fontSize: 16, lineHeight: 1.7, color: '#888780', marginBottom: 32, maxWidth: 520 }}>
-          Kelas 12 dan masih belum tahu mau ambil apa — itu lebih normal dari yang kamu kira.
-          KarirGPS membaca cara kamu berpikir, apa yang memotivasimu, dan kondisi nyatamu — lalu
-          menulis laporan yang terasa seperti dari konselor yang benar-benar mengenalmu.
-        </p>
-
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/auth/register" style={{
-            background: '#1D9E75', color: 'white', borderRadius: 9,
-            padding: '13px 26px', fontSize: 15, fontWeight: 500, textDecoration: 'none',
-            display: 'inline-block',
-          }}>
-            Mulai tes — gratis, ~20 menit
-          </Link>
-          <Link href="/auth/login" style={{
-            background: 'none', border: '0.5px solid rgba(44,44,42,0.15)',
-            borderRadius: 9, padding: '12px 20px', fontSize: 14, color: '#2C2C2A',
-            textDecoration: 'none',
-          }}>
-            Sudah punya akun
-          </Link>
-        </div>
-
-        <p style={{ fontSize: 12, color: '#888780', marginTop: 14 }}>
-          87% mahasiswa Indonesia merasa salah jurusan. KarirGPS hadir supaya kamu tidak masuk statistik itu.
-        </p>
-
-        {/* STATS */}
-        <div style={{
-          display: 'flex', gap: 40, marginTop: 48, paddingTop: 32,
-          borderTop: '0.5px solid rgba(44,44,42,0.12)',
-        }}>
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-32 pt-16 border-t border-surface-200 animate-fade-up" style={{ animationDelay: '0.2s' }}>
           {[
-            { val: '4 dimensi', label: 'Minat, cara berpikir,\nnilai kerja, konteks nyata' },
-            { val: '~20 menit', label: 'Waktu pengerjaan\ntotal keseluruhan' },
-            { val: 'Rp 59rb', label: 'Laporan lengkap\n+ versi untuk orang tua' },
-          ].map(s => (
-            <div key={s.val}>
-              <div style={{ fontSize: 22, fontWeight: 500, color: '#2C2C2A' }}>{s.val}</div>
-              <div style={{ fontSize: 12, color: '#888780', marginTop: 3, lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+            { val: '4 Bagian', label: 'Cek minat, cara berpikir, & kondisi nyata' },
+            { val: '15 Menit', label: 'Waktu santai untuk menyelesaikan tes' },
+            { val: 'Rp 59rb', label: 'Untuk membuka roadmap karier utuh' },
+          ].map((s, i) => (
+            <div key={i} className="text-center md:text-left bg-white/50 backdrop-blur-sm rounded-3xl p-8 border border-surface-200/50 hover:shadow-soft transition-all duration-300 hover:-translate-y-1">
+              <div className="text-4xl font-bold text-ink mb-3">{s.val}</div>
+              <div className="text-sm text-ink-light leading-relaxed font-medium">
                 {s.label}
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </main>
 
-      {/* HOW IT WORKS */}
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 32px 80px' }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-          Cara kerjanya
-        </div>
-        <div style={{ display: 'grid', gap: 12 }}>
-          {[
-            { n: '1', title: 'Kerjakan 4 dimensi tes', desc: 'Minat (RIASEC), cara berpikir (Multiple Intelligences), nilai kerja, dan form konteks personal. Bukan ujian — tidak ada jawaban benar atau salah.' },
-            { n: '2', title: 'Lihat ringkasan gratis', desc: 'Profil singkat dan top 2 jurusan + 3 profesi yang cocok langsung bisa dilihat, gratis, tanpa perlu bayar.' },
-            { n: '3', title: 'Buka laporan lengkap (Rp 59rb)', desc: 'Laporan naratif 5–7 halaman yang terasa seperti ditulis khusus untukmu — plus versi terpisah untuk orang tua. Dikirim ke emailmu.' },
-          ].map(s => (
-            <div key={s.n} style={{
-              display: 'flex', gap: 16, padding: '18px 20px',
-              background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)',
-              borderRadius: 12,
-            }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: '50%', background: '#E1F5EE',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 500, color: '#0F6E56', flexShrink: 0,
-              }}>{s.n}</div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 4 }}>{s.title}</div>
-                <div style={{ fontSize: 13, color: '#888780', lineHeight: 1.6 }}>{s.desc}</div>
+      {/* How it Works Section */}
+      <section className="py-24 bg-white relative z-10">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest mb-3">Cara Kerjanya</h2>
+            <h3 className="text-3xl md:text-4xl font-bold text-ink tracking-tight">Perjalanan menemukan arahmu</h3>
+          </div>
+
+          <div className="grid gap-6">
+            {[
+              { n: '1', title: 'Kerjakan Tes Dasar', desc: 'Jawab pertanyaan sederhana tentang kebiasaanmu, minatmu, dan prioritas hidupmu tanpa ada jawaban yang salah.' },
+              { n: '2', title: 'Lihat Hasil Awal', desc: 'Langsung dapatkan profil singkat karaktermu dan top 2 jurusan atau profesi secara gratis.' },
+              { n: '3', title: 'Buka Roadmap Lengkap', desc: 'Buka akses ke roadmap karier, strategi terarah, dan risiko jika salah ambil jalan.' },
+            ].map((s, i) => (
+              <div key={i} className="group flex flex-col sm:flex-row gap-6 p-8 bg-surface-50 border border-surface-200 rounded-3xl hover:bg-white hover:border-brand-200 hover:shadow-soft transition-all duration-300">
+                <div className="w-14 h-14 rounded-2xl bg-brand-100 flex items-center justify-center text-xl font-bold text-brand-600 shrink-0 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                  {s.n}
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold text-ink mb-2 group-hover:text-brand-600 transition-colors">{s.title}</h4>
+                  <p className="text-ink-light leading-relaxed">{s.desc}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div style={{ marginTop: 32, textAlign: 'center' }}>
-          <Link href="/auth/register" style={{
-            background: '#1D9E75', color: 'white', borderRadius: 9,
-            padding: '13px 32px', fontSize: 15, fontWeight: 500, textDecoration: 'none',
-            display: 'inline-block',
-          }}>
-            Mulai sekarang — gratis
-          </Link>
+          <div className="mt-16 text-center">
+            <Link href="/auth/register" className="inline-block bg-ink text-white rounded-full px-10 py-4 text-base font-semibold hover:bg-brand-600 hover:shadow-float transition-all duration-300 hover:-translate-y-1">
+              Coba Tes Gratis Sekarang
+            </Link>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* FAQ */}
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 32px 88px' }}>
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-          Pertanyaan umum
+      {/* FAQ Section */}
+      <section className="py-24 relative z-10">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest mb-3">FAQ</h2>
+            <h3 className="text-3xl md:text-4xl font-bold text-ink tracking-tight">Pertanyaan yang sering diajukan</h3>
+          </div>
+
+          <div className="grid gap-4">
+            {FAQ.map((f, i) => (
+              <div key={i} className="bg-white border border-surface-200 rounded-2xl p-6 md:p-8 hover:shadow-soft transition-shadow">
+                <h4 className="text-lg font-bold text-ink mb-3">{f.q}</h4>
+                <p className="text-ink-light leading-relaxed">{f.a}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ display: 'grid', gap: 10 }}>
-          {FAQ.map(f => (
-            <div key={f.q} style={{
-              background: '#fff', border: '0.5px solid rgba(44,44,42,0.12)',
-              borderRadius: 12, padding: '18px 20px',
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 6 }}>{f.q}</div>
-              <div style={{ fontSize: 13, color: '#888780', lineHeight: 1.65 }}>{f.a}</div>
-            </div>
-          ))}
+      </section>
+      
+      {/* Footer */}
+      <footer className="border-t border-surface-200 bg-white py-12">
+        <div className="max-w-5xl mx-auto px-6 text-center text-sm font-medium text-ink-light">
+          <p>© {new Date().getFullYear()} KarirGPS. Membantu pelajar Indonesia menemukan jalannya.</p>
         </div>
-      </div>
+      </footer>
+
     </div>
   )
 }

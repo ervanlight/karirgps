@@ -2,257 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   KARIRGPS DESIGN SYSTEM
-   ============================================================ */
-
-:root {
-  /* Core palette */
-  --kg-teal-50:  #E1F5EE;
-  --kg-teal-100: #9FE1CB;
-  --kg-teal-400: #1D9E75;
-  --kg-teal-600: #0F6E56;
-  --kg-teal-800: #085041;
-
-  --kg-ink:      #2C2C2A;
-  --kg-muted:    #888780;
-  --kg-border:   rgba(44, 44, 42, 0.12);
-  --kg-page:     #F8F7F4;
-  --kg-card:     #FFFFFF;
-
-  --kg-purple-50:  #EEEDFE;
-  --kg-purple-400: #534AB7;
-  --kg-amber-50:   #FAEEDA;
-  --kg-amber-600:  #633806;
-
-  /* Spacing */
-  --kg-radius: 8px;
-  --kg-radius-card: 14px;
+@layer base {
+  body {
+    @apply bg-surface-50 text-ink antialiased selection:bg-brand-500 selection:text-white;
+  }
 }
 
-/* Base */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-glass;
+  }
+  
+  .glass-dark {
+    @apply bg-ink-dark/80 backdrop-blur-lg border border-white/10 shadow-glass;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-accent-500;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
+/* Hide scrollbar for clean look in some containers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-
-body {
-  background-color: var(--kg-page);
-  color: var(--kg-ink);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
-.kg-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 32px;
-  background: var(--kg-card);
-  border-bottom: 0.5px solid var(--kg-border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-/* ============================================================
-   PROGRESS BAR
-   ============================================================ */
-.kg-progress-bar {
-  height: 3px;
-  background: var(--kg-teal-400);
-  border-radius: 2px;
-  transition: width 0.4s ease;
-}
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-.btn-primary {
-  background: var(--kg-teal-400);
-  color: white;
-  border: none;
-  border-radius: var(--kg-radius);
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.btn-primary:hover {
-  background: var(--kg-teal-600);
-}
-
-.btn-primary:disabled {
-  background: var(--kg-teal-100);
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--kg-ink);
-  border: 0.5px solid var(--kg-border);
-  border-radius: var(--kg-radius);
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.btn-secondary:hover {
-  background: white;
-}
-
-/* ============================================================
-   CARDS
-   ============================================================ */
-.kg-card {
-  background: var(--kg-card);
-  border: 0.5px solid var(--kg-border);
-  border-radius: var(--kg-radius-card);
-  padding: 24px;
-}
-
-/* ============================================================
-   TEST OPTION CARDS
-   ============================================================ */
-.kg-option {
-  width: 100%;
-  text-align: left;
-  background: var(--kg-card);
-  border: 0.5px solid var(--kg-border);
-  border-radius: var(--kg-radius);
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--kg-ink);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.kg-option:hover {
-  border-color: var(--kg-teal-100);
-  background: var(--kg-teal-50);
-}
-
-.kg-option.selected {
-  border-color: var(--kg-teal-400);
-  background: var(--kg-teal-50);
-  color: var(--kg-teal-600);
-}
-
-/* ============================================================
-   SCALE BUTTONS
-   ============================================================ */
-.kg-scale-btn {
-  flex: 1;
-  height: 38px;
-  border: 0.5px solid var(--kg-border);
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  background: white;
-  color: var(--kg-muted);
-  transition: all 0.12s;
-}
-
-.kg-scale-btn:hover {
-  border-color: var(--kg-teal-100);
-  color: var(--kg-teal-400);
-}
-
-.kg-scale-btn.selected {
-  background: var(--kg-teal-400);
-  color: white;
-  border-color: var(--kg-teal-400);
-}
-
-/* ============================================================
-   FORM OPTIONS (D4)
-   ============================================================ */
-.kg-form-opt {
-  width: 100%;
-  text-align: left;
-  background: var(--kg-card);
-  border: 0.5px solid var(--kg-border);
-  border-radius: var(--kg-radius);
-  padding: 11px 14px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--kg-ink);
-  cursor: pointer;
-  transition: all 0.12s;
-}
-
-.kg-form-opt:hover {
-  border-color: var(--kg-teal-100);
-  background: var(--kg-teal-50);
-}
-
-.kg-form-opt.selected {
-  border-color: var(--kg-teal-400);
-  background: var(--kg-teal-50);
-}
-
-/* ============================================================
-   BADGES / PILLS
-   ============================================================ */
-.badge-riasec {
-  background: var(--kg-teal-50);
-  color: var(--kg-teal-600);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.badge-mi {
-  background: var(--kg-purple-50);
-  color: var(--kg-purple-400);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.badge-wv {
-  background: var(--kg-amber-50);
-  color: var(--kg-amber-600);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: none; }
-}
-
-.animate-fade-up {
-  animation: fadeUp 0.25s ease forwards;
-}
-
-/* ============================================================
-   PAYWALL BLUR
-   ============================================================ */
-.paywall-blur {
-  background: linear-gradient(transparent, rgba(248, 247, 244, 0.97));
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

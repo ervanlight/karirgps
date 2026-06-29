@@ -13,25 +13,35 @@ export const WV_COLOR: Record<WorkValueCode, string> = {
 
 // ── simple free-text summaries per Holland top-pair ──────────
 const PROFIL_TEXT: Record<string, string> = {
-  'A,E': 'Cara kamu memproses dunia lebih banyak lewat ekspresi dan inisiatif. Kamu punya dorongan untuk menciptakan sesuatu yang orisinal — tapi bukan sekadar untuk diri sendiri. Ada bagian dari kamu yang juga ingin karya itu dikenal dan berdampak. Kombinasi itu yang membedakanmu dari tipe artistik murni.',
-  'E,A': 'Kamu bergerak dengan visi yang jelas dan tidak sungkan untuk memimpin — tapi cara kamu memimpin sering kali lewat ide dan kreasi, bukan sekadar otoritas. Itu kombinasi yang langka: pemimpin yang juga pencipta.',
-  'I,A': 'Kamu memiliki rasa ingin tahu yang dalam dan cara berpikir yang tidak konvensional. Kamu menikmati memahami sesuatu sampai ke akarnya — lalu menyampaikannya kembali dengan cara yang tidak biasa.',
-  'A,I': 'Ada kecerdasan analitis di balik kreativitasmu. Kamu tidak hanya membuat — kamu juga memahami mengapa sesuatu berhasil atau tidak. Itu yang membuat karyamu lebih dari sekadar estetis.',
-  'S,E': 'Kamu paling hidup ketika ada orang yang bisa dibantu atau digerakkan. Ada energi kepemimpinan di kamu, tapi yang paling memotivasimu bukan kuasanya — melainkan dampaknya pada orang lain.',
-  'E,S': 'Kamu punya naluri untuk memimpin yang didasarkan pada kepedulian terhadap orang sekitarmu. Bukan pemimpin yang dingin — tapi pemimpin yang tahu kapan harus mendengar.',
-  'I,S': 'Kamu menggabungkan rasa ingin tahu yang dalam dengan empati yang kuat. Itu kombinasi yang jarang — dan sangat dibutuhkan di bidang yang bersinggungan antara ilmu pengetahuan dan manusia.',
-  'S,I': 'Cara kamu membantu orang lain selalu didasari oleh pemahaman yang mendalam, bukan sekadar niat baik. Itu yang membuat kontribusimu lebih dari sekadar kata-kata penyemangat.',
-  'E,I': 'Kamu punya ambisi yang didukung oleh kecerdasan analitis. Kamu tidak hanya ingin mencapai sesuatu — kamu ingin memahami cara terbaik untuk mencapainya.',
-  'I,E': 'Rasa ingin tahumu bukan hanya akademis — ada bagian dari kamu yang juga ingin menerapkan apa yang kamu pelajari untuk hasil yang nyata.',
-  'C,I': 'Kamu punya kombinasi yang kuat antara ketelitian dan kemampuan berpikir analitis. Orang seperti kamu yang biasanya menjaga sistem tetap berjalan dengan baik.',
-  'R,I': 'Kamu berpikir dengan tanganmu — dalam arti yang baik. Kamu memahami dunia lewat mengerjakan sesuatu secara langsung, dan lebih suka fakta konkret daripada teori abstrak.',
+  'A,E': 'Cara kamu memproses dunia lebih banyak lewat ekspresi dan inisiatif. Kamu punya dorongan untuk menciptakan sesuatu yang orisinal — tapi bukan sekadar untuk diri sendiri. Ada bagian dari kamu yang juga ingin karya itu dikenal dan berdampak. Kombinasi ini (Artistic & Enterprising) membedakanmu dari tipe artistik murni, karena kamu memikirkan sisi bisnis dan audiens dari karyamu.',
+  'E,A': 'Kamu bergerak dengan visi yang jelas dan tidak sungkan untuk memimpin — tapi cara kamu memimpin sering kali lewat ide dan kreasi, bukan sekadar otoritas. Itu kombinasi yang langka: pemimpin yang juga pencipta. (Enterprising & Artistic)',
+  'I,A': 'Kamu memiliki rasa ingin tahu yang dalam dan cara berpikir yang tidak konvensional. Kamu menikmati memahami sesuatu sampai ke akarnya — lalu menyampaikannya kembali dengan cara yang tidak biasa. (Investigative & Artistic)',
+  'A,I': 'Ada kecerdasan analitis di balik kreativitasmu. Kamu tidak hanya membuat — kamu juga memahami mengapa sesuatu berhasil atau tidak. Itu yang membuat karyamu lebih dari sekadar estetis. (Artistic & Investigative)',
+  'S,E': 'Kamu paling hidup ketika ada orang yang bisa dibantu atau digerakkan. Ada energi kepemimpinan di kamu, tapi yang paling memotivasimu bukan kuasanya — melainkan dampaknya pada orang lain. (Social & Enterprising)',
+  'E,S': 'Kamu punya naluri untuk memimpin yang didasarkan pada kepedulian terhadap orang sekitarmu. Bukan pemimpin yang dingin — tapi pemimpin yang tahu kapan harus mendengar. (Enterprising & Social)',
+  'I,S': 'Kamu menggabungkan rasa ingin tahu yang dalam dengan empati yang kuat. Itu kombinasi yang jarang — dan sangat dibutuhkan di bidang yang bersinggungan antara ilmu pengetahuan dan manusia. (Investigative & Social)',
+  'S,I': 'Cara kamu membantu orang lain selalu didasari oleh pemahaman yang mendalam, bukan sekadar niat baik. Itu yang membuat kontribusimu lebih dari sekadar kata-kata penyemangat. (Social & Investigative)',
+  'E,I': 'Kamu punya ambisi yang didukung oleh kecerdasan analitis. Kamu tidak hanya ingin mencapai sesuatu — kamu ingin memahami cara terbaik untuk mencapainya. (Enterprising & Investigative)',
+  'I,E': 'Rasa ingin tahumu bukan hanya akademis — ada bagian dari kamu yang juga ingin menerapkan apa yang kamu pelajari untuk hasil yang nyata. (Investigative & Enterprising)',
+  'C,I': 'Kamu punya kombinasi yang kuat antara ketelitian dan kemampuan berpikir analitis. Orang seperti kamu yang biasanya menjaga sistem tetap berjalan dengan baik tanpa banyak drama. (Conventional & Investigative)',
+  'R,I': 'Kamu berpikir dengan tanganmu — dalam arti yang baik. Kamu memahami dunia lewat mengerjakan sesuatu secara langsung, dan lebih suka fakta konkret daripada teori abstrak. (Realistic & Investigative)',
+}
+
+// ── Holland Code Explanations ───────────────────────────────
+export const HOLLAND_DESC: Record<RiasecCode, string> = {
+  R: 'Realistic (Si Praktis): Suka bekerja dengan objek nyata, mesin, alam, alat, atau aktivitas fisik luar ruangan.',
+  I: 'Investigative (Si Pemikir): Suka mengobservasi, menganalisis, mengevaluasi, dan memecahkan masalah kompleks.',
+  A: 'Artistic (Si Kreator): Intuitif, imajinatif, suka bekerja dalam situasi tidak terstruktur untuk menciptakan sesuatu.',
+  S: 'Social (Si Penolong): Suka mencerahkan, membantu, melatih, atau menyembuhkan orang lain.',
+  E: 'Enterprising (Si Persuasif): Suka bekerja dengan orang lain untuk mempengaruhi, memimpin, atau mencapai tujuan organisasi.',
+  C: 'Conventional (Si Pengatur): Suka bekerja dengan data, angka, atau hal-hal yang terstruktur dengan detail yang sangat rapi.'
 }
 
 export function getProfilText(top2: RiasecCode[], labels: Record<RiasecCode, string>): string {
   const key = top2.slice(0, 2).join(',')
   const rev = top2.slice(0, 2).reverse().join(',')
   return PROFIL_TEXT[key] || PROFIL_TEXT[rev] ||
-    `Holland Code kamu menunjukkan kecenderungan dominan ke ${labels[top2[0]]} dengan nuansa ${labels[top2[1]]}. Kombinasi ini punya jalur karir yang lebih spesifik dari yang kamu bayangkan — laporan lengkap akan menjabarkan semuanya.`
+    `Profilmu menunjukkan dominasi pada ${labels[top2[0]]} yang dikombinasikan dengan ${labels[top2[1]]}. Artinya, kamu memadukan pendekatan "${HOLLAND_DESC[top2[0]].split(':')[0]}" dengan gaya "${HOLLAND_DESC[top2[1]].split(':')[0]}". Kombinasi ini membentuk kekuatan unikmu dalam dunia kerja, laporan lengkap akan membedah jalur karir apa yang paling butuh profil seperti ini.`
 }
 
 // ── free top jurusan per Holland top-pair ──────────────────────

@@ -10,7 +10,6 @@ import type { RiasecCode } from '@/types'
 export default function TesD1Page() {
   const { d1_skenario, d1_skala, setD1Skenario, setD1Skala } = useTesStore()
 
-  // Count answered
   const skenarioAnswered = Object.keys(d1_skenario).length
   const skalaAnswered = Object.keys(d1_skala).length
   const totalAnswered = skenarioAnswered + skalaAnswered
@@ -19,21 +18,24 @@ export default function TesD1Page() {
   return (
     <TesLayout
       dimensi={1}
-      judul="Minat & Kecenderungan"
-      subjudul="Dimensi pertama membantu memetakan bidang mana yang paling cocok dengan caramu bergerak di dunia."
-      intro="Tidak ada jawaban yang benar atau salah di sini. Kami bukan menilai kamu — kami hanya ingin mengenal kamu. Jawab sesuai kenyataan, bukan yang kamu rasa 'harusnya' kamu jawab."
+      judul="Minat & Ketertarikan"
+      subjudul="Langkah pertama ini memetakan bidang apa yang secara alami paling menarik buatmu."
+      intro="Tidak ada jawaban benar atau salah. Jawab dengan jujur sesuai apa yang benar-benar kamu suka, bukan apa yang orang lain anggap keren."
       hrefBack="/"
       hrefNext="/tes/d2"
-      labelNext={`Lanjut ke Dimensi 2 → ${totalAnswered > 0 ? `(${totalAnswered}/${totalSoal} dijawab)` : ''}`}
+      labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}
     >
-      {/* BLOK A: SKENARIO */}
-      <div style={{ marginBottom: 8 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Blok A — Pilih satu yang paling mencerminkan kamu
+      {/* BLOK A */}
+      <div className="mb-8">
+        <div className="flex justify-between items-baseline mb-6">
+          <div className="text-sm font-bold text-brand-600 uppercase tracking-widest">
+            Bagian A — Skenario Pilihan
           </div>
-          <div style={{ fontSize: 11, color: '#888780' }}>{skenarioAnswered}/{D1_SKENARIO.length}</div>
+          <div className="text-sm font-medium text-ink-light bg-surface-100 px-3 py-1 rounded-full">
+            {skenarioAnswered} / {D1_SKENARIO.length}
+          </div>
         </div>
+        
         {D1_SKENARIO.map((soal, i) => (
           <SkenarioCard
             key={soal.id}
@@ -49,24 +51,25 @@ export default function TesD1Page() {
       </div>
 
       {/* DIVIDER */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 28px',
-      }}>
-        <div style={{ flex: 1, height: '0.5px', background: 'rgba(44,44,42,0.12)' }}/>
-        <span style={{ fontSize: 12, color: '#888780', fontStyle: 'italic' }}>
-          Bagian berikutnya sedikit lebih reflektif — tapi tetap cepat
+      <div className="flex items-center gap-4 my-14">
+        <div className="flex-1 h-px bg-surface-200"></div>
+        <span className="text-sm font-medium text-ink-light italic">
+          Bagian selanjutnya tentang prioritasmu
         </span>
-        <div style={{ flex: 1, height: '0.5px', background: 'rgba(44,44,42,0.12)' }}/>
+        <div className="flex-1 h-px bg-surface-200"></div>
       </div>
 
-      {/* BLOK B: SKALA */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#1D9E75', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Blok B — Pilih angka yang paling jujur mencerminkan dirimu
+      {/* BLOK B */}
+      <div className="mb-8">
+        <div className="flex justify-between items-baseline mb-6">
+          <div className="text-sm font-bold text-brand-600 uppercase tracking-widest">
+            Bagian B — Skala Setuju
           </div>
-          <div style={{ fontSize: 11, color: '#888780' }}>{skalaAnswered}/{D1_SKALA.length}</div>
+          <div className="text-sm font-medium text-ink-light bg-surface-100 px-3 py-1 rounded-full">
+            {skalaAnswered} / {D1_SKALA.length}
+          </div>
         </div>
+
         {D1_SKALA.map((soal) => (
           <SkalaItem
             key={soal.id}

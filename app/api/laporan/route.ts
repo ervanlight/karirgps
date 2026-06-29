@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/supabase-server'
-import { generateLaporanLengkap, generateRingkasan } from '@/lib/laporan'
+import { generateDecisionMVP, generateRingkasan } from '@/lib/laporan'
 import type { ProfilData } from '@/types'
 
 // ============================================================
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Sesi ini bukan milikmu.' }, { status: 403 })
       }
 
-      const { laporanSiswa, laporanOrtu } = await generateLaporanLengkap(profil)
+      const laporanSiswa = await generateDecisionMVP(profil)
 
       const { data: existing } = await supabase
         .from('reports')
@@ -62,11 +62,11 @@ export async function POST(request: NextRequest) {
       const reportError = existing
         ? (await supabase
             .from('reports')
-            .update({ laporan_siswa: laporanSiswa, laporan_ortu: laporanOrtu })
+            .update({ laporan_siswa: laporanSiswa, laporan_orang_tua: null })
             .eq('id', existing.id)).error
         : (await supabase
             .from('reports')
-            .insert({ session_id, laporan_siswa: laporanSiswa, laporan_ortu: laporanOrtu, payment_status: 'unpaid' })).error
+            .insert({ session_id, laporan_siswa: laporanSiswa, laporan_orang_tua: null, payment_status: 'unpaid' })).error
 
       if (reportError) {
         console.error('Report save error:', reportError)
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       }
       await supabase.from('test_sessions').update({ profil_data: profil }).eq('id', session_id)
 
-      return NextResponse.json({ laporan_siswa: laporanSiswa, laporan_orang_tua: laporanOrtu })
+      return NextResponse.json({ laporan_siswa: laporanSiswa, laporan_orang_tua: null })
     }
 
     return NextResponse.json({ error: 'mode tidak valid' }, { status: 400 })
