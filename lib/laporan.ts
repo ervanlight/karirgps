@@ -105,7 +105,7 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
   const promptData = `PROFIL SISWA:\n\n${JSON.stringify(profil, null, 2)}${grounding}`
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.5-pro',
     contents: promptData,
     config: {
       systemInstruction: SYSTEM_PROMPT_MENTOR,
@@ -193,7 +193,7 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
 
 export async function generateRingkasan(profil: ProfilData) {
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.5-pro',
     contents: JSON.stringify(profil),
     config: {
       systemInstruction: 'Tulis ringkasan profil dalam 2 kalimat personal bahasa Indonesia menggunakan gaya mentor. Gunakan "kamu". Kembalikan JSON dengan key "profil_singkat".',
