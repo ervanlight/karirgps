@@ -44,6 +44,7 @@ function HasilContent() {
   
   const [freeReport, setFreeReport] = useState<FreeReportParsed | null>(null)
   const [loadingFreeReport, setLoadingFreeReport] = useState(false)
+  const [freeReportError, setFreeReportError] = useState('')
 
   // TAB STATE
   const [activeTab, setActiveTab] = useState<'awal' | 'lengkap'>('lengkap')
@@ -108,6 +109,7 @@ function HasilContent() {
 
     async function fetchFreeReport() {
       setLoadingFreeReport(true)
+      setFreeReportError('')
       try {
         const res = await fetch('/api/laporan-gratis', {
           method: 'POST',
@@ -115,11 +117,16 @@ function HasilContent() {
           body: JSON.stringify({ session_id: store.session_id })
         })
         const data = await res.json()
-        if (active && data.report) {
-          setFreeReport(data.report)
+        if (active) {
+          if (data.report) {
+            setFreeReport(data.report)
+          } else {
+            setFreeReportError(data.error || 'Terjadi kendala saat generate laporan gratis.')
+          }
         }
       } catch(err) {
         console.error('Failed fetching free report', err)
+        if (active) setFreeReportError('Koneksi terputus. Gagal memuat laporan gratis.')
       } finally {
         if (active) setLoadingFreeReport(false)
       }
@@ -128,6 +135,11 @@ function HasilContent() {
 
     return () => { active = false }
   }, [sessionReady, store.session_id, freeReport])
+
+  const retryFreeReport = () => {
+    setFreeReport(null)
+    setFreeReportError('')
+  }
 
 
   // Polling for Paid Report
@@ -254,13 +266,38 @@ function HasilContent() {
   }
 
   const renderHasilAwal = () => {
+    if (freeReportError && !loadingFreeReport) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-4 animate-fade-up">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl mb-2">
+            ⚠️
+          </div>
+          <h3 className="text-lg font-bold text-ink">Gagal Memuat Laporan</h3>
+          <p className="text-sm text-ink-light text-center max-w-sm mb-4">
+            {freeReportError}
+          </p>
+          <button onClick={retryFreeReport} className="bg-ink text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-brand-600 transition-colors">
+            Coba Lagi
+          </button>
+        </div>
+      )
+    }
+
     if (loadingFreeReport || !freeReport) {
       return (
-        <div className="flex flex-col items-center justify-center py-20 gap-6 animate-fade-up">
-          <div className="w-12 h-12 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-center py-24 gap-8 animate-fade-in relative min-h-[50vh]">
+          {/* Radar/Pulse effect */}
+          <div className="relative flex items-center justify-center w-24 h-24 mb-2">
+            <div className="absolute inset-0 bg-brand-500/20 rounded-full animate-ping" style={{ animationDuration: '2s' }}></div>
+            <div className="absolute inset-2 bg-brand-500/30 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}></div>
+            <div className="absolute inset-4 bg-brand-500/40 rounded-full animate-pulse"></div>
+            <div className="relative w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center z-10 border border-brand-100">
+               <svg className="w-6 h-6 text-brand-600 animate-[spin_3s_linear_infinite]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+          </div>
           <div className="text-sm font-medium text-ink-light text-center max-w-sm">
-            <strong className="block text-ink text-base mb-1">AI sedang membaca profilmu...</strong>
-            Menyiapkan insight psikologi khusus untukmu (ini hanya butuh beberapa detik).
+            <strong className="block text-ink text-lg mb-2">Membedah DNA Kariermu...</strong>
+            <p className="animate-pulse leading-relaxed">Mensintesis profil kepribadian, gaya belajar, dan nilai kerjamu menjadi satu peta jalan yang jelas.</p>
           </div>
         </div>
       )

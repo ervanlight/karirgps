@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     const promptText = `PROFIL USER:\n- Jurusan: ${jurusan}\n- Minat: ${minat}\n- Gaya belajar: ${gayaBelajar}\n- Preferensi: ${preferensi}\n- Nilai: ${nilai}`
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-2.5-flash',
       contents: promptText,
       config: {
         systemInstruction: getFreePrompt(),
