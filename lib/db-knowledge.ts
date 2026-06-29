@@ -79,7 +79,7 @@ export async function fetchRagContext(profil: ProfilData): Promise<string> {
     
     // 2. Minta embedding dari Gemini
     const embedRes = await ai.models.embedContent({
-      model: 'text-embedding-004',
+      model: 'gemini-embedding-2',
       contents: queryText
     })
     const embedding = embedRes.embeddings?.[0]?.values

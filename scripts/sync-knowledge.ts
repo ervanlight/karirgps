@@ -58,7 +58,7 @@ async function processFile(filePath: string) {
     try {
       console.log(`[${i+1}/${chunks.length}] Membuat vektor embedding...`)
       const response = await ai.models.embedContent({
-        model: 'text-embedding-004',
+        model: 'gemini-embedding-2',
         contents: chunk,
       })
       
