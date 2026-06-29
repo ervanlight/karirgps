@@ -51,7 +51,7 @@ export default function LandingPage() {
             Panduan karier untuk siswa SMA/SMK
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-ink mb-6 leading-[1.15]">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-ink mb-6 leading-[1.15] text-balance">
             Menentukan arah setelah SMA <span className="text-gradient">tidak harus membingungkan.</span>
           </h1>
 

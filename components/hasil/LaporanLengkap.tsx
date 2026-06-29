@@ -124,10 +124,10 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
       <div className={`rounded-3xl p-6 md:p-8 shadow-sm border animate-fade-up ${decisionBg}`} style={{ animationDelay: '0.15s' }}>
         <div className={`absolute w-1.5 h-full left-0 top-0 ${decisionAccent} rounded-l-3xl`} />
         <div className="relative">
-          <div className={`text-xs font-bold uppercase tracking-widest mb-2 ${decisionColor} opacity-70`}>
+          <div className={`text-xs font-bold uppercase tracking-widest mb-3 ${decisionColor} opacity-70`}>
             🎯 Keputusan Terbaik Untukmu
           </div>
-          <h2 className={`text-5xl md:text-6xl font-black mb-4 ${decisionColor} tracking-tight`}>
+          <h2 className={`text-3xl md:text-4xl font-extrabold mb-4 ${decisionColor} tracking-tight text-balance leading-tight`}>
             {laporan.rekomendasi_utama}
           </h2>
           <p className="text-sm text-ink-light">

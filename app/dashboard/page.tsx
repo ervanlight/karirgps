@@ -89,7 +89,6 @@ export default function DashboardPage() {
     const { error } = await supabase.from('profiles').update({ nama, updated_at: new Date().toISOString() }).eq('id', user.id)
     setSavingNama(false)
     setNamaMsg(error ? 'Gagal menyimpan nama.' : 'Berhasil disimpan.')
-    
     if (!error) setTimeout(() => setNamaMsg(''), 3000)
   }
 
@@ -135,154 +134,207 @@ export default function DashboardPage() {
     )
   }
 
+  // Helper untuk inisial nama
+  const initial = nama ? nama.charAt(0).toUpperCase() : email.charAt(0).toUpperCase()
+
   return (
     <div className="min-h-screen bg-surface-50 text-ink font-sans selection:bg-brand-500 selection:text-white">
       
-      {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-brand-100/50 to-transparent pointer-events-none -z-10"></div>
+      {/* Premium Gradient Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-brand-600 to-indigo-900 pointer-events-none -z-10 overflow-hidden">
+        {/* Glow effects */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-white/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute bottom-[-50%] right-[-10%] w-[60%] h-[150%] bg-brand-400/20 rounded-full blur-[80px] pointer-events-none"></div>
+      </div>
 
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 glass border-b border-surface-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      {/* Navbar Transparan */}
+      <nav className="sticky top-0 z-50 glass border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-xl flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="white">
                 <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
               </svg>
             </div>
-            <span className="text-lg font-bold tracking-tight text-ink">KarirGPS</span>
+            <span className="text-lg font-bold tracking-tight text-white drop-shadow-sm">KarirGPS</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-ink-light hidden sm:block">{email}</span>
-            <button onClick={handleLogout} className="text-sm font-medium text-ink hover:text-brand-600 transition-colors">
+            <button onClick={handleLogout} className="text-sm font-medium text-white/80 hover:text-white transition-colors">
               Keluar
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-6 py-12 pb-24">
-        
-        <header className="mb-10 animate-fade-up">
-          <h1 className="text-3xl font-bold text-ink tracking-tight mb-2">Halo, {nama || 'Penjelajah'}! 👋</h1>
-          <p className="text-ink-light">Selamat datang di ruang kerjamu. Lanjutkan perjalanan karirmu di sini.</p>
-        </header>
-
-        {/* Daftar Tes Section */}
-        <section className="mb-14 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest">Riwayat Tes</h2>
-            {sessions.length > 0 && (
-              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="text-sm font-semibold text-brand-600 hover:text-brand-700 hover:underline">
-                + Tes Baru
-              </Link>
-            )}
-          </div>
-
-          {sessions.length === 0 ? (
-            <div className="bg-white border border-surface-200 rounded-3xl p-10 text-center shadow-sm">
-              <div className="w-16 h-16 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                🧭
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 pb-24 relative z-10">
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          
+          {/* =========================================
+              KOLOM KIRI: PROFILE & QUICK ACTIONS
+          ========================================= */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* Profil Card - Glassmorphism style menempel di atas background gelap */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-8 text-center text-white mt-0 lg:-mt-6">
+              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-brand-300 to-white flex items-center justify-center text-4xl font-black text-brand-700 shadow-inner mb-5 ring-4 ring-white/20">
+                {initial}
               </div>
-              <h3 className="text-lg font-bold text-ink mb-2">Belum ada aktivitas tes</h3>
-              <p className="text-ink-light mb-6">Mulai tes pertama untuk memetakan potensimu.</p>
-              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="inline-block bg-brand-600 text-white rounded-full px-8 py-3 text-sm font-semibold hover:bg-brand-700 hover:-translate-y-0.5 transition-all shadow-soft">
-                Mulai Tes Sekarang
+              <h1 className="text-2xl font-bold tracking-tight mb-1">{nama || 'Penjelajah'}</h1>
+              <p className="text-white/70 text-sm mb-6">{email}</p>
+              
+              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="block w-full bg-white text-brand-700 rounded-2xl px-6 py-3.5 text-sm font-bold hover:bg-brand-50 hover:shadow-lg transition-all duration-300 active:scale-95">
+                + Mulai Analisis Baru
               </Link>
             </div>
-          ) : (
-            <div className="grid gap-4">
-              {sessions.map((s) => (
-                <div key={s.id} className="group bg-white border border-surface-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-soft transition-all duration-300">
-                  <div>
-                    <div className="text-base font-bold text-ink mb-1.5 group-hover:text-brand-600 transition-colors">
-                      {new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </div>
-                    {s.paid ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-semibold border border-brand-100">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Laporan Lengkap
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-100 text-ink-light text-xs font-semibold border border-surface-200">
-                        Versi Gratis
-                      </span>
-                    )}
+
+            {/* Statistik Singkat */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-surface-200">
+              <h2 className="text-xs font-bold text-ink-light uppercase tracking-widest mb-4">Statistik Kamu</h2>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm font-medium text-ink">Total Tes Diambil</span>
+                <span className="text-xl font-bold text-brand-600">{sessions.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-ink">Laporan Lengkap</span>
+                <span className="text-xl font-bold text-emerald-600">{sessions.filter(s => s.paid).length}</span>
+              </div>
+            </div>
+
+          </div>
+
+
+          {/* =========================================
+              KOLOM KANAN: RIWAYAT & PENGATURAN
+          ========================================= */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Riwayat Tes Section */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-ink tracking-tight">Riwayat Analisis</h2>
+              </div>
+
+              {sessions.length === 0 ? (
+                <div className="bg-white border border-surface-200 rounded-3xl p-12 text-center shadow-sm">
+                  <div className="w-20 h-20 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-5 text-3xl shadow-inner">
+                    🧭
                   </div>
-                  
-                  <Link href={`/laporan/${s.id}`} className={`w-full sm:w-auto text-center px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                    s.paid 
-                      ? 'bg-surface-50 text-ink border border-surface-200 hover:bg-white hover:border-surface-300 hover:shadow-sm' 
-                      : 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-soft hover:-translate-y-0.5'
-                  }`}>
-                    {s.paid ? 'Buka Laporan' : 'Beli Laporan'}
+                  <h3 className="text-xl font-bold text-ink mb-2">Belum ada aktivitas tes</h3>
+                  <p className="text-ink-light mb-8 max-w-md mx-auto">Mulai perjalananmu memetakan karier impian dengan algoritma AI kami.</p>
+                  <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="inline-block bg-brand-600 text-white rounded-2xl px-8 py-3.5 text-sm font-bold hover:bg-brand-700 transition-all shadow-lg hover:shadow-brand-500/30">
+                    Mulai Tes Sekarang
                   </Link>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Pengaturan Profil */}
-        <section className="animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest mb-6">Pengaturan Profil</h2>
-
-          <div className="grid gap-5">
-            {/* Nama */}
-            <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-              <form onSubmit={handleSaveNama}>
-                <label className="block text-sm font-semibold text-ink mb-3">Nama Lengkap</label>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text" value={nama} onChange={(e) => setNama(e.target.value)}
-                    placeholder="Masukkan namamu"
-                    className="flex-1 border border-surface-200 bg-surface-50 rounded-xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
-                  />
-                  <button type="submit" disabled={savingNama} className="bg-ink text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50">
-                    {savingNama ? 'Menyimpan...' : 'Simpan'}
-                  </button>
+              ) : (
+                <div className="grid gap-4">
+                  {sessions.map((s) => (
+                    <div key={s.id} className="group bg-white border border-surface-200 rounded-3xl p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 hover:border-brand-200 hover:shadow-lg transition-all duration-300">
+                      
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${s.paid ? 'bg-gradient-to-tr from-emerald-500 to-emerald-300 text-white' : 'bg-surface-100 text-ink-light'}`}>
+                          {s.paid ? '👑' : '📄'}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-ink-light mb-1">
+                            {new Date(s.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </div>
+                          {s.paid ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Laporan Lengkap
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-100 text-ink-light text-xs font-bold border border-surface-200">
+                              Versi Gratis
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <Link href={`/laporan/${s.id}`} className={`w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
+                        s.paid 
+                          ? 'bg-brand-50 text-brand-700 hover:bg-brand-100' 
+                          : 'bg-ink text-white hover:bg-brand-600 hover:shadow-lg'
+                      }`}>
+                        {s.paid ? 'Buka Laporan' : 'Buka & Upgrade'}
+                      </Link>
+                    </div>
+                  ))}
                 </div>
-                {namaMsg && <div className="text-sm font-medium text-brand-600 mt-3">{namaMsg}</div>}
-              </form>
-            </div>
+              )}
+            </section>
 
-            {/* Email */}
-            <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-              <form onSubmit={handleChangeEmail}>
-                <label className="block text-sm font-semibold text-ink mb-3">Alamat Email</label>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required
-                    className="flex-1 border border-surface-200 bg-surface-50 rounded-xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
-                  />
-                  <button type="submit" disabled={savingEmail || newEmail === email} className="bg-ink text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50">
-                    {savingEmail ? 'Memproses...' : 'Perbarui Email'}
-                  </button>
-                </div>
-                {emailMsg && <div className="text-sm font-medium text-brand-600 mt-3">{emailMsg}</div>}
-              </form>
-            </div>
+            {/* Pengaturan Profil Section (Modern Form Layout) */}
+            <section className="bg-white rounded-3xl shadow-sm border border-surface-200 overflow-hidden">
+              <div className="bg-surface-50 border-b border-surface-200 px-8 py-5">
+                <h2 className="text-base font-bold text-ink">Pengaturan Akun</h2>
+                <p className="text-xs text-ink-light">Kelola data personal dan keamanan akunmu.</p>
+              </div>
+              
+              <div className="p-8 space-y-8 divider-y divide-surface-100">
+                {/* Nama */}
+                <form onSubmit={handleSaveNama} className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="md:w-1/3 shrink-0">
+                    <label className="block text-sm font-bold text-ink">Nama Lengkap</label>
+                    <p className="text-xs text-ink-light">Akan ditampilkan di laporan</p>
+                  </div>
+                  <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="text" value={nama} onChange={(e) => setNama(e.target.value)}
+                      placeholder="Masukkan namamu"
+                      className="flex-1 border border-surface-200 bg-surface-50 rounded-2xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:bg-white transition-all"
+                    />
+                    <button type="submit" disabled={savingNama} className="shrink-0 bg-white border border-surface-200 text-ink rounded-2xl px-6 py-3 text-sm font-bold hover:bg-surface-50 transition-colors disabled:opacity-50">
+                      {savingNama ? 'Menyimpan...' : 'Simpan'}
+                    </button>
+                  </div>
+                  {namaMsg && <div className="w-full text-xs font-bold text-brand-600 md:ml-auto">{namaMsg}</div>}
+                </form>
 
-            {/* Kata Sandi */}
-            <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-              <form onSubmit={handleChangePassword}>
-                <label className="block text-sm font-semibold text-ink mb-3">Kata Sandi Baru</label>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimal 8 karakter"
-                    className="flex-1 border border-surface-200 bg-surface-50 rounded-xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
-                  />
-                  <button type="submit" disabled={savingPassword || !newPassword} className="bg-ink text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50">
-                    {savingPassword ? 'Memproses...' : 'Perbarui Kata Sandi'}
-                  </button>
-                </div>
-                {passwordMsg && <div className="text-sm font-medium text-brand-600 mt-3">{passwordMsg}</div>}
-              </form>
-            </div>
+                <hr className="border-surface-100" />
+
+                {/* Email */}
+                <form onSubmit={handleChangeEmail} className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="md:w-1/3 shrink-0">
+                    <label className="block text-sm font-bold text-ink">Alamat Email</label>
+                    <p className="text-xs text-ink-light">Email untuk login & notifikasi</p>
+                  </div>
+                  <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required
+                      className="flex-1 border border-surface-200 bg-surface-50 rounded-2xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:bg-white transition-all"
+                    />
+                    <button type="submit" disabled={savingEmail || newEmail === email} className="shrink-0 bg-white border border-surface-200 text-ink rounded-2xl px-6 py-3 text-sm font-bold hover:bg-surface-50 transition-colors disabled:opacity-50">
+                      {savingEmail ? 'Memproses...' : 'Ubah Email'}
+                    </button>
+                  </div>
+                  {emailMsg && <div className="w-full text-xs font-bold text-brand-600">{emailMsg}</div>}
+                </form>
+
+                <hr className="border-surface-100" />
+
+                {/* Password */}
+                <form onSubmit={handleChangePassword} className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="md:w-1/3 shrink-0">
+                    <label className="block text-sm font-bold text-ink">Kata Sandi</label>
+                    <p className="text-xs text-ink-light">Buat kata sandi baru yang kuat</p>
+                  </div>
+                  <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Minimal 8 karakter"
+                      className="flex-1 border border-surface-200 bg-surface-50 rounded-2xl px-4 py-3 text-sm text-ink outline-none focus:border-brand-400 focus:bg-white transition-all"
+                    />
+                    <button type="submit" disabled={savingPassword || !newPassword} className="shrink-0 bg-white border border-surface-200 text-ink rounded-2xl px-6 py-3 text-sm font-bold hover:bg-surface-50 transition-colors disabled:opacity-50">
+                      {savingPassword ? 'Memproses...' : 'Ubah Sandi'}
+                    </button>
+                  </div>
+                  {passwordMsg && <div className="w-full text-xs font-bold text-brand-600">{passwordMsg}</div>}
+                </form>
+              </div>
+            </section>
+
           </div>
-        </section>
-
+        </div>
       </main>
     </div>
   )
