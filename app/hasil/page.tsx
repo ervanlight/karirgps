@@ -4,10 +4,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
 import { createClient } from '@/lib/supabase'
-import { buildProfil, RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
-import { RIASEC_COLOR, WV_COLOR, MI_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID, HOLLAND_DESC } from '@/lib/rekomendasi-gratis'
+import { buildProfil } from '@/lib/scoring'
+import { FITUR_PAID } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
-import type { RiasecCode, MICode, WorkValueCode, MVPDecision } from '@/types'
+import type { MVPDecision } from '@/types'
+import type { FreeReportParsed } from '@/lib/schemas'
 
 export default function HasilPage() {
   return (
@@ -34,6 +35,9 @@ function HasilContent() {
   const [checkingLaporan, setCheckingLaporan] = useState(false)
   const [laporanTimedOut, setLaporanTimedOut] = useState(false)
   
+  const [freeReport, setFreeReport] = useState<FreeReportParsed | null>(null)
+  const [loadingFreeReport, setLoadingFreeReport] = useState(false)
+
   // TAB STATE
   const [activeTab, setActiveTab] = useState<'awal' | 'lengkap'>('lengkap')
 
@@ -72,7 +76,7 @@ function HasilContent() {
           status: 'completed',
           completed_at: new Date().toISOString(),
         })
-        .select('id')
+        .select('id, profil_data')
         .single()
 
       if (!active) return
@@ -80,6 +84,7 @@ function HasilContent() {
         setPayError('Sesi tes gagal disimpan. Muat ulang halaman ini.')
         return
       }
+      
       store.setSessionId(data.id)
       setSessionReady(true)
     }
@@ -88,6 +93,36 @@ function HasilContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Fetch Free Report Data via Gemini
+  useEffect(() => {
+    if (!sessionReady || !store.session_id || freeReport) return
+    let active = true
+
+    async function fetchFreeReport() {
+      setLoadingFreeReport(true)
+      try {
+        const res = await fetch('/api/laporan-gratis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: store.session_id })
+        })
+        const data = await res.json()
+        if (active && data.report) {
+          setFreeReport(data.report)
+        }
+      } catch(err) {
+        console.error('Failed fetching free report', err)
+      } finally {
+        if (active) setLoadingFreeReport(false)
+      }
+    }
+    fetchFreeReport()
+
+    return () => { active = false }
+  }, [sessionReady, store.session_id, freeReport])
+
+
+  // Polling for Paid Report
   useEffect(() => {
     if (!sessionReady || !store.session_id) return
     let active = true
@@ -127,19 +162,6 @@ function HasilContent() {
   function handleDownloadPdf() {
     window.print()
   }
-
-  const hollandCode = profil.d1_riasec.holland_code
-  const miProfile = profil.d2_mi.mi_profile
-  const wvProfile = profil.d3_workvalues.values_profile
-  const riasecScores = profil.d1_riasec.skor
-  const miScores = profil.d2_mi.skor
-  const wvScores = profil.d3_workvalues.skor
-
-  const top2Holland = hollandCode.slice(0, 2) as RiasecCode[]
-  const { jurusan, profesi } = getRekomendasi(top2Holland)
-
-  const riasecSorted = (Object.entries(riasecScores) as [RiasecCode, number][]).sort((a, b) => b[1] - a[1])
-  const wvSorted = (Object.entries(wvScores) as [WorkValueCode, number][]).sort((a, b) => b[1] - a[1])
 
   async function handleBayar() {
     if (!store.session_id) {
@@ -183,106 +205,122 @@ function HasilContent() {
     }
   }
 
-  const renderHasilAwal = () => (
-    <div className="space-y-4 animate-fade-up">
-      {/* PROFIL SINGKAT */}
-      <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-        <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-4">Profil Singkatmu</div>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {top2Holland.map(c => (
-            <span key={c} className="bg-brand-50 text-brand-700 px-3 py-1 rounded-full text-xs font-semibold">
-              {RIASEC_LABELS[c]}
-            </span>
-          ))}
-          {miProfile.slice(0, 2).map(c => (
-            <span key={c} className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
-              {MI_LABELS[c as MICode]}
-            </span>
-          ))}
-          {wvProfile.slice(0, 2).map(c => (
-            <span key={c} className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold">
-              {WV_LABELS[c as WorkValueCode]}
-            </span>
-          ))}
-        </div>
-        <p className="text-sm text-ink leading-relaxed">
-          {getProfilText(top2Holland, RIASEC_LABELS)}
-        </p>
-      </div>
+  function handleShare() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Hasil KarirGPS',
+        text: 'Coba lihat hasil pemetaan karierku dari AI KarirGPS!',
+        url: window.location.origin,
+      }).catch(console.error)
+    } else {
+      navigator.clipboard.writeText(window.location.origin)
+      alert('Link disalin!')
+    }
+  }
 
-      {/* GAMBARAN AWAL */}
-      <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-        <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-5">Gambaran Awal: Jurusan & Profesi</div>
-        
-        <p className="text-sm text-ink-light mb-6 leading-relaxed">
-          <strong>Kerja bagus! Mengisi tes panjang seperti ini membuktikan kamu benar-benar peduli dengan masa depanmu.</strong><br/>
-          Sebagai hadiahnya, ini adalah daftar singkat rekomendasi profesi dan kluster jurusan yang paling sejajar dengan kekuatan alimiahmu. 
-        </p>
-        
-        <div className="mb-6">
-          <div className="text-xs font-semibold text-ink mb-3">Top 3 Kluster Jurusan</div>
-          {jurusan.map(([nama, desc]) => (
-            <div key={nama} className="flex gap-3 mb-2.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-500 mt-2 shrink-0"/>
-              <div>
-                <span className="text-sm font-semibold text-ink">{nama}</span>
-                <span className="text-sm text-ink-light"> — {desc}</span>
-              </div>
+  const renderHasilAwal = () => {
+    if (loadingFreeReport || !freeReport) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-6 animate-fade-up">
+          <div className="w-12 h-12 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+          <div className="text-sm font-medium text-ink-light text-center max-w-sm">
+            <strong className="block text-ink text-base mb-1">AI sedang membaca profilmu...</strong>
+            Menyiapkan insight psikologi khusus untukmu (ini hanya butuh beberapa detik).
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-6 animate-fade-up">
+        {/* VIRAL OUTPUT FORMAT */}
+        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
+          
+          {/* Decision */}
+          <div className="text-center mb-8 border-b border-surface-200 pb-8">
+            <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">🎯 Hasil Karier Kamu</div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight text-balance leading-tight">
+              {freeReport.decision}
+            </h2>
+          </div>
+
+          {/* Personality Insight */}
+          <div className="mb-8">
+            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
+              <span className="text-base">🧠</span> YANG KAMU SEBENARNYA TIPE:
             </div>
-          ))}
+            <p className="text-base text-ink-light leading-relaxed">
+              {freeReport.personality_insight}
+            </p>
+          </div>
+
+          {/* Reasoning */}
+          <div className="mb-8">
+            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
+              <span className="text-base">💡</span> KENAPA INI MASUK AKAL:
+            </div>
+            <p className="text-base text-ink-light leading-relaxed">
+              {freeReport.reasoning}
+            </p>
+          </div>
+
+          {/* Career Fit */}
+          <div className="mb-8">
+            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="text-base">🧭</span> 3 JALUR PALING COCOK:
+            </div>
+            <div className="space-y-2">
+              {freeReport.career_fit.map((c, i) => (
+                <div key={i} className="bg-surface-50 border border-surface-200 rounded-xl px-4 py-3 text-sm font-semibold text-ink">
+                  {i + 1}. {c}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Roadmap */}
+          <div className="mb-8">
+            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
+              <span className="text-base">🚀</span> 6–12 BULAN KE DEPAN:
+            </div>
+            <p className="text-base text-ink-light leading-relaxed">
+              {freeReport.roadmap}
+            </p>
+          </div>
+
+          {/* Risk Statement */}
+          <div className="mb-8">
+            <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <span className="text-base">⚠️</span> RISIKO JIKA SALAH PILIH:
+            </div>
+            <p className="text-sm text-red-800/80 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">
+              {freeReport.risk_statement}
+            </p>
+          </div>
+
+          {/* Viral Hook */}
+          <div className="text-center bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-inner">
+            <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-3">🔥 INI YANG PALING MENGGAMBARKAN KAMU:</div>
+            <h3 className="text-lg md:text-xl font-bold text-brand-800 italic leading-snug">
+              &ldquo;{freeReport.viral_hook}&rdquo;
+            </h3>
+          </div>
         </div>
 
-        <div>
-          <div className="text-xs font-semibold text-ink mb-3">Top 5 Profesi</div>
-          <div className="flex flex-wrap gap-2">
-            {profesi.map(p => (
-              <span key={p} className="bg-surface-50 border border-surface-200 rounded-full px-3 py-1 text-xs text-ink font-medium">
-                {p}
-              </span>
-            ))}
-          </div>
+        {/* VIRAL SHARE BUTTONS */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button onClick={handleShare} className="flex-1 bg-ink text-white rounded-2xl px-6 py-4 text-sm font-bold hover:bg-brand-600 hover:-translate-y-1 hover:shadow-lg transition-all flex items-center justify-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+            Coba lihat hasil karier kamu
+          </button>
+          <button onClick={handleShare} className="flex-1 bg-white border-2 border-surface-200 text-ink rounded-2xl px-6 py-4 text-sm font-bold hover:border-ink hover:bg-surface-50 transition-all flex items-center justify-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Bandingkan dengan teman
+          </button>
         </div>
       </div>
-
-      {/* SCORE BARS — 3 Dimensi */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-1">Dimensi 1 · Minat</div>
-          <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
-            <strong>Holland Code (RIASEC)</strong> — 6 tipe minat yang menentukan lingkungan kerja dan tugas yang paling kamu nikmati secara alami.
-          </div>
-          <div className="space-y-3">
-            {riasecSorted.map(([k, v]) => (
-              <ScoreBar key={k} label={HOLLAND_DESC[k].split(':')[0]} skor={v} warna={RIASEC_COLOR[k]} />
-            ))}
-          </div>
-        </div>
-        <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-          <div className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Dimensi 3 · Nilai Kerja</div>
-          <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
-            <strong>Work Values</strong> — prinsip kerja yang diam-diam mengendalikan keputusanmu. Ini yang membuatmu betah atau muak di tempat kerja.
-          </div>
-          <div className="space-y-3">
-            {wvSorted.map(([k, v]) => (
-              <ScoreBar key={k} label={WV_LABELS[k as WorkValueCode]} skor={v} warna={WV_COLOR[k as WorkValueCode]} />
-            ))}
-          </div>
-        </div>
-      </div>
-      {/* Dimensi 2: MI — full width karena ada 8 tipe */}
-      <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-        <div className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Dimensi 2 · Cara Berpikir</div>
-        <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
-          <strong>Multiple Intelligences</strong> — 8 jenis kecerdasan yang menunjukkan cara berpikirmu yang paling alami dan efektif. Bukan ukuran &quot;sepintar apa kamu&quot;, tapi &quot;kamu pintar di bidang apa&quot;.
-        </div>
-        <div className="grid md:grid-cols-2 gap-x-6">
-          {(Object.entries(miScores) as [MICode, number][]).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
-            <ScoreBar key={k} label={MI_LABELS[k]} skor={v} warna={MI_COLOR[k]} />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="min-h-screen bg-surface-50 selection:bg-brand-500 selection:text-white font-sans">
@@ -362,7 +400,7 @@ function HasilContent() {
           </div>
         )}
 
-        {/* HEADER (Only show if not looking at Laporan Lengkap tabs to avoid clutter) */}
+        {/* HEADER */}
         {(!laporanLengkap || activeTab === 'awal') && (
           <header className="text-center mb-10 pb-8 border-b border-surface-200 animate-fade-up">
             <h1 className="text-3xl font-extrabold text-ink mb-3 tracking-tight">Ini bukan vonis.</h1>
@@ -370,17 +408,6 @@ function HasilContent() {
               Ini lebih seperti cermin — menunjukkan potensimu yang sebenarnya berdasarkan caramu berpikir dan prioritas hidupmu.
             </p>
           </header>
-        )}
-
-        {/* LOADING STATE */}
-        {checkingLaporan && !laporanLengkap && (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <div className="w-10 h-10 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
-            <div className="text-sm font-medium text-ink-light text-center max-w-sm">
-              Menganalisis jawabanmu...<br/>
-              <span className="text-xs font-normal">Hasil ditulis khusus untukmu, bukan template.</span>
-            </div>
-          </div>
         )}
         
         {/* TIMEOUT STATE */}
@@ -399,50 +426,52 @@ function HasilContent() {
         {/* JIKA BELUM BAYAR -> Tampilkan Hasil Awal + Paywall */}
         {!laporanLengkap && paymentStatus !== 'paid' && !checkingLaporan && (
           <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
+            
             {renderHasilAwal()}
             
-            {/* PAYWALL */}
-            <div className="mt-8 bg-gradient-to-b from-brand-600 to-brand-700 rounded-3xl p-8 shadow-xl text-white">
-              <div className="text-brand-100 text-xs font-bold uppercase tracking-widest mb-2">Buka Laporan Lengkap</div>
-              <h2 className="text-2xl font-bold mb-3">Ini baru permukaannya.</h2>
-              <p className="text-brand-50 text-sm leading-relaxed mb-8 max-w-md">
-                Buka hasil analisis mendalam (Arah Kuliah/Kerja, Roadmap 6 Bulan, & Risiko Karier) yang ditulis AI secara personal khusus untukmu.
-              </p>
+            {/* PAYWALL UPSELL (Only show when Free Report is loaded) */}
+            {!loadingFreeReport && freeReport && (
+              <div className="mt-8 bg-gradient-to-b from-brand-600 to-brand-700 rounded-3xl p-8 shadow-xl text-white">
+                <div className="text-brand-100 text-xs font-bold uppercase tracking-widest mb-2">Buka Laporan Lengkap (Vector AI)</div>
+                <h2 className="text-2xl font-bold mb-3">Ini baru permukaannya.</h2>
+                <p className="text-brand-50 text-sm leading-relaxed mb-8 max-w-md">
+                  Buka hasil analisis super mendalam yang ditulis oleh AI Expert berdasarkan Knowledge Graph spesifik untuk profil kondisimu (Keuangan, Nilai Rapor, Ketakutan).
+                </p>
 
-              <div className="grid gap-3 mb-8">
-                {FITUR_PAID.map(f => (
-                  <div key={f} className="flex gap-3 items-start">
-                    <div className="w-5 h-5 rounded-full bg-brand-500/50 flex items-center justify-center shrink-0 mt-0.5 text-xs">✓</div>
-                    <span className="text-sm text-brand-50 font-medium">{f}</span>
-                  </div>
-                ))}
-              </div>
+                <div className="grid gap-3 mb-8">
+                  {FITUR_PAID.map(f => (
+                    <div key={f} className="flex gap-3 items-start">
+                      <div className="w-5 h-5 rounded-full bg-brand-500/50 flex items-center justify-center shrink-0 mt-0.5 text-xs">✓</div>
+                      <span className="text-sm text-brand-50 font-medium">{f}</span>
+                    </div>
+                  ))}
+                </div>
 
-              <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm border border-white/20 text-center">
-                <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
-                <div className="text-xs text-brand-100 mb-5">Sekali bayar · Dikirim ke email · Akses selamanya</div>
-                
-                <button
-                  onClick={handleBayar}
-                  disabled={paying || !sessionReady}
-                  className={`w-full py-4 rounded-xl text-base font-bold transition-all ${
-                    paying || !sessionReady 
-                    ? 'bg-brand-400/50 text-brand-100 cursor-not-allowed' 
-                    : 'bg-white text-brand-600 hover:bg-brand-50 hover:-translate-y-1 hover:shadow-float'
-                  }`}
-                >
-                  {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Laporan Lengkap' : 'Menyiapkan sesi...')}
-                </button>
-                {payError && <div className="mt-4 text-xs text-red-200 bg-red-500/20 p-2 rounded-lg">{payError}</div>}
+                <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm border border-white/20 text-center">
+                  <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
+                  <div className="text-xs text-brand-100 mb-5">Sekali bayar · Dikirim ke email · Akses selamanya</div>
+                  
+                  <button
+                    onClick={handleBayar}
+                    disabled={paying || !sessionReady}
+                    className={`w-full py-4 rounded-xl text-base font-bold transition-all ${
+                      paying || !sessionReady 
+                      ? 'bg-brand-400/50 text-brand-100 cursor-not-allowed' 
+                      : 'bg-white text-brand-600 hover:bg-brand-50 hover:-translate-y-1 hover:shadow-float'
+                    }`}
+                  >
+                    {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Laporan Premium' : 'Menyiapkan sesi...')}
+                  </button>
+                  {payError && <div className="mt-4 text-xs text-red-200 bg-red-500/20 p-2 rounded-lg">{payError}</div>}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {/* JIKA SUDAH BAYAR -> Tampilkan Tabs */}
         {laporanLengkap && (
           <div className="animate-fade-up">
-            {/* TABS */}
             <div className="flex bg-surface-200/50 p-1 rounded-2xl mb-8 no-print max-w-sm mx-auto shadow-inner">
               <button
                 onClick={() => setActiveTab('awal')}
@@ -458,7 +487,6 @@ function HasilContent() {
               </button>
             </div>
 
-            {/* TAB CONTENT */}
             {activeTab === 'awal' ? (
               renderHasilAwal()
             ) : (

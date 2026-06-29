@@ -25,3 +25,15 @@ export const MVPDecisionSchema = z.object({
 })
 
 export type MVPDecisionParsed = z.infer<typeof MVPDecisionSchema>
+
+export const FreeReportSchema = z.object({
+  decision: z.string(),
+  personality_insight: z.string(),
+  reasoning: z.string(),
+  career_fit: z.array(z.string()).max(3),
+  roadmap: z.string(),
+  risk_statement: z.string(),
+  viral_hook: z.string(),
+})
+
+export type FreeReportParsed = z.infer<typeof FreeReportSchema>

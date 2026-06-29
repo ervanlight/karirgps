@@ -1,6 +1,7 @@
 // ============================================================
 // KARIRGPS — TYPE DEFINITIONS
 // ============================================================
+import type { FreeReportParsed } from '@/lib/schemas'
 
 // --- DIMENSI 1: RIASEC ---
 export type RiasecCode = 'R' | 'I' | 'A' | 'S' | 'E' | 'C'
@@ -88,6 +89,7 @@ export interface ProfilData {
     deskripsi_sekunder: string
   }
   d4_konteks: KonteksPersonal
+  free_report?: FreeReportParsed
 }
 
 // --- LAPORAN OUTPUT (MVP) ---
