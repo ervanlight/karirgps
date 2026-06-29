@@ -36,6 +36,7 @@ function HasilContent() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [sessionReady, setSessionReady] = useState(false)
   const creatingSession = useRef(false)
+  const generatingAiRef = useRef(false)
   
   const [laporanLengkap, setLaporanLengkap] = useState<MVPDecision | null>(null)
   const [checkingLaporan, setCheckingLaporan] = useState(false)
@@ -153,6 +154,28 @@ function HasilContent() {
           setLaporanLengkap(data.laporan_siswa as MVPDecision)
           setCheckingLaporan(false)
           return
+        }
+
+        // Trigger AI Generation if paid but no report
+        if (data?.payment_status === 'paid' && !data.laporan_siswa && !generatingAiRef.current) {
+          generatingAiRef.current = true
+          try {
+            const genRes = await fetch('/api/laporan/generate-premium', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ session_id: store.session_id })
+            })
+            const genData = await genRes.json()
+            if (active && genData.laporan_siswa) {
+              setLaporanLengkap(genData.laporan_siswa as MVPDecision)
+              setCheckingLaporan(false)
+              return
+            }
+          } catch (e) {
+            console.error('Generation trigger failed', e)
+          } finally {
+            if (active) generatingAiRef.current = false
+          }
         }
       } catch (err) {
         console.error('Polling error:', err)

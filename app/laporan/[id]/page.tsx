@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useRef } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
@@ -33,6 +33,7 @@ function LaporanContent() {
   
   const [checkingLaporan, setCheckingLaporan] = useState(false)
   const [laporanTimedOut, setLaporanTimedOut] = useState(false)
+  const generatingAiRef = useRef(false)
   
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState('')
@@ -106,6 +107,28 @@ function LaporanContent() {
           setLaporanLengkap(data.laporan_siswa as MVPDecision)
           setCheckingLaporan(false)
           return
+        }
+
+        // Trigger AI Generation if paid but no report
+        if (data?.payment_status === 'paid' && !data.laporan_siswa && !generatingAiRef.current) {
+          generatingAiRef.current = true
+          try {
+            const genRes = await fetch('/api/laporan/generate-premium', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ session_id: sessionId })
+            })
+            const genData = await genRes.json()
+            if (active && genData.laporan_siswa) {
+              setLaporanLengkap(genData.laporan_siswa as MVPDecision)
+              setCheckingLaporan(false)
+              return
+            }
+          } catch (e) {
+            console.error('Generation trigger failed', e)
+          } finally {
+            if (active) generatingAiRef.current = false
+          }
         }
       } catch (err) {
         console.error('Polling error:', err)

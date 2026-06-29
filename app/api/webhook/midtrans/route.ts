@@ -112,39 +112,7 @@ export async function POST(request: NextRequest) {
         .update({ status: 'paid' })
         .eq('id', sessionId)
 
-      // 2. Jalankan AI Generation secara inline (Gemini 2.5 Flash sangat cepat, 1-3 detik, aman dari Vercel 10s timeout)
-      console.log('🚀 Menjalankan AI Generation...')
-      try {
-        const profil = sessionData.profil_data as ProfilData
-        const laporanSiswa = await generateDecisionMVP(profil)
-        await supabase.from('reports').update({ laporan_siswa: laporanSiswa }).eq('session_id', sessionId)
-        console.log('✅ AI Generation sukses.')
-
-        // 3. Kirim Email Laporan
-        const { data: userData } = await supabase.auth.admin.getUserById(sessionData.user_id)
-        if (userData?.user?.email) {
-          const hollandCode = profil.d1_riasec.holland_code
-          const miProfile = profil.d2_mi.mi_profile
-          const wvProfile = profil.d3_workvalues.values_profile
-          
-          await kirimLaporan({
-            toEmail: userData.user.email,
-            laporan: laporanSiswa,
-            laporanOrtu: null,
-            hollandCode,
-            miProfile,
-            wvProfile
-          })
-          console.log('✅ Email terkirim ke', userData.user.email)
-        }
-      } catch (e) {
-        console.error('❌ AI Generation gagal:', e)
-        // Mark AI as failed in JSON so polling UI can detect it
-        const errPayload = { _error: 'ai_generation_failed', message: e instanceof Error ? e.message : 'Unknown' }
-        await supabase.from('reports').update({ laporan_siswa: errPayload }).eq('session_id', sessionId)
-      }
-
-      return NextResponse.json({ status: 'ok', action: 'paid_and_dispatched' })
+      return NextResponse.json({ status: 'ok', action: 'paid_recorded' })
     }
 
     console.log(`Midtrans notification: ${order_id} → ${transaction_status}`)
