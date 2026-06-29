@@ -40,6 +40,7 @@ function HasilContent() {
 
   // TAB STATE
   const [activeTab, setActiveTab] = useState<'awal' | 'lengkap'>('lengkap')
+  const [exploreOpen, setExploreOpen] = useState(false)
 
   // Build profil from store
   const profil = buildProfil({
@@ -231,96 +232,117 @@ function HasilContent() {
       )
     }
 
+    const userName = userEmail ? userEmail.split('@')[0] : 'Sobat'
+
     return (
       <div className="space-y-6 animate-fade-up">
-        {/* VIRAL OUTPUT FORMAT */}
+        {/* 1. RESULT HERO */}
         <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
+          <div className="mb-4">
+            <span className="text-sm font-semibold text-ink-light">Halo, <span className="capitalize">{userName}</span></span>
+          </div>
+          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-2">🎯 Arah Terbaik Kamu:</div>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight mb-4">
+            👉 {freeReport.decision}
+          </h2>
           
-          {/* Decision */}
-          <div className="text-center mb-8 border-b border-surface-200 pb-8">
-            <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">🎯 Arah Terbaik Untukmu</div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight text-balance leading-tight mb-6">
-              {freeReport.decision}
-            </h2>
-            {/* Identity-Shock Hook (Moved to top for immediate impact) */}
-            <div className="bg-gradient-to-br from-brand-50 to-white border border-brand-200/60 rounded-2xl p-6 shadow-sm inline-block w-full text-left">
-              <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></span>
-                Sistem Membaca Polamu
-              </div>
-              <h3 className="text-lg md:text-xl font-bold text-ink italic leading-snug">
-                &ldquo;{freeReport.viral_hook}&rdquo;
-              </h3>
+          <p className="text-base text-ink-light leading-relaxed mb-6 font-medium">
+            &ldquo;{freeReport.explore_layer?.why_this_fits_you || freeReport.reasoning}&rdquo;
+          </p>
+
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-ink-light uppercase tracking-widest">Kejelasan Arah</span>
+              <span className="text-sm font-bold text-ink">72%</span>
+            </div>
+            <div className="h-2 w-full bg-surface-200 rounded-full overflow-hidden">
+              <div className="h-full bg-brand-500 rounded-full w-[72%]"></div>
             </div>
           </div>
-
-          {/* Personality Insight */}
-          <div className="mb-8">
-            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
-              <span className="text-base">🧠</span> PROFIL KEPRIBADIAN:
-            </div>
-            <p className="text-base text-ink-light leading-relaxed">
-              {freeReport.personality_insight}
-            </p>
-          </div>
-
-          {/* Reasoning */}
-          <div className="mb-8">
-            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
-              <span className="text-base">💡</span> KENAPA INI MASUK AKAL:
-            </div>
-            <p className="text-base text-ink-light leading-relaxed">
-              {freeReport.reasoning}
-            </p>
-          </div>
-
-          {/* Career Fit */}
-          <div className="mb-8">
-            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="text-base">🧭</span> 3 JALUR PALING COCOK:
-            </div>
-            <div className="space-y-2">
-              {freeReport.career_fit.map((c, i) => (
-                <div key={i} className="bg-surface-50 border border-surface-200 rounded-xl px-4 py-3 text-sm font-semibold text-ink">
-                  {i + 1}. {c}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Roadmap */}
-          <div className="mb-8">
-            <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
-              <span className="text-base">🚀</span> 6–12 BULAN KE DEPAN:
-            </div>
-            <p className="text-base text-ink-light leading-relaxed">
-              {freeReport.roadmap}
-            </p>
-          </div>
-
-          {/* Risk Statement */}
-          <div className="mb-8">
-            <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2 flex items-center gap-2">
-              <span className="text-base">⚠️</span> RISIKO JIKA SALAH PILIH:
-            </div>
-            <p className="text-sm text-red-800/80 leading-relaxed bg-red-50 p-4 rounded-xl border border-red-100">
-              {freeReport.risk_statement}
-            </p>
-          </div>
-
-          {/* Removed original Viral Hook position */}
         </div>
 
-        {/* VIRAL SHARE BUTTONS */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button onClick={handleShare} className="flex-1 bg-ink text-white rounded-2xl px-6 py-4 text-sm font-bold hover:bg-brand-600 hover:-translate-y-1 hover:shadow-lg transition-all flex items-center justify-center gap-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-            Cocokkah ini dengan asliku? Tanya temanmu.
-          </button>
-          <button onClick={handleShare} className="flex-1 bg-white border-2 border-surface-200 text-ink rounded-2xl px-6 py-4 text-sm font-bold hover:border-ink hover:bg-surface-50 transition-all flex items-center justify-center gap-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Bandingkan dengan teman
-          </button>
+        {/* 2. QUICK INSIGHT STRIP (VIRAL HOOK) */}
+        <div className="bg-brand-50 border-l-4 border-brand-500 rounded-xl p-5 shadow-sm">
+          <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <span className="text-base">💡</span> INSIGHT TENTANG KAMU
+          </div>
+          <h3 className="text-base md:text-lg font-semibold text-ink leading-snug">
+            &ldquo;{freeReport.viral_hook}&rdquo;
+          </h3>
+        </div>
+
+        {/* 3. CAREER PATH CARDS */}
+        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
+          <div className="text-xs font-bold text-ink uppercase tracking-widest mb-4">🧭 JALUR KARIER YANG COCOK</div>
+          <div className="space-y-3">
+            {freeReport.career_fit.map((c, i) => (
+              <div key={i} className="bg-surface-50 border border-surface-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                <span className="text-sm font-semibold text-ink">{c}</span>
+                {i === 0 && <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded">Rekomendasi Utama</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. ROADMAP MINI */}
+        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
+          <div className="text-xs font-bold text-ink uppercase tracking-widest mb-4">🗺 ROADMAP 6-12 BULAN</div>
+          <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 text-sm text-ink-light leading-relaxed whitespace-pre-line">
+            {freeReport.roadmap}
+          </div>
+        </div>
+
+        {/* 5. RISK TRUTH BLOCK */}
+        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-3xl p-6 md:p-8 shadow-sm">
+          <div className="text-xs font-bold text-accent-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span className="text-lg">⚠️</span> RISIKO JIKA TIDAK FOKUS
+          </div>
+          <p className="text-sm md:text-base text-ink-light font-medium leading-relaxed">
+            {freeReport.risk_statement}
+          </p>
+        </div>
+
+        {/* 6. ACTION STRIP & 7. EXPLORE LAYER */}
+        <div className="bg-white border border-surface-200 rounded-3xl p-6 shadow-sm">
+          <div className="flex flex-col gap-3">
+            <button 
+              onClick={() => setExploreOpen(!exploreOpen)}
+              className="w-full bg-surface-50 border border-surface-200 text-ink rounded-xl px-6 py-4 text-sm font-bold hover:bg-surface-100 transition-all flex items-center justify-center gap-2"
+            >
+              ▼ Jelajahi Lebih Dalam {exploreOpen ? '(Tutup)' : ''}
+            </button>
+            <button onClick={handleShare} className="w-full bg-ink text-white rounded-xl px-6 py-4 text-sm font-bold hover:bg-ink-dark transition-all flex items-center justify-center gap-2">
+              Cocokkah ini dengan asliku? Tanya temanmu.
+            </button>
+          </div>
+
+          {exploreOpen && freeReport.explore_layer && (
+            <div className="mt-6 pt-6 border-t border-surface-200 space-y-6 animate-fade-in">
+              <div>
+                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">1. Why This Fits You</div>
+                <p className="text-sm text-ink-light">{freeReport.explore_layer.why_this_fits_you}</p>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">2. Compare Paths</div>
+                <p className="text-sm text-ink-light">{freeReport.explore_layer.compare_paths}</p>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">3. What If Scenario</div>
+                <p className="text-sm text-ink-light">{freeReport.explore_layer.what_if_scenario}</p>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">4. Skill Gap</div>
+                <ul className="space-y-1">
+                  {freeReport.explore_layer.skill_gap.map((skill, idx) => (
+                    <li key={idx} className="text-sm text-ink-light flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-400"></span>
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -435,23 +457,22 @@ function HasilContent() {
             
             {/* PAYWALL UPSELL (Only show when Free Report is loaded) */}
             {!loadingFreeReport && freeReport && (
-              <div className="mt-8 bg-gradient-to-b from-ink to-ink/90 rounded-3xl p-8 shadow-2xl text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-widest">Penting Untuk Masa Depanmu</div>
-                <div className="text-brand-400 text-xs font-bold uppercase tracking-widest mb-2">Asuransi Keputusan Kariermu</div>
-                <h2 className="text-2xl font-bold mb-3">Arahmu sudah benar. Tapi apakah aman?</h2>
-                <p className="text-white/70 text-sm leading-relaxed mb-8 max-w-md">
-                  Arah karier yang tepat bisa hancur tanpa persiapan matang. Buka laporan simulasi AI yang membongkar <strong>titik buta (blind spots)</strong> kamu, probabilitas kegagalan, dan strategi Plan B jika skenario terburuk terjadi.
-                </p>
-
-                <div className="grid gap-3 mb-8">
-                  <div className="flex gap-3 items-start"><span className="text-red-400 mt-0.5 text-xs">⚠️</span><span className="text-sm text-white/90 font-medium">Prediksi 3 skenario kegagalan paling fatal (dengan persentase %)</span></div>
-                  <div className="flex gap-3 items-start"><span className="text-emerald-400 mt-0.5 text-xs">✓</span><span className="text-sm text-white/90 font-medium">Plan B / Jalan Alternatif jika skenario awal hancur</span></div>
-                  <div className="flex gap-3 items-start"><span className="text-emerald-400 mt-0.5 text-xs">✓</span><span className="text-sm text-white/90 font-medium">Proyeksi rentang gaji riil (Rp) di Indonesia</span></div>
+              <div className="mt-8 bg-ink rounded-3xl p-6 md:p-8 shadow-float text-white relative overflow-hidden border border-white/10">
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
+                <div className="text-brand-400 text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <span className="text-base">🔒</span> PREMIUM INSIGHT
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold mb-3">Lihat simulasi hidup kamu 3–5 tahun ke depan</h2>
+                
+                <div className="grid gap-3 mb-8 mt-6">
+                  <div className="flex gap-3 items-center"><span className="text-brand-400 text-sm">→</span><span className="text-sm font-medium">Income projection (Rentang Gaji)</span></div>
+                  <div className="flex gap-3 items-center"><span className="text-brand-400 text-sm">→</span><span className="text-sm font-medium">Career trajectory (Roadmap Lengkap)</span></div>
+                  <div className="flex gap-3 items-center"><span className="text-brand-400 text-sm">→</span><span className="text-sm font-medium">Risk modeling (Probabilitas Kegagalan & Plan B)</span></div>
                 </div>
 
-                <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm border border-white/20 text-center">
+                <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
                   <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
-                  <div className="text-xs text-brand-100 mb-5">Bayar 1x · Kepastian selamanya</div>
+                  <div className="text-xs text-white/40 mb-5">Bayar 1x · Kepastian selamanya</div>
                   
                   <button
                     onClick={handleBayar}

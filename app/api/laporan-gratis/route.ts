@@ -18,9 +18,19 @@ const freeReportSchemaGenAI: Schema = {
     career_fit: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Realistic Indonesian context, exactly 3 items" },
     roadmap: { type: Type.STRING, description: "Practical steps for the next 6-12 months" },
     risk_statement: { type: Type.STRING, description: "Honest but not scary risk if wrong decision is taken" },
-    viral_hook: { type: Type.STRING, description: "One sentence that feels like 'wow this is me'" }
+    viral_hook: { type: Type.STRING, description: "One sentence that feels like 'wow this is me'" },
+    explore_layer: {
+      type: Type.OBJECT,
+      properties: {
+        why_this_fits_you: { type: Type.STRING, description: "Short, sharp explanation of why this decision fits them based on their personality" },
+        compare_paths: { type: Type.STRING, description: "Compare 3 career paths: stability, growth speed, etc" },
+        what_if_scenario: { type: Type.STRING, description: "If you choose X, this happens. If you choose Y, that happens" },
+        skill_gap: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 skills they need to build immediately" }
+      },
+      required: ["why_this_fits_you", "compare_paths", "what_if_scenario", "skill_gap"]
+    }
   },
-  required: ["decision", "personality_insight", "reasoning", "career_fit", "roadmap", "risk_statement", "viral_hook"]
+  required: ["decision", "personality_insight", "reasoning", "career_fit", "roadmap", "risk_statement", "viral_hook", "explore_layer"]
 }
 
 export async function POST(req: Request) {
@@ -91,6 +101,12 @@ Generate the output based on the provided schema.
 11. 6-12 MONTH ROADMAP -> practical steps
 12. RISK STATEMENT -> what happens if wrong decision is taken
 13. VIRAL INSIGHT HOOK -> Tulis 1 kalimat mutlak yang membongkar sifat asli siswa secara psikologis. Gunakan pola kontradiksi: "[Sifat yang terlihat di luar], tapi sebenarnya [Kebenaran yang disembunyikan/Kekuatan uniknya]". Kalimat ini harus memicu reaksi "Sial, kok AI ini tahu banget gue kayak gini?!".
+14. EXPLORE LAYER -> 4 items:
+    - why_this_fits_you: explanation of why this decision fits their learning style and personality
+    - compare_paths: Compare the 3 paths you gave in CAREER FIT
+    - what_if_scenario: What if they pick College vs Work vs Hybrid (based on their context)
+    - skill_gap: array of exactly 3 missing skills they must build
+
 
 OUTPUT STYLE (MANDATORY):
 - Indonesian Mentor Mode

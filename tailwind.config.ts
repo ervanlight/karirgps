@@ -9,31 +9,32 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          200: '#C7D2FE',
-          300: '#A5B4FC',
-          400: '#818CF8',
-          500: '#6366F1', // Playful Indigo
-          600: '#4F46E5', // Elegant Deep Indigo
-          700: '#4338CA',
-          800: '#3730A3',
-          900: '#312E81',
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#5B6CFF', // Soft Indigo
+          500: '#2F6BFF', // Deep Blue
+          600: '#2563EB',
+          700: '#1D4ED8',
+          800: '#1E40AF',
+          900: '#1E3A8A',
         },
         accent: {
-          500: '#F59E0B', // Playful Amber/Orange
+          500: '#F59E0B', // Accent Warning
           600: '#D97706',
+          success: '#22C55E', // Accent Success
         },
         surface: {
-          50: '#F9FAFB',
-          100: '#F3F4F6',
-          200: '#E5E7EB',
-          300: '#D1D5DB',
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0', // Border
+          300: '#CBD5E1',
         },
         ink: {
-          light: '#6B7280',
-          DEFAULT: '#1F2937',
-          dark: '#111827',
+          light: '#64748B', // Text Secondary
+          DEFAULT: '#0F172A', // Text Primary
+          dark: '#020617',
         }
       },
       fontFamily: {

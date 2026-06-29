@@ -32,6 +32,13 @@ export const MVPDecisionSchema = z.object({
 
 export type MVPDecisionParsed = z.infer<typeof MVPDecisionSchema>
 
+export const ExploreLayerSchema = z.object({
+  why_this_fits_you: z.string(),
+  compare_paths: z.string(),
+  what_if_scenario: z.string(),
+  skill_gap: z.array(z.string()),
+})
+
 export const FreeReportSchema = z.object({
   decision: z.string(),
   personality_insight: z.string(),
@@ -40,6 +47,7 @@ export const FreeReportSchema = z.object({
   roadmap: z.string(),
   risk_statement: z.string(),
   viral_hook: z.string(),
+  explore_layer: ExploreLayerSchema,
 })
 
 export type FreeReportParsed = z.infer<typeof FreeReportSchema>

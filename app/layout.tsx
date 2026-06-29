@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://karirgps.id'),
@@ -26,8 +29,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body style={{ margin: 0, padding: 0 }}>
+    <html lang="id" className={`${inter.variable}`}>
+      <body style={{ margin: 0, padding: 0 }} className="font-sans">
         {children}
       </body>
     </html>
