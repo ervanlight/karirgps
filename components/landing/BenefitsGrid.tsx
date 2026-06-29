@@ -72,16 +72,17 @@ export default function BenefitsGrid() {
           </div>
 
           {/* Card 5 (Premium Focus) */}
-          <div className="bg-slate-900 text-white p-6 md:p-8 rounded-2xl border border-slate-800 shadow-md md:col-span-2 xl:col-span-3 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-brand-500/20 blur-[60px] rounded-full pointer-events-none"></div>
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-6 md:p-8 rounded-2xl border border-indigo-500/30 shadow-xl shadow-indigo-900/10 md:col-span-2 xl:col-span-3 relative overflow-hidden group hover:border-indigo-500/50 transition-colors duration-500">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-500/30 blur-[60px] rounded-full pointer-events-none group-hover:bg-brand-500/40 transition-colors duration-700"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/20 blur-[60px] rounded-full pointer-events-none"></div>
             <div className="relative z-10 flex flex-col h-full justify-center">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-slate-800 border border-slate-700 text-brand-300 rounded-xl flex items-center justify-center shrink-0">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-brand-300 rounded-xl flex items-center justify-center shrink-0 shadow-inner">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <h3 className="font-bold text-white">Roadmap 6–12 Bulan</h3>
+                <h3 className="font-bold text-white text-lg tracking-wide">Roadmap 6–12 Bulan</h3>
               </div>
-              <p className="text-slate-300 text-sm leading-[1.7] max-w-lg">
+              <p className="text-slate-300 text-sm leading-[1.8] max-w-lg">
                 Panduan aksi per bulan yang konkrit. Kamu akan tahu harus fokus belajar apa bulan ini, dan persiapan apa untuk bulan berikutnya.
               </p>
             </div>
