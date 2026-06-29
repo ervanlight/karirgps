@@ -162,7 +162,7 @@ function HasilContent() {
 
       // @ts-expect-error Midtrans Snap global
       window.snap?.pay(data.token, {
-        onSuccess: () => { window.location.href = `/laporan/${store.session_id}?status=paid` },
+        onSuccess: () => { router.push('/hasil?status=paid', { scroll: false }) },
         onPending: () => {
           setPaying(false)
           setPayStep('')
