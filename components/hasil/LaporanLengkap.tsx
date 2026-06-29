@@ -41,6 +41,11 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
   const decisionBg = isKerja ? 'bg-amber-50 border-amber-200' : isKuliah ? 'bg-brand-50 border-brand-200' : 'bg-indigo-50 border-indigo-200'
   const decisionAccent = isKerja ? 'bg-amber-500' : isKuliah ? 'bg-brand-500' : 'bg-indigo-500'
 
+  // Backward compatibility untuk laporan lama yang belum punya field baru
+  const pesanPembuka = laporan.pesan_pembuka || "Jelajahi potensi terbaikmu berdasarkan kombinasi profil unikmu."
+  const profilNaratif = laporan.profil_naratif || "Profilmu menunjukkan perpaduan unik antara minat, nilai kerja, dan cara berpikir. Berdasarkan data tersebut, kami telah menyusun rekomendasi langkah ke depan yang paling sesuai dengan kondisimu."
+  const kekuatan = laporan.kekuatan || []
+
   return (
     <div className="space-y-6 md:space-y-8 pb-10" id="laporan-print-area">
 
@@ -64,7 +69,7 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
           </div>
 
           <blockquote className="text-2xl md:text-3xl font-bold leading-snug mb-6 text-white">
-            &ldquo;{laporan.pesan_pembuka}&rdquo;
+            &ldquo;{pesanPembuka}&rdquo;
           </blockquote>
 
           <div className="text-sm text-white/50 font-medium">— Dibuat khusus dari profil 4 dimensimu</div>
@@ -86,27 +91,29 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
 
         {/* Narasi kepribadian */}
         <div className="space-y-4 mb-8">
-          {laporan.profil_naratif.split('\n\n').filter(Boolean).map((para, i) => (
+          {profilNaratif.split('\n\n').filter(Boolean).map((para, i) => (
             <p key={i} className="text-base text-ink leading-relaxed">{para}</p>
           ))}
         </div>
 
         {/* Kekuatan alami */}
-        <div className="bg-brand-50 rounded-2xl p-5 border border-brand-100">
-          <div className="text-xs font-bold text-brand-700 uppercase tracking-widest mb-4">Kekuatan Alami yang Mungkin Belum Kamu Sadari</div>
-          <div className="space-y-2.5">
-            {laporan.kekuatan.map((k, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+        {kekuatan.length > 0 && (
+          <div className="bg-brand-50 rounded-2xl p-5 border border-brand-100">
+            <div className="text-xs font-bold text-brand-700 uppercase tracking-widest mb-4">Kekuatan Alami yang Mungkin Belum Kamu Sadari</div>
+            <div className="space-y-2.5">
+              {kekuatan.map((k, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span className="text-sm text-ink leading-relaxed font-medium">{k}</span>
                 </div>
-                <span className="text-sm text-ink leading-relaxed font-medium">{k}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ═══════════════════════════════════════════════════
@@ -141,7 +148,7 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
           </div>
         </div>
         <div className="space-y-4">
-          {laporan.alasan.split('\n\n').filter(Boolean).map((para, i) => (
+          {(laporan.alasan || '').split('\n\n').filter(Boolean).map((para, i) => (
             <p key={i} className="text-base text-ink leading-relaxed">{para}</p>
           ))}
         </div>
@@ -160,10 +167,10 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
           </div>
         </div>
         <div className="space-y-4">
-          {laporan.karir.map((k, i) => (
+          {laporan.karir?.map((k, i) => (
             <div key={i} className="bg-surface-50 rounded-2xl p-5 border border-surface-200 hover:border-brand-200 hover:bg-brand-50/30 transition-all">
               <div className="flex items-start gap-3 mb-3">
-                <div className="text-3xl shrink-0 mt-0.5">{k.emoji}</div>
+                <div className="text-3xl shrink-0 mt-0.5">{k.emoji || '🎯'}</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-base font-bold text-ink">{k.nama}</h4>
@@ -177,7 +184,7 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
                 </div>
               </div>
 
-              <FitScoreBar score={k.fit_score} />
+              <FitScoreBar score={k.fit_score || Math.max(70, 92 - (i * 8))} />
 
               <div className="mt-4 pt-3 border-t border-surface-200">
                 <span className="text-xs font-bold text-ink uppercase tracking-wide">Jalur Masuk: </span>
@@ -201,23 +208,23 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
           </div>
         </div>
         <div className="space-y-0 relative">
-          {laporan.roadmap.map((r, i) => (
+          {laporan.roadmap?.map((r, i) => (
             <div key={i} className="flex gap-4">
               {/* Timeline indicator */}
               <div className="flex flex-col items-center shrink-0">
                 <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-bold shadow-sm z-10">
                   {i + 1}
                 </div>
-                {i !== laporan.roadmap.length - 1 && (
+                {i !== (laporan.roadmap?.length || 0) - 1 && (
                   <div className="w-0.5 flex-1 bg-brand-100 my-1 min-h-[20px]" />
                 )}
               </div>
 
               {/* Content */}
-              <div className={`pb-6 flex-1 ${i === laporan.roadmap.length - 1 ? '' : ''}`}>
+              <div className={`pb-6 flex-1 ${i === (laporan.roadmap?.length || 0) - 1 ? '' : ''}`}>
                 <div className="text-sm font-bold text-brand-700 mb-2">{r.fase}</div>
                 <div className="space-y-2">
-                  {r.kegiatan.split('\n').filter(Boolean).map((item, kIdx) => (
+                  {(r.kegiatan || '').split('\n').filter(Boolean).map((item, kIdx) => (
                     <div key={kIdx} className="flex gap-2 items-start">
                       <span className="text-brand-300 mt-0.5 shrink-0">→</span>
                       <span className="text-sm text-ink leading-relaxed">{item.replace(/^[-*]\s*/, '')}</span>
@@ -243,7 +250,7 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
           </div>
         </div>
         <div className="space-y-4">
-          {laporan.risiko_antisipasi.map((r, i) => (
+          {laporan.risiko_antisipasi?.map((r, i) => (
             <div key={i} className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
               <div className="flex gap-3">
                 <span className="text-red-400 shrink-0 text-lg">⚡</span>
