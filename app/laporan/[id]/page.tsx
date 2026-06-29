@@ -1,6 +1,6 @@
 'use client'
 import { Suspense, useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
@@ -20,6 +20,7 @@ export default function LaporanPage() {
 
 function LaporanContent() {
   const params = useParams()
+  const router = useRouter()
   const sessionId = params.id as string
   const searchParams = useSearchParams()
   const paymentStatus = searchParams.get('status')
@@ -81,7 +82,7 @@ function LaporanContent() {
   }, [sessionId])
 
   useEffect(() => {
-    if (status !== 'ready' || !paymentPaid || laporanLengkap) return
+    if (status !== 'ready' || (!paymentPaid && paymentStatus !== 'paid') || laporanLengkap) return
     let active = true
     let attempts = 0
     const maxAttempts = 70
@@ -133,7 +134,7 @@ function LaporanContent() {
       }
       // @ts-expect-error Midtrans Snap global
       window.snap?.pay(data.token, {
-        onSuccess: () => { window.location.href = `/laporan/${sessionId}?status=paid` },
+        onSuccess: () => { router.push(`/laporan/${sessionId}?status=paid`, { scroll: false }) },
         onPending: () => {
           setPaying(false)
           setPayStep('')
