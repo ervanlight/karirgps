@@ -9,9 +9,13 @@ import { STYLE_GUIDE } from '@/lib/knowledge/style-guide'
 
 export const maxDuration = 60
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!
-})
+// Gunakan API Key jamak jika ada (dipisah koma) untuk mengelabui rate limit, atau fallback ke 1 key
+const apiKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean)
+
+function getAvailableAiClient() {
+  const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)]
+  return new GoogleGenAI({ apiKey: randomKey })
+}
 
 function getFreePrompt(): string {
   return freeReportPrompt
@@ -100,6 +104,7 @@ ${STYLE_GUIDE}
 - Analisis Konteks: ${anxiety.contextDescription}
 `;
 
+    const ai = getAvailableAiClient()
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-pro',
       contents: promptText,
@@ -131,8 +136,13 @@ ${STYLE_GUIDE}
       .eq('id', session_id)
 
     return NextResponse.json({ report: reportData })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Laporan Gratis Error:', error)
-    return NextResponse.json({ error: 'Gagal memproses laporan gratis' }, { status: 500 })
+    if (error?.status === 429 || error?.message?.includes('Quota exceeded') || error?.message?.includes('429')) {
+      return NextResponse.json({ 
+        error: 'Trafik AI sedang penuh (Limit Google tercapai). Harap tunggu sekitar 1 menit, lalu klik Coba Lagi.' 
+      }, { status: 429 })
+    }
+    return NextResponse.json({ error: 'Gagal memproses laporan gratis. Coba beberapa saat lagi.' }, { status: 500 })
   }
 }

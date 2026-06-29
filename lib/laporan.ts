@@ -8,7 +8,12 @@ import { premiumReportV3Prompt } from '@/lib/prompts/premium-report-v3'
 import { parentReportPrompt } from '@/lib/prompts/parent-report'
 import type { ProfilData, PremiumReportV3, ParentReport } from '@/types'
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
+const apiKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean)
+
+function getAvailableAiClient() {
+  const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)]
+  return new GoogleGenAI({ apiKey: randomKey })
+}
 
 function getPremiumPrompt(): string {
   return premiumReportV3Prompt
@@ -76,6 +81,7 @@ ${groundingContext}
 `
 
   try {
+    const ai = getAvailableAiClient()
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-pro',
       contents: promptText,
@@ -120,8 +126,9 @@ ${JSON.stringify(laporanSiswa, null, 2)}
 `
 
   try {
+    const ai = getAvailableAiClient()
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: promptText,
       config: {
         systemInstruction: getParentPrompt(),
