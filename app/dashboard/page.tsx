@@ -140,26 +140,19 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-surface-50 text-ink font-sans selection:bg-brand-500 selection:text-white">
       
-      {/* Premium Gradient Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-brand-600 to-indigo-900 pointer-events-none -z-10 overflow-hidden">
-        {/* Glow effects */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[150%] bg-white/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute bottom-[-50%] right-[-10%] w-[60%] h-[150%] bg-brand-400/20 rounded-full blur-[80px] pointer-events-none"></div>
-      </div>
-
-      {/* Navbar Transparan */}
-      <nav className="sticky top-0 z-50 glass border-b border-white/10">
+      {/* Navbar Minimalis */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="white">
                 <path d="M7 1 L11 5 L9 5 L9 13 L5 13 L5 5 L3 5 Z"/>
               </svg>
             </div>
-            <span className="text-lg font-bold tracking-tight text-white drop-shadow-sm">KarirGPS</span>
+            <span className="text-lg font-bold tracking-tight text-ink">KarirGPS</span>
           </Link>
           <div className="flex items-center gap-4">
-            <button onClick={handleLogout} className="text-sm font-medium text-white/80 hover:text-white transition-colors">
+            <button onClick={handleLogout} className="text-sm font-medium text-ink-light hover:text-ink transition-colors">
               Keluar
             </button>
           </div>
@@ -174,15 +167,15 @@ export default function DashboardPage() {
           ========================================= */}
           <div className="lg:col-span-4 space-y-6">
             
-            {/* Profil Card - Glassmorphism style menempel di atas background gelap */}
-            <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-8 text-center text-white mt-0 lg:-mt-6">
-              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-brand-300 to-white flex items-center justify-center text-4xl font-black text-brand-700 shadow-inner mb-5 ring-4 ring-white/20">
+            {/* Profil Card - Calm Intelligence style */}
+            <div className="bg-white border border-surface-200 shadow-sm rounded-3xl p-8 text-center text-ink mt-0">
+              <div className="w-24 h-24 mx-auto rounded-full bg-brand-50 flex items-center justify-center text-4xl font-black text-brand-600 mb-5">
                 {initial}
               </div>
               <h1 className="text-2xl font-bold tracking-tight mb-1">{nama || 'Penjelajah'}</h1>
-              <p className="text-white/70 text-sm mb-6">{email}</p>
+              <p className="text-ink-light text-sm mb-6">{email}</p>
               
-              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="block w-full bg-white text-brand-700 rounded-2xl px-6 py-3.5 text-sm font-bold hover:bg-brand-50 hover:shadow-lg transition-all duration-300 active:scale-95">
+              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="block w-full bg-ink text-white rounded-xl px-6 py-3.5 text-sm font-bold hover:bg-brand-600 hover:shadow-lg transition-all duration-300">
                 + Mulai Analisis Baru
               </Link>
             </div>
