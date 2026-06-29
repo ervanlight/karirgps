@@ -24,7 +24,7 @@ export default function PremiumReportV3Renderer({ laporan }: { laporan: PremiumR
 
           <div className="bg-black/20 p-5 rounded-2xl border border-white/10">
             <p className="text-sm text-brand-50 leading-relaxed italic">
-              "{laporan.pembuka}"
+              &quot;{laporan.pembuka}&quot;
             </p>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function PremiumReportV3Renderer({ laporan }: { laporan: PremiumR
         </div>
         <div className="w-12 h-1 bg-brand-200 mx-auto rounded-full mb-6"></div>
         <p className="text-sm font-medium text-ink-light italic max-w-xl mx-auto">
-          "{laporan.penutup}"
+          &quot;{laporan.penutup}&quot;
         </p>
       </div>
 

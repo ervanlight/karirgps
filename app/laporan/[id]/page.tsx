@@ -150,7 +150,7 @@ function LaporanContent() {
     }
     checkLaporan()
     return () => { active = false }
-  }, [status, paymentPaid, laporanLengkap, sessionId])
+  }, [status, paymentPaid, laporanLengkap, sessionId, paymentStatus])
 
   function handleDownloadPdf() {
     window.print()

@@ -127,7 +127,7 @@ export default function PremiumReportV1Renderer({ laporan, userName = 'Penjelaja
           <div className="bg-brand-50/50 border-l-4 border-brand-500 p-6 rounded-r-xl">
             <div className="text-[10px] font-bold text-brand-700 uppercase tracking-widest mb-2">Core Truth</div>
             <p className="text-[15px] font-medium leading-relaxed text-ink">
-              "{executive_summary.truth_statement}"
+              &quot;{executive_summary.truth_statement}&quot;
             </p>
           </div>
         </div>
@@ -306,7 +306,7 @@ export default function PremiumReportV1Renderer({ laporan, userName = 'Penjelaja
           </h2>
           
           <p className="text-[18px] md:text-[20px] font-bold leading-[1.6] text-ink p-8 bg-surface-50 border border-surface-200 rounded-2xl">
-            "{final_diagnosis}"
+            &quot;{final_diagnosis}&quot;
           </p>
         </div>
 

@@ -11,7 +11,7 @@ export default function SkalaItem({ id, pernyataan, nilai, onSelect }: SkalaItem
   return (
     <div className="bg-white border border-surface-200 rounded-2xl p-6 md:p-8 mb-6 shadow-sm hover:shadow-soft transition-shadow">
       <div className="text-base md:text-lg text-ink font-medium leading-relaxed mb-6 text-center text-balance">
-        "{pernyataan}"
+        &quot;{pernyataan}&quot;
       </div>
       
       <div className="flex justify-between text-xs font-semibold text-ink-light uppercase tracking-wider mb-3">

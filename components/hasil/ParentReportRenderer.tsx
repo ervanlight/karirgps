@@ -100,7 +100,7 @@ export default function ParentReportRenderer({ laporan }: { laporan: ParentRepor
         <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 text-6xl opacity-10">✨</div>
         <h3 className="text-sm font-bold text-amber-800 uppercase tracking-widest mb-4">Satu Hal Terpenting</h3>
         <p className="text-base md:text-lg font-medium text-amber-900 leading-relaxed max-w-2xl mx-auto italic">
-          "{laporan.hal_terpenting}"
+          &quot;{laporan.hal_terpenting}&quot;
         </p>
       </div>
 
