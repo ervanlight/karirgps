@@ -12,7 +12,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))
-  if (!isProtected) return NextResponse.next()
+  const isAuthPage = ['/auth/login', '/auth/register'].some((p) => pathname.startsWith(p))
+
+  if (!isProtected && !isAuthPage) return NextResponse.next()
 
   let response = NextResponse.next({ request })
 
@@ -35,10 +37,17 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/register'
     url.searchParams.set('next', pathname)
+    return NextResponse.redirect(url)
+  }
+
+  // Jika user sudah login dan mencoba ke halaman login/register, arahkan ke dashboard
+  if (isAuthPage && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
@@ -46,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/tes/:path*', '/hasil/:path*', '/laporan/:path*', '/dashboard/:path*'],
+  matcher: ['/tes/:path*', '/hasil/:path*', '/laporan/:path*', '/dashboard/:path*', '/auth/:path*'],
 }
