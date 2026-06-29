@@ -45,38 +45,71 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* 1. HERO SECTION */}
-      <main className="pt-48 pb-32 px-6 max-w-4xl mx-auto relative z-10 text-center">
-        <div className="animate-fade-up">
-          {/* Sub-headline / Eyebrow */}
-          <div className="inline-flex items-center gap-2 bg-brand-50 text-brand-700 rounded-full px-5 py-2 text-sm font-bold mb-10 border border-brand-100 shadow-sm tracking-wide">
-            <span className="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse"></span>
-            Bingung Setelah Lulus SMA/SMK?
-          </div>
+      {/* 1. VISUAL HERO SECTION */}
+      <main className="pt-40 pb-32 px-6 max-w-6xl mx-auto relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="animate-fade-up">
+            <div className="inline-flex items-center gap-2 bg-brand-50 text-brand-700 rounded-full px-5 py-2 text-xs font-bold mb-8 border border-brand-100 shadow-sm tracking-widest uppercase">
+              <span className="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse"></span>
+              Lebih Dari Sekadar Tes Psikologi
+            </div>
 
-          {/* Main Headline (H1) */}
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-8 leading-[1.2] text-balance">
-            Temukan Arah Karier yang <span className="text-brand-600">Paling Masuk Akal</span> Buat Kamu.
-          </h1>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-ink mb-6 leading-[1.1]">
+              Pilih arah karier dengan <span className="text-brand-600">data, bukan asumsi.</span>
+            </h1>
 
-          {/* Body Text (P) */}
-          <p className="text-base md:text-lg text-ink-light mb-14 max-w-2xl mx-auto leading-[1.8] text-balance">
-            KarirGPS membantu kamu memilih jalur yang paling cocok — kuliah, kerja, atau jalur hybrid — berdasarkan minat, kekuatan, kondisi, dan tujuanmu. Bukan sekadar tes kepribadian generik, melainkan analisis untuk mengambil keputusan nyata.
-          </p>
+            <p className="text-base md:text-lg text-ink-light mb-10 leading-[1.8] max-w-lg">
+              Sistem inteligensi karier yang memproses minat, kondisi, dan tujuanmu untuk menghasilkan satu keputusan paling rasional: Kuliah, Kerja, atau Hybrid.
+            </p>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-5 items-center justify-center w-full sm:w-auto mb-8">
-            <Link href="/auth/register" className="w-full sm:w-auto bg-brand-600 text-white rounded-full px-10 py-4 text-base font-bold hover:bg-brand-700 hover:-translate-y-1 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(29,158,117,0.6)]">
-              Mulai Analisis Gratis
-            </Link>
-            <a href="#output-preview" className="w-full sm:w-auto bg-white border-2 border-surface-200 text-ink rounded-full px-10 py-4 text-base font-bold hover:bg-surface-50 hover:border-surface-300 transition-all duration-300">
-              Lihat Contoh Hasil
-            </a>
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto mb-6">
+              <Link href="/auth/register" className="w-full sm:w-auto bg-ink text-white rounded-full px-10 py-4 text-sm font-bold hover:bg-brand-600 hover:-translate-y-1 transition-all duration-300 shadow-float">
+                Mulai Analisis Gratis
+              </Link>
+            </div>
           </div>
           
-          <p className="text-sm font-medium text-ink-light/80">
-            Gratis untuk mulai. Bayar sekali saja jika ingin buka laporan lengkap. Tanpa langganan.
-          </p>
+          <div className="relative animate-fade-in hidden md:block">
+            {/* Visual Mockup Background Glow */}
+            <div className="absolute inset-0 bg-brand-500/20 blur-[100px] rounded-full scale-75 pointer-events-none"></div>
+            
+            {/* Mockup Card */}
+            <div className="relative bg-white border border-surface-200 rounded-[2rem] shadow-float p-8 transform rotate-2 hover:rotate-0 transition-transform duration-500 overflow-hidden group">
+              {/* Dynamic Header mimicking UI */}
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-surface-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-surface-50 border border-surface-200 flex items-center justify-center text-sm font-bold">ER</div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-widest font-bold text-ink-light">Klien</div>
+                    <div className="text-sm font-bold text-ink">Ervanna</div>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] uppercase font-bold tracking-widest rounded-full border border-emerald-100">Selesai</div>
+              </div>
+
+              {/* The "Decision" Block */}
+              <div className="bg-brand-600 rounded-3xl p-8 text-white shadow-inner relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-400/50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-3">Arah Utama Keputusan</div>
+                <div className="text-3xl font-extrabold mb-2 leading-tight">Hybrid (Kerja + Kuliah Online)</div>
+                <div className="text-sm text-white/90 leading-relaxed">Paling rasional berdasarkan kondisi finansial dan skor adaptabilitasmu yang tinggi.</div>
+              </div>
+
+              {/* Mini Stats Grid */}
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="p-4 rounded-2xl bg-surface-50 border border-surface-100">
+                  <div className="text-[10px] uppercase font-bold text-ink-light mb-1">Kejelasan Arah</div>
+                  <div className="text-lg font-bold text-ink">84%</div>
+                  <div className="w-full h-1 bg-surface-200 rounded-full mt-2"><div className="w-[84%] h-full bg-brand-500 rounded-full"></div></div>
+                </div>
+                <div className="p-4 rounded-2xl bg-surface-50 border border-surface-100">
+                  <div className="text-[10px] uppercase font-bold text-ink-light mb-1">Rekomendasi Utama</div>
+                  <div className="text-sm font-bold text-ink truncate">Tech Ops</div>
+                  <div className="text-xs text-ink-light mt-1">Gaji Entry: ~6jt</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 

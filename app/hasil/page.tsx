@@ -10,6 +10,12 @@ import LaporanLengkap from '@/components/hasil/LaporanLengkap'
 import type { MVPDecision } from '@/types'
 import type { FreeReportParsed } from '@/lib/schemas'
 
+// New Visual Components
+import DecisionCard from '@/components/hasil/DecisionCard'
+import InsightCard from '@/components/hasil/InsightCard'
+import CareerGrid from '@/components/hasil/CareerGrid'
+import RiskCard from '@/components/hasil/RiskCard'
+
 export default function HasilPage() {
   return (
     <Suspense fallback={null}>
@@ -235,102 +241,85 @@ function HasilContent() {
     const userName = userEmail ? userEmail.split('@')[0] : 'Sobat'
 
     return (
-      <div className="space-y-6 animate-fade-up">
-        {/* 1. IDENTITY MIRROR */}
-        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm text-center">
-          <div className="mb-4">
-            <span className="text-sm font-semibold text-ink-light">Halo, <span className="capitalize">{userName}</span></span>
-          </div>
-          <div className="text-base text-ink-light leading-relaxed mb-6 font-medium">
-            {freeReport.identity_mirror}
-          </div>
-        </div>
+      <div className="space-y-8 animate-fade-up">
+        {/* 1. RESULT HERO (CAREER DIRECTION) */}
+        <DecisionCard 
+          title="Arah Karier Terbaik" 
+          recommendation={freeReport.career_direction} 
+          subtitle={freeReport.direction_reasoning} 
+        />
 
-        {/* 2. RESULT HERO (CAREER DIRECTION) */}
-        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
-          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-2">🎯 Arah Terbaik Kamu:</div>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight mb-4">
-            👉 {freeReport.career_direction}
-          </h2>
-          
-          <p className="text-base text-ink-light leading-relaxed mb-6 font-medium">
-            &ldquo;{freeReport.direction_reasoning}&rdquo;
-          </p>
+        {/* 2. IDENTITY MIRROR */}
+        <InsightCard 
+          title={`Halo, ${userName.charAt(0).toUpperCase() + userName.slice(1)}`} 
+          content={freeReport.identity_mirror} 
+        />
 
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-ink-light uppercase tracking-widest">Kejelasan Arah</span>
-              <span className="text-sm font-bold text-ink">72%</span>
-            </div>
-            <div className="h-2 w-full bg-surface-200 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-500 rounded-full w-[72%]"></div>
-            </div>
+        {/* 3. QUICK INSIGHT */}
+        <div className="bg-brand-50 border-l-4 border-brand-500 rounded-2xl p-6 shadow-sm">
+          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span className="text-lg">💡</span> INSIGHT TENTANG KAMU
           </div>
-        </div>
-
-        {/* 3. QUICK INSIGHT STRIP (VIRAL HOOK) */}
-        <div className="bg-brand-50 border-l-4 border-brand-500 rounded-xl p-5 shadow-sm">
-          <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-2">
-            <span className="text-base">💡</span> INSIGHT TENTANG KAMU
-          </div>
-          <h3 className="text-base md:text-lg font-semibold text-ink leading-snug">
+          <h3 className="text-lg font-bold text-ink leading-snug">
             &ldquo;{freeReport.insight_moment}&rdquo;
           </h3>
         </div>
 
         {/* 4. CAREER PATH CARDS */}
-        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
-          <div className="text-xs font-bold text-ink uppercase tracking-widest mb-4">🧭 JALUR KARIER YANG COCOK</div>
-          <div className="space-y-3">
-            {freeReport.career_options.map((c, i) => (
-              <div key={i} className="bg-surface-50 border border-surface-200 rounded-xl p-4 flex items-center justify-between gap-4">
-                <span className="text-sm font-semibold text-ink">{c}</span>
-                {i === 0 && <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded">Rekomendasi Utama</span>}
+        <CareerGrid 
+          title="Jalur Karier Yang Cocok" 
+          paths={freeReport.career_options.map(c => ({ name: c, description: '' }))} 
+        />
+
+        {/* 5. RISK TRUTH BLOCK */}
+        <RiskCard 
+          title="Risiko Jika Tidak Fokus" 
+          content={freeReport.key_risk} 
+        />
+
+        {/* 6. FAKE LOCKED PREMIUM SECTION (Teaser) */}
+        <div className="relative mt-12 rounded-3xl overflow-hidden border border-surface-200 bg-white">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNFMkU4RjAiLz48L3N2Zz4=')] opacity-50 z-0"></div>
+          
+          {/* Fake content behind blur */}
+          <div className="p-8 md:p-12 opacity-30 select-none pointer-events-none blur-[4px]">
+            <div className="w-1/3 h-4 bg-surface-300 rounded mb-6"></div>
+            <div className="w-full h-32 bg-surface-200 rounded-xl mb-4"></div>
+            <div className="w-2/3 h-16 bg-surface-200 rounded-xl"></div>
+          </div>
+
+          {/* Premium Lock Overlay */}
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 bg-white/40 backdrop-blur-md">
+            <div className="max-w-md w-full bg-white border border-surface-200 rounded-3xl p-8 md:p-10 shadow-float text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-brand-100">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 5. ROADMAP MINI */}
-        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
-          <div className="text-xs font-bold text-ink uppercase tracking-widest mb-4">🗺 ROADMAP 6-12 BULAN</div>
-          <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 text-sm text-ink-light leading-relaxed whitespace-pre-line">
-            {freeReport.roadmap}
-          </div>
-        </div>
-
-        {/* 6. RISK TRUTH BLOCK */}
-        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-3xl p-6 md:p-8 shadow-sm">
-          <div className="text-xs font-bold text-accent-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <span className="text-lg">⚠️</span> RISIKO JIKA TIDAK FOKUS
-          </div>
-          <p className="text-sm md:text-base text-ink-light font-medium leading-relaxed">
-            {freeReport.key_risk}
-          </p>
-        </div>
-
-        {/* 7. PREMIUM CURIOUS GAP & ACTION STRIP */}
-        <div className="bg-white border border-surface-200 rounded-3xl p-6 shadow-sm">
-          <div className="flex flex-col gap-3">
-            <button 
-              onClick={() => setExploreOpen(!exploreOpen)}
-              className="w-full bg-surface-50 border border-surface-200 text-ink rounded-xl px-6 py-4 text-sm font-bold hover:bg-surface-100 transition-all flex items-center justify-center gap-2"
-            >
-              ▼ Analisis Lebih Dalam {exploreOpen ? '(Tutup)' : ''}
-            </button>
-            <button onClick={handleShare} className="w-full bg-ink text-white rounded-xl px-6 py-4 text-sm font-bold hover:bg-ink-dark transition-all flex items-center justify-center gap-2">
-              Cocokkah ini dengan asliku? Tanya temanmu.
-            </button>
-          </div>
-
-          {exploreOpen && (
-            <div className="mt-6 pt-6 border-t border-surface-200 space-y-6 animate-fade-in">
-              <div>
-                <p className="text-sm text-ink-light leading-relaxed">{freeReport.premium_curious_gap}</p>
-              </div>
+              <h3 className="text-2xl font-bold text-ink mb-4 leading-tight">Simulasi Karier Terkunci</h3>
+              <p className="text-sm text-ink-light mb-8 leading-relaxed">
+                Buka Laporan Lengkap untuk melihat peta jalan 12 bulan ke depan, simulasi keputusan spesifik, dan analisis risiko mendalam.
+              </p>
+              
+              <button
+                onClick={handleBayar}
+                disabled={paying || !sessionReady}
+                className={`w-full py-4 rounded-full text-sm font-bold transition-all shadow-soft hover:shadow-float hover:-translate-y-0.5 ${
+                  paying || !sessionReady 
+                  ? 'bg-brand-400/50 text-brand-100 cursor-not-allowed' 
+                  : 'bg-ink text-white hover:bg-brand-600'
+                }`}
+              >
+                {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Akses Penuh — Rp 59.000' : 'Menyiapkan sesi...')}
+              </button>
+              {payError && <div className="mt-4 text-xs text-red-500 bg-red-50 p-2 rounded-lg font-medium">{payError}</div>}
+              <p className="text-[11px] text-ink-light mt-6 uppercase tracking-widest font-bold">Sekali Bayar · Akses Selamanya</p>
             </div>
-          )}
+          </div>
         </div>
+
       </div>
     )
   }
@@ -439,43 +428,7 @@ function HasilContent() {
         {/* JIKA BELUM BAYAR -> Tampilkan Hasil Awal + Paywall */}
         {!laporanLengkap && paymentStatus !== 'paid' && !checkingLaporan && (
           <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            
             {renderHasilAwal()}
-            
-            {/* PAYWALL UPSELL (Only show when Free Report is loaded) */}
-            {!loadingFreeReport && freeReport && (
-              <div className="mt-8 bg-ink rounded-3xl p-6 md:p-8 shadow-float text-white relative overflow-hidden border border-white/10">
-                <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
-                <div className="text-brand-400 text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <span className="text-base">🔒</span> PREMIUM INSIGHT
-                </div>
-                <h2 className="text-2xl md:text-3xl font-extrabold mb-3">Lihat simulasi hidup kamu 3–5 tahun ke depan</h2>
-                
-                <div className="grid gap-3 mb-8 mt-6">
-                  <div className="flex gap-3 items-center"><span className="text-brand-400 text-sm">→</span><span className="text-sm font-medium">Income projection (Rentang Gaji)</span></div>
-                  <div className="flex gap-3 items-center"><span className="text-brand-400 text-sm">→</span><span className="text-sm font-medium">Career trajectory (Roadmap Lengkap)</span></div>
-                  <div className="flex gap-3 items-center"><span className="text-brand-400 text-sm">→</span><span className="text-sm font-medium">Risk modeling (Probabilitas Kegagalan & Plan B)</span></div>
-                </div>
-
-                <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
-                  <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
-                  <div className="text-xs text-white/40 mb-5">Bayar 1x · Kepastian selamanya</div>
-                  
-                  <button
-                    onClick={handleBayar}
-                    disabled={paying || !sessionReady}
-                    className={`w-full py-4 rounded-xl text-base font-bold transition-all ${
-                      paying || !sessionReady 
-                      ? 'bg-brand-400/50 text-brand-100 cursor-not-allowed' 
-                      : 'bg-white text-brand-600 hover:bg-brand-50 hover:-translate-y-1 hover:shadow-float'
-                    }`}
-                  >
-                    {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Laporan Premium' : 'Menyiapkan sesi...')}
-                  </button>
-                  {payError && <div className="mt-4 text-xs text-red-200 bg-red-500/20 p-2 rounded-lg">{payError}</div>}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
