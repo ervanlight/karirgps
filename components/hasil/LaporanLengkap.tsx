@@ -1,7 +1,8 @@
 'use client'
-import type { MVPDecision } from '@/types'
+import type { MVPDecision, OldMVPDecision, PremiumReportV1 } from '@/types'
 import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
+import PremiumReportV1Renderer from './PremiumReportV1Renderer'
 
 interface LaporanLengkapProps {
   laporan: MVPDecision
@@ -66,7 +67,7 @@ function ConfidenceGauge({ score }: { score: number }) {
   )
 }
 
-export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
+function OldReportRenderer({ laporan }: { laporan: OldMVPDecision }) {
   const isKerja = laporan.rekomendasi_utama === 'Kerja'
   const isKuliah = laporan.rekomendasi_utama === 'Kuliah'
 
@@ -340,4 +341,12 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
 
     </div>
   )
+}
+
+export default function LaporanLengkap({ laporan }: { laporan: OldMVPDecision | PremiumReportV1 }) {
+  if ('executive_summary' in laporan) {
+    return <PremiumReportV1Renderer laporan={laporan as PremiumReportV1} />
+  }
+
+  return <OldReportRenderer laporan={laporan as OldMVPDecision} />
 }

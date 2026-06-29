@@ -1,58 +1,22 @@
-import { GoogleGenAI, Type } from '@google/genai'
+import { GoogleGenAI, Type, Schema } from '@google/genai'
 import { ambilKandidatJurusan, ambilKandidatProfesi, fetchRagContext } from '@/lib/db-knowledge'
 import { KOMBINASI_RIASEC_MI, KOMBINASI_RIASEC_WV } from '@/lib/scoring'
-import type { ProfilData, MVPDecision } from '@/types'
+import type { ProfilData, MVPDecision, PremiumReportV1 } from '@/types'
+import fs from 'fs'
+import path from 'path'
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
-// ============================================================
-// SYSTEM PROMPT — MENTOR MODE
-// Didesain untuk menghasilkan "wow, ini gue banget" bukan "AI report"
-// ============================================================
-const SYSTEM_PROMPT_MENTOR = `Kamu adalah mentor karir pribadi yang duduk berhadapan langsung dengan seorang siswa SMA/SMK Indonesia yang sedang bingung tentang masa depannya.
+function getPremiumPrompt(): string {
+  try {
+    const promptPath = path.join(process.cwd(), 'lib', 'prompts', 'premium-report-v1.md')
+    return fs.readFileSync(promptPath, 'utf8')
+  } catch (error) {
+    console.error('Failed to load premium-report-v1.md', error)
+    return 'You are a Senior Career Strategy Consultant AI...' // Fallback
+  }
+}
 
-Kamu bukan robot. Kamu bukan sistem. Kamu orang yang peduli, tajam, dan jujur.
-
----
-
-KONTEKS DATA:
-Kamu menerima profil lengkap siswa dari 4 dimensi:
-- D1 (Holland Code/RIASEC): tipe minat kerja — R=Realistic, I=Investigative, A=Artistic, S=Social, E=Enterprising, C=Conventional
-- D2 (Multiple Intelligences): cara siswa berpikir paling alami — L=Linguistik, LM=Logis-Matematis, SP=Spasial, MU=Musikal, BK=Kinestetik, N=Naturalis, IP=Interpersonal, IA=Intrapersonal
-- D3 (Work Values): nilai kerja yang paling penting bagi siswa — ST=Stabilitas, DA=Dampak, OT=Otonomi, KR=Kreativitas, KM=Kemakmuran, FL=Fleksibilitas
-- D4 (Konteks Personal): kondisi nyata — kondisi_biaya, domisili, kemampuan_akademik, dll
-
-ATURAN D4 YANG WAJIB DIIKUTI:
-- kondisi_biaya=PRIORITAS_HEMAT → prioritaskan jalur SNBT/KIP/Kedinasan/Beasiswa/Kerja
-- kondisi_biaya=LANGSUNG_KERJA → arahkan ke kerja/bootcamp/politeknik/vokasi
-- kondisi_biaya=BEBAS atau PERTIMBANGAN → bebas sarankan, tapi tetap realistis
-- kemampuan_akademik=ATAS → boleh sarankan PTN favorit atau jurusan ketat
-- kemampuan_akademik=PERLU_USAHA → hindari jurusan yang butuh persaingan sangat ketat
-
----
-
-ATURAN MENULIS (WAJIB DIPATUHI):
-1. Gunakan "kamu" bukan "Anda", "gue", "lu", atau "bro"
-2. Tulis seperti MENTOR BICARA, bukan laporan akademis
-3. MULAI pesan_pembuka dengan observasi yang tajam dan spesifik — bukan generik
-4. profil_naratif harus terasa seperti seseorang yang benar-benar MENGENAL kamu
-5. JANGAN pernah menyebut "berdasarkan data", "analisis menunjukkan", "mengoptimalkan"
-6. VALIDASI kondisi siswa sebelum memberi saran — terutama jika ada keterbatasan finansial
-7. alasan harus BERCERITA, bukan menjelaskan. Gunakan perumpamaan jika perlu
-8. Setiap karir WAJIB punya fit_score (0-100) yang jujur berdasarkan overlap profil siswa
-9. emoji pada karir harus relevan dengan bidang karir tersebut
-
----
-
-CONTOH KALIMAT YANG BENAR (Mentor Mode):
-- "Kamu bukan tipe yang bisa duduk diam menunggu. Kamu lebih suka membangun sesuatu."
-- "Dari caramu menjawab, jelas kamu lebih cocok kerja dengan tangan daripada kerja dengan spreadsheet."
-- "Ini bukan berarti kamu tidak pintar. Ini berarti kamu punya jenis kecerdasan yang berbeda."
-
-CONTOH KALIMAT YANG SALAH (jangan dipakai):
-- "Berdasarkan analisis profil Anda..." ❌
-- "Hasil tes menunjukkan bahwa..." ❌
-- "Anda direkomendasikan untuk..." ❌`
 
 async function buildGroundingContext(profil: ProfilData): Promise<string> {
   const [jurusanKandidat, profesiKandidat, ragContext] = await Promise.all([
@@ -110,89 +74,103 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
     model: 'gemini-2.5-pro',
     contents: promptData,
     config: {
-      systemInstruction: SYSTEM_PROMPT_MENTOR,
+      systemInstruction: getPremiumPrompt(),
       temperature: 0.8,
       responseMimeType: 'application/json',
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          // 🪞 PERSONAL MIRROR
-          pesan_pembuka: {
-            type: Type.STRING,
-            description: 'Hook emosional 1-2 kalimat yang sangat personal dan tajam. Mulai dengan observasi spesifik tentang siswa, bukan pernyataan generik. Contoh: "Kamu bukan tipe yang cocok duduk diam dan menunggu perintah."'
+          executive_summary: {
+            type: Type.OBJECT,
+            properties: {
+              user_identity: { type: Type.STRING },
+              core_direction: { type: Type.STRING },
+              truth_statement: { type: Type.STRING }
+            },
+            required: ['user_identity', 'core_direction', 'truth_statement']
           },
-          profil_naratif: {
-            type: Type.STRING,
-            description: '2-3 paragraf yang mencerminkan kepribadian siswa seperti seorang mentor yang benar-benar mengenal mereka. Bahas cara berpikir, kekuatan tersembunyi, dan pola perilaku berdasarkan kombinasi D1+D2+D3. Jangan menyebut kode seperti RIASEC/MI — ceritakan orangnya.'
+          cognitive_profile: {
+            type: Type.OBJECT,
+            properties: {
+              thinking_style: { type: Type.STRING },
+              learning_style: { type: Type.STRING },
+              decision_style: { type: Type.STRING },
+              strengths_blindspots: { type: Type.STRING }
+            },
+            required: ['thinking_style', 'learning_style', 'decision_style', 'strengths_blindspots']
           },
-          kekuatan: {
+          career_fit: {
             type: Type.ARRAY,
-            description: '3-4 kekuatan alami yang sangat spesifik dan berbasis data. Bukan pujian generik seperti "kamu kreatif". Contoh: "Kamu bisa melihat pola dalam data ketika orang lain masih kebingungan."',
-            items: { type: Type.STRING }
-          },
-          // 🎯 KEPUTUSAN
-          rekomendasi_utama: {
-            type: Type.STRING,
-            description: 'Hanya isi dengan: Kuliah, Kerja, atau Hybrid'
-          },
-          confidence_score: {
-            type: Type.NUMBER,
-            description: 'Tingkat keyakinan AI atas keputusan ini (0-100%). Harus realistis berdasarkan kekuatan sinyal dari profil D1-D4. Jangan selalu 95+ jika sinyalnya ambigu.'
-          },
-          alasan: {
-            type: Type.STRING,
-            description: 'Narasi 2-3 paragraf yang menjelaskan MENGAPA ini keputusan terbaik untuk siswa ini secara spesifik. Bercerita, bukan menjelaskan. Hubungkan dengan profil, kondisi, dan potensi nyata siswa. Pisahkan paragraf dengan \\n\\n.'
-          },
-          // 🧭 PILIHAN KARIR
-          karir: {
-            type: Type.ARRAY,
-            description: 'Tepat 3 pilihan karir yang paling cocok, diurutkan dari yang paling sesuai ke yang ke-3',
             items: {
               type: Type.OBJECT,
               properties: {
-                nama: { type: Type.STRING, description: 'Nama karir/profesi yang spesifik' },
-                deskripsi: { type: Type.STRING, description: '2-3 kalimat yang menjelaskan apa yang dikerjakan dan mengapa cocok untuk siswa ini secara spesifik — bukan deskripsi generik' },
-                jalur_masuk: { type: Type.STRING, description: 'Jalur masuk yang realistis sesuai kondisi D4 siswa (SNBT/mandiri/bootcamp/kerja langsung/dll)' },
-                fit_score: { type: Type.NUMBER, description: 'Skor kecocokan 0-100 berdasarkan overlap profil D1+D2+D3 dengan kebutuhan karir. Jangan semua > 85.' },
-                emoji: { type: Type.STRING, description: 'Satu emoji representatif (misal: 🩺, 💻, 🎨)' },
-                income_range: { type: Type.STRING, description: 'Estimasi rentang gaji riil profesi ini di Indonesia (misal: "Rp 4 Jt - Rp 7 Jt" atau "Rp 7 Jt - Rp 15 Jt"). Harus realistis.' },
+                path_name: { type: Type.STRING },
+                why_it_fits: { type: Type.STRING },
+                thrive_environment: { type: Type.STRING },
+                avoid_environment: { type: Type.STRING }
               },
-              required: ['nama', 'deskripsi', 'jalur_masuk', 'fit_score', 'emoji', 'income_range']
+              required: ['path_name', 'why_it_fits', 'thrive_environment', 'avoid_environment']
             }
           },
-          // 🗺️ ROADMAP
-          roadmap: {
+          path_simulation: {
+            type: Type.OBJECT,
+            properties: {
+              college_scenario: {
+                type: Type.OBJECT,
+                properties: { lifestyle: { type: Type.STRING }, skill_trajectory: { type: Type.STRING }, risks: { type: Type.STRING }, outcome: { type: Type.STRING } },
+                required: ['lifestyle', 'skill_trajectory', 'risks', 'outcome']
+              },
+              work_scenario: {
+                type: Type.OBJECT,
+                properties: { lifestyle: { type: Type.STRING }, skill_trajectory: { type: Type.STRING }, risks: { type: Type.STRING }, outcome: { type: Type.STRING } },
+                required: ['lifestyle', 'skill_trajectory', 'risks', 'outcome']
+              },
+              hybrid_scenario: {
+                type: Type.OBJECT,
+                properties: { lifestyle: { type: Type.STRING }, skill_trajectory: { type: Type.STRING }, risks: { type: Type.STRING }, outcome: { type: Type.STRING } },
+                required: ['lifestyle', 'skill_trajectory', 'risks', 'outcome']
+              }
+            },
+            required: ['college_scenario', 'work_scenario', 'hybrid_scenario']
+          },
+          real_world_outcome: {
+            type: Type.OBJECT,
+            properties: {
+              income_range: { type: Type.STRING },
+              likely_roles: { type: Type.ARRAY, items: { type: Type.STRING } },
+              industry_positioning: { type: Type.STRING },
+              career_ceiling: { type: Type.STRING }
+            },
+            required: ['income_range', 'likely_roles', 'industry_positioning', 'career_ceiling']
+          },
+          risk_analysis: {
+            type: Type.OBJECT,
+            properties: {
+              wrong_direction_impact: { type: Type.STRING },
+              stagnation_causes: { type: Type.STRING },
+              growth_blockers: { type: Type.STRING }
+            },
+            required: ['wrong_direction_impact', 'stagnation_causes', 'growth_blockers']
+          },
+          strategic_roadmap: {
             type: Type.ARRAY,
-            description: 'Tepat 3-5 fase roadmap karir yang mensimulasikan alur hidup 3-5 tahun ke depan (misal: Tahun 1 (Kuliah), Tahun 2-3 (Magang), Tahun 4 (Lulus & Kerja))',
             items: {
               type: Type.OBJECT,
               properties: {
-                fase: { type: Type.STRING, description: 'Label fase waktu yang jelas, contoh: Tahun 1 (Masa Transisi)' },
-                kegiatan: { type: Type.STRING, description: '2-3 langkah konkret di fase tersebut, pisahkan dengan \\n. Harus actionable dan simulatif.' },
+                timeline: { type: Type.STRING },
+                action: { type: Type.STRING },
+                skill_focus: { type: Type.STRING },
+                learning_priority: { type: Type.STRING }
               },
-              required: ['fase', 'kegiatan']
+              required: ['timeline', 'action', 'skill_focus', 'learning_priority']
             }
           },
-          // ⚠️ RISIKO
-          risiko_antisipasi: {
-            type: Type.ARRAY,
-            description: 'Analisis Skenario Kegagalan: Tepat 3 skenario nyata yang bisa merusak roadmap ini. Buat senyata mungkin untuk memicu loss aversion (kesadaran akan risiko).',
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                risiko: { type: Type.STRING, description: 'Risiko kegagalan spesifik dan fatal yang mungkin terjadi' },
-                probabilitas: { type: Type.STRING, description: 'Estimasi probabilitas terjadinya risiko ini (Contoh: "Tingkat Risiko: TINGGI (78%)" atau "MENENGAH (45%)")' },
-                solusi: { type: Type.STRING, description: 'Mitigasi konkret untuk mencegah skenario kegagalan ini' },
-              },
-              required: ['risiko', 'probabilitas', 'solusi']
-            }
-          },
-          alternative_scenario: {
-            type: Type.STRING,
-            description: 'Skenario Jalan Alternatif: Jika Plan A hancur (misal: tidak lulus ujian, kehabisan biaya, dll), apa Plan B yang masuk akal dan aman untuk siswa ini? Tulis 1-2 paragraf padat.'
-          }
+          final_diagnosis: { type: Type.STRING }
         },
-        required: ['pesan_pembuka', 'profil_naratif', 'kekuatan', 'rekomendasi_utama', 'confidence_score', 'alasan', 'karir', 'roadmap', 'risiko_antisipasi', 'alternative_scenario']
+        required: [
+          'executive_summary', 'cognitive_profile', 'career_fit', 'path_simulation', 
+          'real_world_outcome', 'risk_analysis', 'strategic_roadmap', 'final_diagnosis'
+        ]
       }
     }
   })

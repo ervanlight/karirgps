@@ -236,18 +236,25 @@ function HasilContent() {
 
     return (
       <div className="space-y-6 animate-fade-up">
-        {/* 1. RESULT HERO */}
-        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
+        {/* 1. IDENTITY MIRROR */}
+        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm text-center">
           <div className="mb-4">
             <span className="text-sm font-semibold text-ink-light">Halo, <span className="capitalize">{userName}</span></span>
           </div>
+          <div className="text-base text-ink-light leading-relaxed mb-6 font-medium">
+            {freeReport.identity_mirror}
+          </div>
+        </div>
+
+        {/* 2. RESULT HERO (CAREER DIRECTION) */}
+        <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
           <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-2">🎯 Arah Terbaik Kamu:</div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight mb-4">
-            👉 {freeReport.decision}
+            👉 {freeReport.career_direction}
           </h2>
           
           <p className="text-base text-ink-light leading-relaxed mb-6 font-medium">
-            &ldquo;{freeReport.explore_layer?.why_this_fits_you || freeReport.reasoning}&rdquo;
+            &ldquo;{freeReport.direction_reasoning}&rdquo;
           </p>
 
           <div className="mt-6">
@@ -261,21 +268,21 @@ function HasilContent() {
           </div>
         </div>
 
-        {/* 2. QUICK INSIGHT STRIP (VIRAL HOOK) */}
+        {/* 3. QUICK INSIGHT STRIP (VIRAL HOOK) */}
         <div className="bg-brand-50 border-l-4 border-brand-500 rounded-xl p-5 shadow-sm">
           <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-2">
             <span className="text-base">💡</span> INSIGHT TENTANG KAMU
           </div>
           <h3 className="text-base md:text-lg font-semibold text-ink leading-snug">
-            &ldquo;{freeReport.viral_hook}&rdquo;
+            &ldquo;{freeReport.insight_moment}&rdquo;
           </h3>
         </div>
 
-        {/* 3. CAREER PATH CARDS */}
+        {/* 4. CAREER PATH CARDS */}
         <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
           <div className="text-xs font-bold text-ink uppercase tracking-widest mb-4">🧭 JALUR KARIER YANG COCOK</div>
           <div className="space-y-3">
-            {freeReport.career_fit.map((c, i) => (
+            {freeReport.career_options.map((c, i) => (
               <div key={i} className="bg-surface-50 border border-surface-200 rounded-xl p-4 flex items-center justify-between gap-4">
                 <span className="text-sm font-semibold text-ink">{c}</span>
                 {i === 0 && <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded">Rekomendasi Utama</span>}
@@ -284,7 +291,7 @@ function HasilContent() {
           </div>
         </div>
 
-        {/* 4. ROADMAP MINI */}
+        {/* 5. ROADMAP MINI */}
         <div className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm">
           <div className="text-xs font-bold text-ink uppercase tracking-widest mb-4">🗺 ROADMAP 6-12 BULAN</div>
           <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 text-sm text-ink-light leading-relaxed whitespace-pre-line">
@@ -292,54 +299,34 @@ function HasilContent() {
           </div>
         </div>
 
-        {/* 5. RISK TRUTH BLOCK */}
+        {/* 6. RISK TRUTH BLOCK */}
         <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-3xl p-6 md:p-8 shadow-sm">
           <div className="text-xs font-bold text-accent-600 uppercase tracking-widest mb-3 flex items-center gap-2">
             <span className="text-lg">⚠️</span> RISIKO JIKA TIDAK FOKUS
           </div>
           <p className="text-sm md:text-base text-ink-light font-medium leading-relaxed">
-            {freeReport.risk_statement}
+            {freeReport.key_risk}
           </p>
         </div>
 
-        {/* 6. ACTION STRIP & 7. EXPLORE LAYER */}
+        {/* 7. PREMIUM CURIOUS GAP & ACTION STRIP */}
         <div className="bg-white border border-surface-200 rounded-3xl p-6 shadow-sm">
           <div className="flex flex-col gap-3">
             <button 
               onClick={() => setExploreOpen(!exploreOpen)}
               className="w-full bg-surface-50 border border-surface-200 text-ink rounded-xl px-6 py-4 text-sm font-bold hover:bg-surface-100 transition-all flex items-center justify-center gap-2"
             >
-              ▼ Jelajahi Lebih Dalam {exploreOpen ? '(Tutup)' : ''}
+              ▼ Analisis Lebih Dalam {exploreOpen ? '(Tutup)' : ''}
             </button>
             <button onClick={handleShare} className="w-full bg-ink text-white rounded-xl px-6 py-4 text-sm font-bold hover:bg-ink-dark transition-all flex items-center justify-center gap-2">
               Cocokkah ini dengan asliku? Tanya temanmu.
             </button>
           </div>
 
-          {exploreOpen && freeReport.explore_layer && (
+          {exploreOpen && (
             <div className="mt-6 pt-6 border-t border-surface-200 space-y-6 animate-fade-in">
               <div>
-                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">1. Why This Fits You</div>
-                <p className="text-sm text-ink-light">{freeReport.explore_layer.why_this_fits_you}</p>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">2. Compare Paths</div>
-                <p className="text-sm text-ink-light">{freeReport.explore_layer.compare_paths}</p>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">3. What If Scenario</div>
-                <p className="text-sm text-ink-light">{freeReport.explore_layer.what_if_scenario}</p>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2">4. Skill Gap</div>
-                <ul className="space-y-1">
-                  {freeReport.explore_layer.skill_gap.map((skill, idx) => (
-                    <li key={idx} className="text-sm text-ink-light flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-400"></span>
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-sm text-ink-light leading-relaxed">{freeReport.premium_curious_gap}</p>
               </div>
             </div>
           )}

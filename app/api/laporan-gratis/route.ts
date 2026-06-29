@@ -4,33 +4,40 @@ import { GoogleGenAI, Type, Schema } from '@google/genai'
 import type { ProfilData } from '@/types'
 import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
 
+import fs from 'fs'
+import path from 'path'
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!
 })
+
+function getFreePrompt(): string {
+  try {
+    const promptPath = path.join(process.cwd(), 'lib', 'prompts', 'free-report-v1.md')
+    return fs.readFileSync(promptPath, 'utf8')
+  } catch (error) {
+    console.error('Failed to load free-report-v1.md', error)
+    return 'You are a Senior Career Mentor AI...' // Fallback
+  }
+}
 
 // Schema for Gemini Structured Output
 const freeReportSchemaGenAI: Schema = {
   type: Type.OBJECT,
   properties: {
-    decision: { type: Type.STRING, description: "Firm decision: Work, College, or Hybrid" },
-    personality_insight: { type: Type.STRING, description: "Simple language describing user behavior pattern" },
-    reasoning: { type: Type.STRING, description: "Short reasoning why this makes sense" },
-    career_fit: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Realistic Indonesian context, exactly 3 items" },
-    roadmap: { type: Type.STRING, description: "Practical steps for the next 6-12 months" },
-    risk_statement: { type: Type.STRING, description: "Honest but not scary risk if wrong decision is taken" },
-    viral_hook: { type: Type.STRING, description: "One sentence that feels like 'wow this is me'" },
-    explore_layer: {
-      type: Type.OBJECT,
-      properties: {
-        why_this_fits_you: { type: Type.STRING, description: "Short, sharp explanation of why this decision fits them based on their personality" },
-        compare_paths: { type: Type.STRING, description: "Compare 3 career paths: stability, growth speed, etc" },
-        what_if_scenario: { type: Type.STRING, description: "If you choose X, this happens. If you choose Y, that happens" },
-        skill_gap: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 skills they need to build immediately" }
-      },
-      required: ["why_this_fits_you", "compare_paths", "what_if_scenario", "skill_gap"]
-    }
+    identity_mirror: { type: Type.STRING, description: "Describe the user in 2-4 sentences. Focus on learning style, decision tendency, work preference." },
+    career_direction: { type: Type.STRING, description: "Firm decision: WORK, COLLEGE, or HYBRID" },
+    direction_reasoning: { type: Type.STRING, description: "One short explanation WHY this direction fits" },
+    career_options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Provide ONLY 3 career paths, short without explanation" },
+    roadmap: { type: Type.STRING, description: "Practical steps for the next 6-12 months. No long-term simulation." },
+    key_risk: { type: Type.STRING, description: "One clear risk if direction is ignored or wrong" },
+    insight_moment: { type: Type.STRING, description: "One sentence only that makes the user feel understood deeply" },
+    premium_curious_gap: { type: Type.STRING, description: "Subtle upgrade hook indicating more depth in Premium" }
   },
-  required: ["decision", "personality_insight", "reasoning", "career_fit", "roadmap", "risk_statement", "viral_hook", "explore_layer"]
+  required: [
+    "identity_mirror", "career_direction", "direction_reasoning", "career_options", 
+    "roadmap", "key_risk", "insight_moment", "premium_curious_gap"
+  ]
 }
 
 export async function POST(req: Request) {
@@ -73,62 +80,13 @@ export async function POST(req: Request) {
     const preferensi = `Nilai kerja prioritas: ${topWV}. Rencana masuk via: ${d4.jalur.join(',')}. Hambatan biaya: ${d4.kondisi_biaya}.`
     const nilai = `Kemampuan akademik saat ini: ${d4.kemampuan_akademik}`
 
-    const prompt = `You are a senior career mentor AI for Indonesian high school students.
-Your job is to give HIGHLY INSIGHTFUL, emotionally accurate, and simple career guidance based on limited user data.
-
-You must:
-- infer deeper personality traits from minimal input
-- avoid generic answers
-- sound like a human mentor, not AI system
-- be very clear, structured, and decisive
-
-------------------------------------------------------------
-USER DATA:
-- Jurusan: ${jurusan}
-- Minat: ${minat}
-- Gaya belajar: ${gayaBelajar}
-- Preferensi: ${preferensi}
-- Nilai: ${nilai}
-------------------------------------------------------------
-
-TASK:
-Generate the output based on the provided schema.
-
-1. DECISION (Work / College / Hybrid) -> Must be firm, not vague
-8. PERSONALITY INSIGHT (very important) -> describe user behavior pattern (simple language)
-9. REASONING -> why this makes sense
-10. CAREER FIT (3 options only) -> realistic Indonesian context
-11. 6-12 MONTH ROADMAP -> practical steps
-12. RISK STATEMENT -> what happens if wrong decision is taken
-13. VIRAL INSIGHT HOOK -> Tulis 1 kalimat mutlak yang membongkar sifat asli siswa secara psikologis. Gunakan pola kontradiksi: "[Sifat yang terlihat di luar], tapi sebenarnya [Kebenaran yang disembunyikan/Kekuatan uniknya]". Kalimat ini harus memicu reaksi "Sial, kok AI ini tahu banget gue kayak gini?!".
-14. EXPLORE LAYER -> 4 items:
-    - why_this_fits_you: explanation of why this decision fits their learning style and personality
-    - compare_paths: Compare the 3 paths you gave in CAREER FIT
-    - what_if_scenario: What if they pick College vs Work vs Hybrid (based on their context)
-    - skill_gap: array of exactly 3 missing skills they must build
-
-
-OUTPUT STYLE (MANDATORY):
-- Indonesian Mentor Mode
-- calm, clear, structured
-- NO slang (no gue/lu)
-- not robotic
-- not academic
-- short paragraphs
-
-IMPORTANT RULES:
-- Do NOT be generic
-- Do NOT repeat user input
-- Always infer deeper meaning
-- Always give decisive recommendation
-- Think like a human career mentor
-
-GOAL: Make the user feel: "This AI understands me better than I understand myself"`
+    const promptText = `PROFIL USER:\n- Jurusan: ${jurusan}\n- Minat: ${minat}\n- Gaya belajar: ${gayaBelajar}\n- Preferensi: ${preferensi}\n- Nilai: ${nilai}`
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-pro',
-      contents: prompt,
+      contents: promptText,
       config: {
+        systemInstruction: getFreePrompt(),
         responseMimeType: 'application/json',
         responseSchema: freeReportSchemaGenAI,
         temperature: 0.7
@@ -139,8 +97,8 @@ GOAL: Make the user feel: "This AI understands me better than I understand mysel
     const reportData = JSON.parse(resultText)
 
     // Ensure array is capped to 3
-    if (Array.isArray(reportData.career_fit)) {
-      reportData.career_fit = reportData.career_fit.slice(0, 3)
+    if (Array.isArray(reportData.career_options)) {
+      reportData.career_options = reportData.career_options.slice(0, 3)
     }
 
     // Save back to database

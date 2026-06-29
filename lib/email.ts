@@ -19,11 +19,20 @@ function renderLaporanHTML(
   miProfile: MICode[],
   wvProfile: WorkValueCode[]
 ): string {
-  const karirHTML = laporan.karir.map((k, i) => `
+  const isPremium = 'executive_summary' in laporan;
+  
+  const karirArray = isPremium 
+    ? (laporan.career_fit || []).map(c => ({ nama: c.path_name, deskripsi: c.why_it_fits, jalur_masuk: c.thrive_environment }))
+    : (laporan.karir || []);
+    
+  const rekomendasiUtama = isPremium ? laporan.executive_summary.core_direction : (laporan.rekomendasi_utama || 'Jalur Khusus');
+  const alasan = isPremium ? laporan.executive_summary.truth_statement : (laporan.alasan || '');
+
+  const karirHTML = karirArray.map((k, i) => `
     <div style="margin-bottom:20px;padding:16px 18px;background:#F8F7F4;border-radius:8px;border-left:3px solid #1D9E75;">
       <div style="font-size:15px;font-weight:500;color:#2C2C2A;margin-bottom:6px;">${i + 1}. ${k.nama}</div>
       <div style="font-size:13px;color:#555;line-height:1.65;margin-bottom:8px;">${k.deskripsi}</div>
-      <div style="font-size:12px;color:#888;"><strong>Jalur Masuk:</strong> ${k.jalur_masuk}</div>
+      <div style="font-size:12px;color:#888;"><strong>Jalur Masuk:</strong> ${k.jalur_masuk || 'Berdasarkan roadmap'}</div>
     </div>
   `).join('')
 
@@ -56,8 +65,8 @@ function renderLaporanHTML(
     <!-- KEPUTUSAN UTAMA -->
     <div style="background:#fff;border:0.5px solid #1D9E75;border-radius:14px;padding:24px;margin-bottom:16px;">
       <div style="font-size:11px;font-weight:500;color:#1D9E75;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Arah Terbaikmu</div>
-      <div style="font-size:24px;font-weight:700;color:#1D9E75;margin-bottom:12px;">${laporan.rekomendasi_utama}</div>
-      <div style="font-size:14px;color:#2C2C2A;line-height:1.7;">${laporan.alasan}</div>
+      <div style="font-size:24px;font-weight:700;color:#1D9E75;margin-bottom:12px;">${rekomendasiUtama}</div>
+      <div style="font-size:14px;color:#2C2C2A;line-height:1.7;">${alasan}</div>
     </div>
 
     <!-- KARIR -->
@@ -97,12 +106,15 @@ export async function kirimLaporan({
 
   const topCode = hollandCode.slice(0, 2).map(c => RIASEC_LABELS[c]).join(' + ')
 
+  const isPremium = 'executive_summary' in laporan;
+  const rekomendasiUtama = isPremium ? laporan.executive_summary.core_direction : (laporan.rekomendasi_utama || 'Jalur Khusus');
+
   const payload = {
     from: `KarirGPS <${FROM_EMAIL}>`,
     to: [toEmail],
-    subject: `Arah Terbaik KarirGPSmu sudah siap — ${laporan.rekomendasi_utama}`,
+    subject: `Arah Terbaik KarirGPSmu sudah siap — ${rekomendasiUtama}`,
     html,
-    text: `Laporan KarirGPS kamu sudah siap! Arah terbaikmu: ${laporan.rekomendasi_utama}.\n\nKunjungi karirgps.id/dashboard untuk melihat versi lengkap online.\n\n—\nKarirGPS`,
+    text: `Laporan KarirGPS kamu sudah siap! Arah terbaikmu: ${rekomendasiUtama}.\n\nKunjungi karirgps.id/dashboard untuk melihat versi lengkap online.\n\n—\nKarirGPS`,
   }
 
   try {

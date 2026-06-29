@@ -113,23 +113,79 @@ export interface RisikoItem {
   solusi: string
 }
 
-export interface MVPDecision {
-  // 🪞 PERSONAL MIRROR — bagian yang bikin user "wow, ini gue banget"
-  pesan_pembuka: string          // Hook emosional pembuka, 1-2 kalimat tajam dan personal
-  profil_naratif: string         // Refleksi kepribadian 2-3 paragraf, tulis seperti mentor
-  kekuatan: string[]             // 3-4 kekuatan alami berdasarkan data, bukan generik
+// --- NEW V1 PREMIUM REPORT ---
+export interface PremiumCareerFit {
+  path_name: string
+  why_it_fits: string
+  thrive_environment: string
+  avoid_environment: string
+}
+
+export interface PathScenario {
+  lifestyle: string
+  skill_trajectory: string
+  risks: string
+  outcome: string
+}
+
+export interface RoadmapStep {
+  timeline: string
+  action: string
+  skill_focus: string
+  learning_priority: string
+}
+
+export interface PremiumReportV1 {
+  executive_summary: {
+    user_identity: string
+    core_direction: string
+    truth_statement: string
+  }
+  cognitive_profile: {
+    thinking_style: string
+    learning_style: string
+    decision_style: string
+    strengths_blindspots: string
+  }
+  career_fit: PremiumCareerFit[]
+  path_simulation: {
+    college_scenario: PathScenario
+    work_scenario: PathScenario
+    hybrid_scenario: PathScenario
+  }
+  real_world_outcome: {
+    income_range: string
+    likely_roles: string[]
+    industry_positioning: string
+    career_ceiling: string
+  }
+  risk_analysis: {
+    wrong_direction_impact: string
+    stagnation_causes: string
+    growth_blockers: string
+  }
+  strategic_roadmap: RoadmapStep[]
+  final_diagnosis: string
+}
+
+export interface OldMVPDecision {
+  pesan_pembuka?: string          // Hook emosional pembuka, 1-2 kalimat tajam dan personal
+  profil_naratif?: string         // Refleksi kepribadian 2-3 paragraf, tulis seperti mentor
+  kekuatan?: string[]             // 3-4 kekuatan alami berdasarkan data, bukan generik
 
   // 🎯 KEPUTUSAN UTAMA
-  rekomendasi_utama: 'Kuliah' | 'Kerja' | 'Hybrid'
-  confidence_score: number       // AI confidence level 0-100%
-  alasan: string                 // Reasoning dalam format narasi, bukan poin-poin kaku
+  rekomendasi_utama?: 'Kuliah' | 'Kerja' | 'Hybrid'
+  confidence_score?: number       // AI confidence level 0-100%
+  alasan?: string                 // Reasoning dalam format narasi, bukan poin-poin kaku
 
   // 🧭 PILIHAN & RENCANA
-  karir: KarirItem[]
-  roadmap: RoadmapItem[]         // Life trajectory (3-5 tahun)
-  risiko_antisipasi: RisikoItem[] // Skenario kegagalan
-  alternative_scenario: string   // Skenario jalan alternatif jika plan A gagal
+  karir?: KarirItem[]
+  roadmap?: RoadmapItem[]         // Life trajectory (3-5 tahun)
+  risiko_antisipasi?: RisikoItem[] // Skenario kegagalan
+  alternative_scenario?: string   // Skenario jalan alternatif jika plan A gagal
 }
+
+export type MVPDecision = OldMVPDecision | PremiumReportV1
 
 // --- DATABASE TYPES (Supabase) ---
 export interface DbUser {
