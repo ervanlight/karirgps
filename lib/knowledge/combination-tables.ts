@@ -1,0 +1,44 @@
+export const KOMBINASI_TABLES = `RIASEC + MI → Arah spesifik dalam bidang:
+- I + LM → Matematika, Data Science, Fisika, Statistika
+- I + L → Jurnalisme sains, Filsafat, Ilmu Komunikasi
+- I + SP → Arsitektur, Teknik, UX Research
+- I + N → Kedokteran, Biologi, Farmasi, Lingkungan
+- A + SP → DKV, Animasi, Arsitektur interior, Film
+- A + MU → Musik, Produksi audio, Seni pertunjukan
+- A + L → Sastra, Penulisan kreatif, Skenario
+- A + BK → Tari, Teater, Kriya, Kedokteran gigi
+- S + IP → Psikologi, Konseling, HR, Pekerjaan sosial
+- S + L → Komunikasi, Pendidikan, Diplomasi
+- S + IA → Psikologi klinis, Penelitian perilaku
+- E + L → Hukum, PR, Politik, Marketing konten
+- E + LM → Keuangan, Strategi bisnis, Konsultansi
+- E + IP → Manajemen, Negosiasi, Wirausaha sosial
+- C + LM → Akuntansi, Audit, Sistem Informasi
+- C + SP → Desain sistem, Manajemen arsip visual
+- R + BK → Teknik mesin, Olahraga, Fisioterapi
+- R + N → Pertanian modern, Kehutanan, Teknik lingkungan
+- R + SP → Teknik sipil, Desain produk
+
+RIASEC + Work Values → Jenis peran dalam bidang:
+- S + ST → Guru PNS, Konselor BK, Penyuluh sosial pemerintah
+- S + DA → Pekerja sosial NGO, Pendidik komunitas
+- S + OT → Coach independen, Psikolog praktik mandiri
+- S + KM → HR Director, Psikolog korporat
+- E + ST → Manajer BUMN, Eksekutif korporat besar
+- E + DA → Wirausaha sosial, Aktivis kebijakan
+- E + OT → Founder startup, Pengusaha, Konsultan mandiri
+- E + KM → Investment banker, Sales Director, Konsultan strategi
+- I + ST → Peneliti pemerintah, Dosen tetap, Analis BUMN
+- I + DA → Peneliti kesehatan, Ilmuwan lingkungan
+- I + OT → Peneliti independen, Konsultan riset
+- I + KR → Data Scientist, R&D, Pengembang teknologi
+- A + ST → Desainer in-house, Content creator media besar
+- A + OT → Freelance designer, Creative director agensi
+- A + KM → UX Lead, Art Director brand besar
+- A + FL → Remote creative, Digital nomad
+- R + ST → Teknisi BUMN, PNS teknik, Engineer korporat
+- R + KM → Engineer minyak & gas, Pilot, Dokter spesialis
+- R + OT → Kontraktor independen, Petani modern
+- C + ST → Akuntan pemerintah, Auditor BUMN
+- C + KM → Akuntan Big4, Aktuaris, Analis investasi
+- C + OT → Konsultan keuangan mandiri`;

@@ -44,7 +44,7 @@ export default function PremiumReportV2Renderer({ laporan }: { laporan: PremiumR
       case 'text_block':
         // Specifically check for Executive Summary vs Insight
         if (section.id === 'executive_summary') {
-          return <DecisionCard recommendation={laporan.user_profile.decision_type.toUpperCase()} subtitle={section.content} />
+          return <DecisionCard recommendation={(laporan.user_profile.decision_type || 'Rekomendasi Optimal').toUpperCase()} subtitle={section.content} />
         }
         return <InsightCard title={section.title} content={section.content || ''} />
 

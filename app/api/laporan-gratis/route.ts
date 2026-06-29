@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-server'
 import { GoogleGenAI, Type, Schema } from '@google/genai'
 import type { ProfilData } from '@/types'
-import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
-
+import { getAnxietyContext } from '@/lib/knowledge/anxiety-framework'
 import { freeReportPrompt } from '@/lib/prompts/free-report'
+import { BRAND_VOICE } from '@/lib/knowledge/brand-voice'
+import { STYLE_GUIDE } from '@/lib/knowledge/style-guide'
 
 export const maxDuration = 30
 export const runtime = 'edge'
@@ -21,17 +22,29 @@ function getFreePrompt(): string {
 const freeReportSchemaGenAI: Schema = {
   type: Type.OBJECT,
   properties: {
-    identity_mirror: { type: Type.STRING, description: "Describe the user in 2-4 sentences. Focus on learning style, decision tendency, work preference." },
-    career_direction: { type: Type.STRING, description: "Firm decision: WORK, COLLEGE, or HYBRID" },
-    direction_reasoning: { type: Type.STRING, description: "One short explanation WHY this direction fits" },
-    career_options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Provide ONLY 3 career paths, short without explanation" },
-    roadmap: { type: Type.STRING, description: "Practical steps for the next 6-12 months. No long-term simulation." },
-    key_risk: { type: Type.STRING, description: "One clear risk if direction is ignored or wrong" },
-    insight_moment: { type: Type.STRING, description: "One sentence only that makes the user feel understood deeply" },
-    premium_curious_gap: { type: Type.STRING, description: "Subtle upgrade hook indicating more depth in Premium" }
+    pembuka_personal: { type: Type.STRING, description: "1 kalimat pembuka yang langsung 'kena' dan empatik" },
+    identity_mirror: { type: Type.STRING, description: "3-4 kalimat refleksi psikologis mendalam (gaya belajar, pengambilan keputusan, nilai kerja). Harus terasa seperti cermin." },
+    career_direction: { type: Type.STRING, description: "Firm decision: Kuliah, Kerja, or Hybrid" },
+    direction_reasoning: { type: Type.STRING, description: "2-3 kalimat alasan strategis di balik arah tersebut, hubungkan dengan kondisi nyata mereka (biaya/akademik)." },
+    career_options: { 
+      type: Type.ARRAY, 
+      items: { 
+        type: Type.OBJECT,
+        properties: {
+          nama: { type: Type.STRING },
+          deskripsi_singkat: { type: Type.STRING }
+        },
+        required: ["nama", "deskripsi_singkat"]
+      }, 
+      description: "Tepat 3 opsi karir yang sangat spesifik" 
+    },
+    roadmap: { type: Type.STRING, description: "2-3 kalimat langkah konkret untuk 6 bulan ke depan" },
+    key_risk: { type: Type.STRING, description: "1-2 kalimat menyoroti blind spot psikologis atau strategis yang harus diwaspadai" },
+    insight_moment: { type: Type.STRING, description: "1 kalimat puitis dan powerful yang memvalidasi potensi atau struggle mereka" },
+    premium_curious_gap: { type: Type.STRING, description: "1-2 kalimat secara halus menyinggung bahwa simulasi 5 tahun dan jurusan spesifik ada di laporan premium" }
   },
   required: [
-    "identity_mirror", "career_direction", "direction_reasoning", "career_options", 
+    "pembuka_personal", "identity_mirror", "career_direction", "direction_reasoning", "career_options", 
     "roadmap", "key_risk", "insight_moment", "premium_curious_gap"
   ]
 }
@@ -60,23 +73,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ report: profilData.free_report })
     }
 
-    // 1. Prepare Data for Prompt
-    const d1 = profilData.d1_riasec
-    const d2 = profilData.d2_mi
-    const d3 = profilData.d3_workvalues
-    const d4 = profilData.d4_konteks
+    const anxiety = getAnxietyContext(profilData.d4_konteks)
 
-    const topRiasec = d1.holland_code.slice(0, 2).map(c => RIASEC_LABELS[c]).join(', ')
-    const topMI = d2.mi_profile.slice(0, 2).map(c => MI_LABELS[c]).join(', ')
-    const topWV = d3.values_profile.slice(0, 2).map(c => WV_LABELS[c]).join(', ')
-    
-    const jurusan = `Ketertarikan bidang: ${topRiasec}`
-    const minat = `Fokus utama pada: ${d1.deskripsi_primer}`
-    const gayaBelajar = `Kecerdasan dominan: ${topMI} (${d2.deskripsi_primer})`
-    const preferensi = `Nilai kerja prioritas: ${topWV}. Rencana masuk via: ${d4.jalur.join(',')}. Hambatan biaya: ${d4.kondisi_biaya}.`
-    const nilai = `Kemampuan akademik saat ini: ${d4.kemampuan_akademik}`
+    const promptText = `---
+IDENTITAS & TONE VOICE (WAJIB DIIKUTI)
+${BRAND_VOICE}
 
-    const promptText = `PROFIL USER:\n- Jurusan: ${jurusan}\n- Minat: ${minat}\n- Gaya belajar: ${gayaBelajar}\n- Preferensi: ${preferensi}\n- Nilai: ${nilai}`
+STYLE GUIDE BAHASA (WAJIB DIIKUTI)
+${STYLE_GUIDE}
+---
+
+[DATA PROFIL SISWA]
+- D1 (RIASEC): ${profilData.d1_riasec.holland_code.join('')} (${profilData.d1_riasec.deskripsi_primer}, ${profilData.d1_riasec.deskripsi_sekunder})
+- D2 (MI): ${profilData.d2_mi.mi_profile.join(', ')} (${profilData.d2_mi.deskripsi_primer}, ${profilData.d2_mi.deskripsi_sekunder})
+- D3 (Work Values): ${profilData.d3_workvalues.values_profile.join(', ')} (${profilData.d3_workvalues.deskripsi_primer}, ${profilData.d3_workvalues.deskripsi_sekunder})
+- D4 Konteks (Tahap): ${profilData.d4_konteks.tahap}
+- D4 Konteks (Domisili): ${profilData.d4_konteks.domisili}
+- D4 Konteks (Jalur): ${profilData.d4_konteks.jalur.join(', ')}
+- D4 Konteks (Biaya): ${profilData.d4_konteks.kondisi_biaya}
+- D4 Konteks (Tanggungan): ${profilData.d4_konteks.tanggungan_keluarga}
+- D4 Konteks (Akademik): ${profilData.d4_konteks.kemampuan_akademik}
+- D4 Konteks (Mobilitas): ${profilData.d4_konteks.mobilitas}
+
+[KONTEKS KEGELISAHAN/ANXIETY USER]
+- Primary Anxiety: ${anxiety.primaryAnxiety}
+- Secondary Anxiety: ${anxiety.secondaryAnxiety || 'N/A'}
+- Analisis Konteks: ${anxiety.contextDescription}
+`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-pro',

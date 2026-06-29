@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase'
 import { getAuthenticatedUser } from '@/lib/supabase-server'
-import { generateDecisionMVP, generateRingkasan } from '@/lib/laporan'
+import { generateDecisionMVP } from '@/lib/laporan'
 import type { ProfilData } from '@/types'
 
 // ============================================================
@@ -31,8 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (mode === 'ringkasan') {
-      const ringkasan = await generateRingkasan(profil)
-      return NextResponse.json({ ringkasan })
+      return NextResponse.json({ error: 'Endpoint ringkasan sudah tidak digunakan (depreacated). Gunakan endpoint laporan-gratis.' }, { status: 410 })
     }
 
     if (mode === 'full') {

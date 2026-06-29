@@ -1,9 +1,10 @@
 'use client'
-import type { MVPDecision, OldMVPDecision, PremiumReportV1, PremiumReportV2 } from '@/types'
+import type { MVPDecision, OldMVPDecision, PremiumReportV1, PremiumReportV2, PremiumReportV3 } from '@/types'
 import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
 import PremiumReportV1Renderer from './PremiumReportV1Renderer'
 import PremiumReportV2Renderer from './PremiumReportV2Renderer'
+import PremiumReportV3Renderer from './PremiumReportV3Renderer'
 
 interface LaporanLengkapProps {
   laporan: MVPDecision
@@ -344,9 +345,14 @@ function OldReportRenderer({ laporan }: { laporan: OldMVPDecision }) {
   )
 }
 
-export default function LaporanLengkap({ laporan }: { laporan: OldMVPDecision | PremiumReportV1 | PremiumReportV2 }) {
-  if ('report_type' in laporan && laporan.report_type === 'career_intelligence_visual_report') {
-    return <PremiumReportV2Renderer laporan={laporan as PremiumReportV2} />
+export default function LaporanLengkap({ laporan }: { laporan: MVPDecision }) {
+  if ('report_type' in laporan) {
+    if (laporan.report_type === 'premium_report_v3') {
+      return <PremiumReportV3Renderer laporan={laporan as PremiumReportV3} />
+    }
+    if (laporan.report_type === 'career_intelligence_visual_report') {
+      return <PremiumReportV2Renderer laporan={laporan as PremiumReportV2} />
+    }
   }
 
   if ('executive_summary' in laporan && !('report_type' in laporan)) {

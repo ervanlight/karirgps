@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
     const orderId = `KG-${session_id}-${Math.floor(Date.now() / 1000)}`
     const transactionParams = {
       transaction_details: {
-        order_id: orderId,
-        gross_amount: 59000, // Rp 59.000
+        order_id: `KARIRGPS-${session_id}-${Date.now()}`,
+        gross_amount: 99000,
       },
       customer_details: {
         email: email || 'user@karirgps.id',

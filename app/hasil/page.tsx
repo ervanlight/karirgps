@@ -7,8 +7,9 @@ import { createClient } from '@/lib/supabase'
 import { buildProfil } from '@/lib/scoring'
 import { FITUR_PAID } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
-import type { MVPDecision } from '@/types'
-import type { FreeReportParsed } from '@/lib/schemas'
+import type { MVPDecision, ParentReport } from '@/types'
+import type { FreeReportParsed, FreeReportV2Parsed } from '@/lib/schemas'
+import ParentReportRenderer from '@/components/hasil/ParentReportRenderer'
 
 // New Visual Components
 import DecisionCard from '@/components/hasil/DecisionCard'
@@ -39,15 +40,16 @@ function HasilContent() {
   const generatingAiRef = useRef(false)
   
   const [laporanLengkap, setLaporanLengkap] = useState<MVPDecision | null>(null)
+  const [laporanOrtu, setLaporanOrtu] = useState<ParentReport | null>(null)
   const [checkingLaporan, setCheckingLaporan] = useState(false)
   const [laporanTimedOut, setLaporanTimedOut] = useState(false)
   
-  const [freeReport, setFreeReport] = useState<FreeReportParsed | null>(null)
+  const [freeReport, setFreeReport] = useState<FreeReportV2Parsed | null>(null)
   const [loadingFreeReport, setLoadingFreeReport] = useState(false)
   const [freeReportError, setFreeReportError] = useState('')
 
   // TAB STATE
-  const [activeTab, setActiveTab] = useState<'awal' | 'lengkap'>('lengkap')
+  const [activeTab, setActiveTab] = useState<'awal' | 'lengkap' | 'ortu'>('lengkap')
   const [exploreOpen, setExploreOpen] = useState(false)
 
   // Build profil from store
@@ -164,6 +166,7 @@ function HasilContent() {
             return
           }
           setLaporanLengkap(data.laporan_siswa as MVPDecision)
+          if (data.laporan_orang_tua) setLaporanOrtu(data.laporan_orang_tua as ParentReport)
           setCheckingLaporan(false)
           return
         }
@@ -333,7 +336,7 @@ function HasilContent() {
         {/* 4. CAREER PATH CARDS */}
         <CareerGrid 
           title="Jalur Karier Yang Cocok" 
-          paths={freeReport.career_options.map(c => ({ name: c, description: '' }))} 
+          paths={freeReport.career_options.map(c => ({ name: c.nama, description: c.deskripsi_singkat }))} 
         />
 
         {/* 5. RISK TRUTH BLOCK */}
@@ -377,7 +380,7 @@ function HasilContent() {
                   : 'bg-ink text-white hover:bg-brand-600'
                 }`}
               >
-                {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Akses Penuh — Rp 59.000' : 'Menyiapkan sesi...')}
+                {paying ? (payStep || 'Memproses...') : (sessionReady ? 'Buka Akses Penuh — Rp 99.000' : 'Menyiapkan sesi...')}
               </button>
               {payError && <div className="mt-4 text-xs text-red-500 bg-red-50 p-2 rounded-lg font-medium">{payError}</div>}
               <p className="text-[11px] text-ink-light mt-6 uppercase tracking-widest font-bold">Sekali Bayar · Akses Selamanya</p>
@@ -513,10 +516,31 @@ function HasilContent() {
               >
                 Hasil Lengkap
               </button>
+              {laporanOrtu && (
+                <button
+                  onClick={() => setActiveTab('ortu')}
+                  className={`flex-1 text-sm font-semibold py-2.5 rounded-xl transition-all ${activeTab === 'ortu' ? 'bg-white text-indigo-600 shadow-sm' : 'text-ink-light hover:text-ink'}`}
+                >
+                  Untuk Orang Tua
+                </button>
+              )}
             </div>
 
             {activeTab === 'awal' ? (
               renderHasilAwal()
+            ) : activeTab === 'ortu' && laporanOrtu ? (
+              <div id="laporan-print-area">
+                <div className="no-print flex items-center justify-between mb-6">
+                  <div className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100">
+                    Mode Panduan Orang Tua
+                  </div>
+                  <button onClick={handleDownloadPdf} className="text-sm font-semibold text-ink-light hover:text-ink transition-colors flex gap-2 items-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Simpan PDF
+                  </button>
+                </div>
+                <ParentReportRenderer laporan={laporanOrtu} />
+              </div>
             ) : (
               <div id="laporan-print-area">
                 <div className="no-print flex items-center justify-between mb-6">

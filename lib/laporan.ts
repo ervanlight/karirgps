@@ -1,176 +1,142 @@
 import { GoogleGenAI, Type, Schema } from '@google/genai'
 import { ambilKandidatJurusan, ambilKandidatProfesi, fetchRagContext } from '@/lib/db-knowledge'
-import { KOMBINASI_RIASEC_MI, KOMBINASI_RIASEC_WV } from '@/lib/scoring'
-import type { ProfilData, MVPDecision, PremiumReportV1 } from '@/types'
-import fs from 'fs'
-import path from 'path'
+import { BRAND_VOICE } from '@/lib/knowledge/brand-voice'
+import { STYLE_GUIDE } from '@/lib/knowledge/style-guide'
+import { KOMBINASI_TABLES } from '@/lib/knowledge/combination-tables'
+import { getAnxietyContext } from '@/lib/knowledge/anxiety-framework'
+import { premiumReportV3Prompt } from '@/lib/prompts/premium-report-v3'
+import { parentReportPrompt } from '@/lib/prompts/parent-report'
+import type { ProfilData, PremiumReportV3, ParentReport } from '@/types'
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
 function getPremiumPrompt(): string {
-  try {
-    const promptPath = path.join(process.cwd(), 'lib', 'prompts', 'premium-report-v2.md')
-    return fs.readFileSync(promptPath, 'utf8')
-  } catch (error) {
-    console.error('Failed to load premium-report-v2.md', error)
-    return 'You are a Senior Career Strategy Consultant AI...' // Fallback
-  }
+  return premiumReportV3Prompt
 }
 
+function getParentPrompt(): string {
+  return parentReportPrompt
+}
 
 async function buildGroundingContext(profil: ProfilData): Promise<string> {
-  const [jurusanKandidat, profesiKandidat, ragContext] = await Promise.all([
+  const [kandidatJurusan, kandidatProfesi, ragContext] = await Promise.all([
     ambilKandidatJurusan(profil),
     ambilKandidatProfesi(profil),
     fetchRagContext(profil)
   ])
 
-  const parts: string[] = []
+  const anxiety = getAnxietyContext(profil.d4_konteks)
 
-  if (jurusanKandidat) parts.push(`KANDIDAT JURUSAN (berdasarkan database KarirGPS):\n${jurusanKandidat}`)
-  if (profesiKandidat) parts.push(`KANDIDAT PROFESI (berdasarkan database KarirGPS):\n${profesiKandidat}`)
-  if (ragContext) parts.push(ragContext)
+  return `
+[DATA PROFIL SISWA]
+- D1 (RIASEC): ${profil.d1_riasec.holland_code.join('')} (${profil.d1_riasec.deskripsi_primer}, ${profil.d1_riasec.deskripsi_sekunder})
+- D2 (MI): ${profil.d2_mi.mi_profile.join(', ')} (${profil.d2_mi.deskripsi_primer}, ${profil.d2_mi.deskripsi_sekunder})
+- D3 (Work Values): ${profil.d3_workvalues.values_profile.join(', ')} (${profil.d3_workvalues.deskripsi_primer}, ${profil.d3_workvalues.deskripsi_sekunder})
+- D4 Konteks (Tahap): ${profil.d4_konteks.tahap}
+- D4 Konteks (Domisili): ${profil.d4_konteks.domisili}
+- D4 Konteks (Jalur): ${profil.d4_konteks.jalur.join(', ')}
+- D4 Konteks (Biaya): ${profil.d4_konteks.kondisi_biaya}
+- D4 Konteks (Tanggungan): ${profil.d4_konteks.tanggungan_keluarga}
+- D4 Konteks (Akademik): ${profil.d4_konteks.kemampuan_akademik}
+- D4 Konteks (Mobilitas): ${profil.d4_konteks.mobilitas}
 
-  // Tambahkan kombinasi RIASEC×MI yang relevan
-  const topRiasec = profil.d1_riasec.holland_code.slice(0, 2)
-  const topMI = profil.d2_mi.mi_profile.slice(0, 2)
-  const relevantRiasecMI: string[] = []
-  for (const r of topRiasec) {
-    for (const m of topMI) {
-      const key = `${r}-${m}`
-      if (KOMBINASI_RIASEC_MI[key]) {
-        relevantRiasecMI.push(`${key}: ${KOMBINASI_RIASEC_MI[key]}`)
-      }
-    }
-  }
-  if (relevantRiasecMI.length > 0) {
-    parts.push(`KOMBINASI MINAT×CARA BERPIKIR yang relevan:\n${relevantRiasecMI.join('\n')}`)
-  }
+[KONTEKS KEGELISAHAN/ANXIETY USER]
+- Primary Anxiety: ${anxiety.primaryAnxiety}
+- Secondary Anxiety: ${anxiety.secondaryAnxiety || 'N/A'}
+- Analisis Konteks: ${anxiety.contextDescription}
+Gunakan ini untuk mengatur tone pembuka dan langkah selanjutnya agar tepat sasaran!
 
-  // Tambahkan kombinasi RIASEC×WV yang relevan
-  const topWV = profil.d3_workvalues.values_profile.slice(0, 2)
-  const relevantRiasecWV: string[] = []
-  for (const r of topRiasec) {
-    for (const w of topWV) {
-      const key = `${r}-${w}`
-      if (KOMBINASI_RIASEC_WV[key]) {
-        relevantRiasecWV.push(`${key}: ${KOMBINASI_RIASEC_WV[key]}`)
-      }
-    }
-  }
-  if (relevantRiasecWV.length > 0) {
-    parts.push(`KOMBINASI MINAT×NILAI KERJA yang relevan:\n${relevantRiasecWV.join('\n')}`)
-  }
+[KANDIDAT JURUSAN DARI DATABASE (Relevan dengan profil ini)]
+${kandidatJurusan || 'Tidak ada data spesifik'}
 
-  if (parts.length === 0) return ''
-  return `\n\nREFERENSI KARIR (pilih yang paling realistis dengan kondisi D4):\n${parts.join('\n\n')}`
+[KANDIDAT PROFESI DARI DATABASE (Relevan dengan profil ini)]
+${kandidatProfesi || 'Tidak ada data spesifik'}
+
+[KNOWLEDGE BASE RAG (Info spesifik terkait jurusan/profesi di atas)]
+${ragContext || ''}
+
+[TABEL KOMBINASI REFERENSI]
+${KOMBINASI_TABLES}
+`
 }
 
-export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecision> {
-  const grounding = await buildGroundingContext(profil)
-  const promptData = `PROFIL SISWA:\n\n${JSON.stringify(profil, null, 2)}${grounding}`
+export async function generateDecisionMVP(profil: ProfilData): Promise<PremiumReportV3> {
+  const groundingContext = await buildGroundingContext(profil)
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-pro',
-    contents: promptData,
-    config: {
-      systemInstruction: getPremiumPrompt(),
-      temperature: 0.8,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          report_type: { type: Type.STRING },
-          version: { type: Type.STRING },
-          user_profile: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              decision_type: { type: Type.STRING }
-            },
-            required: ['name', 'decision_type']
-          },
-          sections: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                id: { type: Type.STRING },
-                type: { type: Type.STRING },
-                title: { type: Type.STRING },
-                content: { type: Type.STRING },
-                cards: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: { label: { type: Type.STRING }, value: { type: Type.STRING } },
-                    required: ['label', 'value']
-                  }
-                },
-                items: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: { path: { type: Type.STRING }, score: { type: Type.NUMBER }, description: { type: Type.STRING } },
-                    required: ['path', 'score', 'description']
-                  }
-                },
-                tree: {
-                  type: Type.OBJECT,
-                  properties: {
-                    root: { type: Type.STRING },
-                    branches: {
-                      type: Type.ARRAY,
-                      items: {
-                        type: Type.OBJECT,
-                        properties: { label: { type: Type.STRING }, result: { type: Type.STRING } },
-                        required: ['label', 'result']
-                      }
-                    }
-                  },
-                  required: ['root', 'branches']
-                },
-                timeline: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: { period: { type: Type.STRING }, action: { type: Type.STRING } },
-                    required: ['period', 'action']
-                  }
-                }
-              },
-              required: ['id', 'type', 'title']
-            }
-          }
-        },
-        required: ['report_type', 'version', 'user_profile', 'sections']
+  const promptText = `
+---
+IDENTITAS & TONE VOICE (WAJIB DIIKUTI)
+${BRAND_VOICE}
+
+STYLE GUIDE BAHASA (WAJIB DIIKUTI)
+${STYLE_GUIDE}
+---
+
+${groundingContext}
+`
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-pro',
+      contents: promptText,
+      config: {
+        systemInstruction: getPremiumPrompt(),
+        temperature: 0.8,
+        responseMimeType: 'application/json',
       }
-    }
-  })
+    })
 
-  const text = response.text
-  if (!text) throw new Error('Empty response from Gemini')
-
-  return JSON.parse(text) as MVPDecision
+    const text = response.text
+    if (!text) throw new Error('Empty response from AI')
+    
+    const json = JSON.parse(text)
+    json.report_type = 'premium_report_v3'
+    return json as PremiumReportV3
+  } catch (error) {
+    console.error('Failed to generate full report:', error)
+    return { _error: true } as unknown as PremiumReportV3
+  }
 }
 
-export async function generateRingkasan(profil: ProfilData) {
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-pro',
-    contents: JSON.stringify(profil),
-    config: {
-      systemInstruction: 'Tulis ringkasan profil dalam 2 kalimat personal bahasa Indonesia menggunakan gaya mentor. Gunakan "kamu". Kembalikan JSON dengan key "profil_singkat".',
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          profil_singkat: { type: Type.STRING }
-        },
-        required: ['profil_singkat']
-      }
-    }
-  })
+export async function generateParentReport(profil: ProfilData, laporanSiswa: PremiumReportV3): Promise<ParentReport> {
+  const promptText = `
+---
+IDENTITAS & TONE VOICE (WAJIB DIIKUTI)
+${BRAND_VOICE}
 
-  const text = response.text
-  return JSON.parse(text || '{}')
+STYLE GUIDE BAHASA (WAJIB DIIKUTI)
+${STYLE_GUIDE}
+---
+
+[DATA PROFIL SISWA]
+- D1 (RIASEC): ${profil.d1_riasec.holland_code.join('')} (${profil.d1_riasec.deskripsi_primer})
+- D2 (MI): ${profil.d2_mi.mi_profile.join(', ')} (${profil.d2_mi.deskripsi_primer})
+- D3 (Work Values): ${profil.d3_workvalues.values_profile.join(', ')} (${profil.d3_workvalues.deskripsi_primer})
+- D4 Konteks (Biaya): ${profil.d4_konteks.kondisi_biaya}
+- D4 Konteks (Tanggungan): ${profil.d4_konteks.tanggungan_keluarga}
+
+[LAPORAN SISWA YANG SUDAH JADI SEBAGAI KONTEKS]
+${JSON.stringify(laporanSiswa, null, 2)}
+`
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: promptText,
+      config: {
+        systemInstruction: getParentPrompt(),
+        temperature: 0.7,
+        responseMimeType: 'application/json',
+      }
+    })
+
+    const text = response.text
+    if (!text) throw new Error('Empty response from AI')
+    
+    const json = JSON.parse(text)
+    return json.untuk_orang_tua as ParentReport
+  } catch (error) {
+    console.error('Failed to generate parent report:', error)
+    return { _error: true } as unknown as ParentReport
+  }
 }

@@ -21,12 +21,22 @@ function renderLaporanHTML(
 ): string {
   const isPremiumV1 = 'executive_summary' in laporan && !('report_type' in laporan)
   const isPremiumV2 = 'report_type' in laporan && laporan.report_type === 'career_intelligence_visual_report'
+  const isPremiumV3 = 'report_type' in laporan && laporan.report_type === 'premium_report_v3'
   
   let karirArray: { nama: string, deskripsi: string, jalur_masuk?: string }[] = []
   let rekomendasiUtama = 'Jalur Khusus'
   let alasan = ''
 
-  if (isPremiumV2) {
+  if (isPremiumV3) {
+    const v3 = laporan as any
+    rekomendasiUtama = v3.profil_singkat || 'Rekomendasi Personal V3'
+    alasan = v3.pembuka || ''
+    karirArray = (v3.profesi || []).map((p: any) => ({
+      nama: p.nama,
+      deskripsi: p.gambaran_nyata,
+      jalur_masuk: p.jalur_masuk
+    }))
+  } else if (isPremiumV2) {
     const v2 = laporan as any
     const execSummary = v2.sections?.find((s: any) => s.id === 'executive_summary')?.content
     const careerPaths = v2.sections?.find((s: any) => s.id === 'career_paths')?.items || []
@@ -134,9 +144,12 @@ export async function kirimLaporan({
 
   const isPremiumV1 = 'executive_summary' in laporan && !('report_type' in laporan)
   const isPremiumV2 = 'report_type' in laporan && laporan.report_type === 'career_intelligence_visual_report'
+  const isPremiumV3 = 'report_type' in laporan && laporan.report_type === 'premium_report_v3'
   
   let rekomendasiUtama = 'Jalur Khusus'
-  if (isPremiumV2) {
+  if (isPremiumV3) {
+    rekomendasiUtama = 'Laporan Spesifik Karir & Jurusan'
+  } else if (isPremiumV2) {
     rekomendasiUtama = (laporan as any).user_profile?.decision_type || 'Rekomendasi Optimal'
   } else if (isPremiumV1) {
     rekomendasiUtama = (laporan as any).executive_summary?.core_direction || 'Rekomendasi Optimal'

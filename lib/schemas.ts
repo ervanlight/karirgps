@@ -44,3 +44,61 @@ export const FreeReportSchema = z.object({
 })
 
 export type FreeReportParsed = z.infer<typeof FreeReportSchema>
+
+export const FreeReportV2Schema = z.object({
+  pembuka_personal: z.string(),
+  identity_mirror: z.string(),
+  career_direction: z.enum(['Kuliah', 'Kerja', 'Hybrid']),
+  direction_reasoning: z.string(),
+  career_options: z.array(z.object({
+    nama: z.string(),
+    deskripsi_singkat: z.string(),
+  })).length(3),
+  roadmap: z.string(),
+  key_risk: z.string(),
+  insight_moment: z.string(),
+  premium_curious_gap: z.string(),
+})
+
+export type FreeReportV2Parsed = z.infer<typeof FreeReportV2Schema>
+
+export const JurusanRekomendasiSchema = z.object({
+  nama: z.string(),
+  reasoning: z.string(),
+  kampus_rekomendasi: z.string(),
+  keketatan: z.string(),
+})
+
+export const ProfesiRekomendasiSchema = z.object({
+  nama: z.string(),
+  gambaran_nyata: z.string(),
+  jalur_masuk: z.string(),
+  catatan: z.string().optional(),
+})
+
+export const PremiumReportV3Schema = z.object({
+  profil_singkat: z.string(),
+  pembuka: z.string(),
+  profil_kepribadian: z.string(),
+  nilai_kerja: z.string(),
+  jurusan: z.array(JurusanRekomendasiSchema).length(3),
+  profesi: z.array(ProfesiRekomendasiSchema).length(5),
+  kekuatan: z.array(z.string()).min(2).max(3),
+  perlu_diwaspadai: z.array(z.string()).length(2),
+  langkah_selanjutnya: z.string(),
+  penutup: z.string(),
+})
+
+export type PremiumReportV3Parsed = z.infer<typeof PremiumReportV3Schema>
+
+export const ParentReportSchema = z.object({
+  untuk_orang_tua: z.object({
+    cara_berpikir_anak: z.string(),
+    apa_yang_memotivasi: z.string(),
+    dukungan_yang_dibutuhkan: z.string(),
+    cara_berdiskusi: z.string(),
+    hal_terpenting: z.string(),
+  })
+})
+
+export type ParentReportParsed = z.infer<typeof ParentReportSchema>['untuk_orang_tua']

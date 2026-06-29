@@ -180,14 +180,67 @@ export interface PremiumReportSection {
   timeline?: { period: string; action: string }[]
 }
 
-export interface PremiumReportV2 {
+export type PremiumReportV2 = {
   report_type: 'career_intelligence_visual_report'
   version: '2.0'
   user_profile: {
-    name: string
-    decision_type: string
+    holland_code: string
+    mi_profile: string
+    work_values: string
+    decision_type?: string
   }
   sections: PremiumReportSection[]
+}
+
+// ----------------------------------------------------------------------------
+// TIPE KEPUTUSAN (V3 - TERBARU)
+// ----------------------------------------------------------------------------
+export type JurusanRekomendasi = {
+  nama: string
+  reasoning: string
+  kampus_rekomendasi: string
+  keketatan: string
+}
+
+export type ProfesiRekomendasi = {
+  nama: string
+  gambaran_nyata: string
+  jalur_masuk: string
+  catatan?: string
+}
+
+export type PremiumReportV3 = {
+  report_type: 'premium_report_v3'
+  profil_singkat: string
+  pembuka: string
+  profil_kepribadian: string
+  nilai_kerja: string
+  jurusan: JurusanRekomendasi[]
+  profesi: ProfesiRekomendasi[]
+  kekuatan: string[]
+  perlu_diwaspadai: string[]
+  langkah_selanjutnya: string
+  penutup: string
+}
+
+export type ParentReport = {
+  cara_berpikir_anak: string
+  apa_yang_memotivasi: string
+  dukungan_yang_dibutuhkan: string
+  cara_berdiskusi: string
+  hal_terpenting: string
+}
+
+export type FreeReportV2 = {
+  pembuka_personal: string
+  identity_mirror: string
+  career_direction: 'Kuliah' | 'Kerja' | 'Hybrid'
+  direction_reasoning: string
+  career_options: { nama: string, deskripsi_singkat: string }[]
+  roadmap: string
+  key_risk: string
+  insight_moment: string
+  premium_curious_gap: string
 }
 
 export interface OldMVPDecision {
@@ -207,7 +260,7 @@ export interface OldMVPDecision {
   alternative_scenario?: string   // Skenario jalan alternatif jika plan A gagal
 }
 
-export type MVPDecision = OldMVPDecision | PremiumReportV1 | PremiumReportV2
+export type MVPDecision = OldMVPDecision | PremiumReportV1 | PremiumReportV2 | PremiumReportV3
 
 // --- DATABASE TYPES (Supabase) ---
 export interface DbUser {
@@ -220,7 +273,7 @@ export interface DbTestSession {
   id: string
   user_id: string | null
   session_token: string
-  profil_data: ProfilData
+  profil_data: ProfilData | null
   status: 'in_progress' | 'completed' | 'paid'
   created_at: string
   completed_at: string | null
@@ -228,12 +281,11 @@ export interface DbTestSession {
 
 export interface DbReport {
   id: string
+  user_id: string
   session_id: string
-  user_id: string | null
-  laporan_siswa: MVPDecision
-  laporan_orang_tua: null // deprecated for MVP
-  payment_status: 'unpaid' | 'paid'
-  payment_id: string | null
+  laporan_siswa: MVPDecision | null
+  laporan_orang_tua: ParentReport | null
+  payment_status: 'pending' | 'paid' | 'failed'
   created_at: string
 }
 

@@ -7,7 +7,8 @@ import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
 import { RIASEC_COLOR, WV_COLOR, MI_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID, HOLLAND_DESC } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
 import { useTesStore } from '@/lib/store'
-import type { RiasecCode, MICode, WorkValueCode, MVPDecision, ProfilData } from '@/types'
+import type { RiasecCode, MICode, WorkValueCode, MVPDecision, ProfilData, ParentReport } from '@/types'
+import ParentReportRenderer from '@/components/hasil/ParentReportRenderer'
 
 type Status = 'loading' | 'not_found' | 'ready'
 
@@ -30,6 +31,7 @@ function LaporanContent() {
   const [profil, setProfil] = useState<ProfilData | null>(null)
   const [paymentPaid, setPaymentPaid] = useState(false)
   const [laporanLengkap, setLaporanLengkap] = useState<MVPDecision | null>(null)
+  const [laporanOrtu, setLaporanOrtu] = useState<ParentReport | null>(null)
   
   const [checkingLaporan, setCheckingLaporan] = useState(false)
   const [laporanTimedOut, setLaporanTimedOut] = useState(false)
@@ -41,7 +43,7 @@ function LaporanContent() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
   // TAB STATE
-  const [activeTab, setActiveTab] = useState<'awal' | 'lengkap'>('lengkap')
+  const [activeTab, setActiveTab] = useState<'awal' | 'lengkap' | 'ortu'>('lengkap')
 
   useEffect(() => {
     let active = true
@@ -66,7 +68,7 @@ function LaporanContent() {
 
       const { data: report } = await supabase
         .from('reports')
-        .select('payment_status, laporan_siswa')
+        .select('payment_status, laporan_siswa, laporan_orang_tua')
         .eq('session_id', sessionId)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -77,6 +79,9 @@ function LaporanContent() {
         setPaymentPaid(true)
         if (report.laporan_siswa) {
           setLaporanLengkap(report.laporan_siswa as MVPDecision)
+        }
+        if (report.laporan_orang_tua) {
+          setLaporanOrtu(report.laporan_orang_tua as ParentReport)
         }
       }
       setStatus('ready')
@@ -105,6 +110,7 @@ function LaporanContent() {
             return
           }
           setLaporanLengkap(data.laporan_siswa as MVPDecision)
+          if (data.laporan_orang_tua) setLaporanOrtu(data.laporan_orang_tua as ParentReport)
           setCheckingLaporan(false)
           return
         }
@@ -452,7 +458,7 @@ function LaporanContent() {
               </div>
 
               <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm border border-white/20 text-center">
-                <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
+                <div className="text-3xl font-extrabold mb-1">Rp 99.000</div>
                 <div className="text-xs text-brand-100 mb-5">Sekali bayar · Dikirim ke email · Akses selamanya</div>
                 
                 <button
@@ -487,10 +493,31 @@ function LaporanContent() {
               >
                 Hasil Lengkap
               </button>
+              {laporanOrtu && (
+                <button
+                  onClick={() => setActiveTab('ortu')}
+                  className={`flex-1 text-sm font-semibold py-2.5 rounded-xl transition-all ${activeTab === 'ortu' ? 'bg-white text-indigo-600 shadow-sm' : 'text-ink-light hover:text-ink'}`}
+                >
+                  Untuk Orang Tua
+                </button>
+              )}
             </div>
 
             {activeTab === 'awal' ? (
               renderHasilAwal()
+            ) : activeTab === 'ortu' && laporanOrtu ? (
+              <div id="laporan-print-area">
+                <div className="no-print flex items-center justify-between mb-6">
+                  <div className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100">
+                    Mode Panduan Orang Tua
+                  </div>
+                  <button onClick={handleDownloadPdf} className="text-sm font-semibold text-ink-light hover:text-ink transition-colors flex gap-2 items-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Simpan PDF
+                  </button>
+                </div>
+                <ParentReportRenderer laporan={laporanOrtu} />
+              </div>
             ) : (
               <div id="laporan-print-area">
                 <div className="no-print flex items-center justify-between mb-6">
