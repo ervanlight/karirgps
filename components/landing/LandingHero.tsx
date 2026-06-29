@@ -1,0 +1,110 @@
+import Link from 'next/link'
+
+export default function LandingHero() {
+  return (
+    <section className="pt-32 pb-16 md:pt-40 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
+      <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        {/* Hero Left: Free-first, calm copy */}
+        <div className="animate-fade-up order-2 lg:order-1 mt-8 lg:mt-0 text-center lg:text-left">
+          <h1 className="text-4xl md:text-5xl lg:text-[52px] font-extrabold tracking-tight text-ink mb-6 leading-[1.15] text-balance">
+            Temukan arah karier yang jelas untuk <span className="text-brand-600">masa depanmu.</span>
+          </h1>
+
+          <p className="text-base md:text-lg text-ink-light mb-10 leading-[1.8] max-w-lg mx-auto lg:mx-0">
+            Pahami apakah kamu lebih cocok untuk fokus <strong>kuliah, kerja, atau menempuh jalur hybrid.</strong> Tidak perlu menebak-nebak lagi, mari kita petakan langkah pertamamu.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start w-full mb-8">
+            <Link 
+              href="/auth/register" 
+              className="w-full sm:w-auto bg-brand-600 text-white rounded-2xl px-10 py-4 text-base font-bold hover:bg-brand-700 hover:-translate-y-0.5 transition-all duration-300 shadow-soft text-center"
+            >
+              Mulai Analisis Gratis
+            </Link>
+            <a 
+              href="#preview" 
+              className="w-full sm:w-auto bg-white border border-surface-200 text-ink rounded-2xl px-10 py-4 text-base font-bold hover:bg-surface-50 transition-all duration-300 text-center"
+            >
+              Lihat Contoh Hasil
+            </a>
+          </div>
+
+          {/* Low-pressure Trust Chips */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm font-medium text-ink-light pt-2">
+            <div className="flex items-center gap-2">
+              <svg className="text-brand-500" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 
+              Gratis untuk mulai
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="text-brand-500" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 
+              Tanpa komitmen
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="text-brand-500" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 
+              Cocok untuk SMA/SMK
+            </div>
+          </div>
+        </div>
+        
+        {/* Hero Right: Real UI Mockup */}
+        <div className="relative animate-fade-in z-0 order-1 lg:order-2">
+          {/* Calm background glow */}
+          <div className="absolute inset-0 bg-brand-500/10 blur-[100px] rounded-full scale-100 pointer-events-none"></div>
+          
+          <div className="relative bg-white border border-surface-200 rounded-3xl shadow-md p-6 lg:p-8 transform rotate-1 hover:rotate-0 transition-transform duration-700 select-none mx-auto max-w-md lg:max-w-none">
+            
+            {/* Mockup Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-brand-50 text-brand-600 font-bold text-sm flex items-center justify-center border border-brand-100">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <div>
+                  <div className="text-[11px] text-ink-light uppercase tracking-widest font-semibold">Hasil Analisis</div>
+                  <div className="text-sm font-bold text-ink">Profil Siswa #842</div>
+                </div>
+              </div>
+              <div className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[11px] uppercase font-bold tracking-widest rounded-full border border-emerald-100">
+                Selesai
+              </div>
+            </div>
+
+            {/* Core Decision */}
+            <div className="bg-surface-50 rounded-2xl p-6 border border-surface-200 mb-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-xs uppercase tracking-widest text-ink-light font-bold">Rekomendasi Utama</div>
+                <div className="flex items-center gap-1.5 bg-brand-50 text-brand-700 px-2.5 py-1 rounded-md text-xs font-bold border border-brand-100">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  Tinggi
+                </div>
+              </div>
+              <div className="text-2xl font-extrabold text-ink mb-1">Jalur Hybrid</div>
+              <div className="text-sm text-ink-light leading-relaxed">
+                Mulai bekerja (freelance/entry-level) sambil mengikuti kuliah online untuk menyeimbangkan finansial dan gelar akademik.
+              </div>
+            </div>
+
+            {/* Grid of Mini Insights */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white border border-surface-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div className="text-[11px] uppercase tracking-widest text-ink-light font-bold mb-1">Kecocokan</div>
+                <div className="text-xl font-bold text-brand-600">84%</div>
+                <div className="w-full h-1.5 bg-surface-100 rounded-full mt-3 overflow-hidden">
+                  <div className="w-[84%] h-full bg-brand-500 rounded-full"></div>
+                </div>
+              </div>
+              <div className="bg-white border border-surface-200 rounded-xl p-4 shadow-sm">
+                <div className="text-[11px] uppercase tracking-widest text-ink-light font-bold mb-1">Fokus Awal</div>
+                <div className="text-sm font-bold text-ink leading-snug">Magang & Bootcamp</div>
+                <div className="text-xs text-ink-light mt-2 flex items-center gap-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  Dalam 30 hari
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

@@ -29,8 +29,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable}`}>
-      <body style={{ margin: 0, padding: 0 }} className="font-sans">
+    <html lang="id" className={`${inter.variable} scroll-smooth`}>
+      <body style={{ margin: 0, padding: 0 }} className="font-sans antialiased text-ink selection:bg-brand-500 selection:text-white">
         {children}
       </body>
     </html>
