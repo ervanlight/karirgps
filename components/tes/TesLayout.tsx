@@ -33,10 +33,10 @@ export default function TesLayout({
   const router = useRouter()
   const meta = DIMENSI_META[dimensi - 1]
   
-  // Calculate dynamic progress
-  const baseProgress = ((dimensi - 1) / 4) * 100
-  const localProgress = total > 0 ? (answered / total) * 25 : 0 // Each dimension is 25% of the total test
-  const progress = Math.min(100, baseProgress + localProgress)
+  // Calculate dynamic local progress (Micro-wins UX)
+  // Instead of showing 12% out of the whole test, we show 0-100% for the CURRENT phase.
+  const localProgress = total > 0 ? (answered / total) * 100 : 0
+  const progress = Math.min(100, localProgress)
 
   function handleNext() {
     if (onNext) onNext()
@@ -59,11 +59,11 @@ export default function TesLayout({
 
           {/* Progress Bar */}
           <div className="flex-1 max-w-xs mx-4">
-            <div className="flex justify-between text-xs font-medium text-ink-light mb-2">
-              <span>Langkah {dimensi} dari 4</span>
-              <span>{Math.round(progress)}%</span>
+            <div className="flex justify-between text-[11px] font-bold text-ink-light uppercase tracking-wider mb-2">
+              <span>Fase {dimensi} dari 4</span>
+              {/* Persentase disembunyikan agar tidak mengintimidasi */}
             </div>
-            <div className="h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-surface-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-brand-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
