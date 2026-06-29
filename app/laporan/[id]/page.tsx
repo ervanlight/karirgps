@@ -88,18 +88,18 @@ function LaporanContent() {
     const maxAttempts = 70
 
     async function checkLaporan() {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('reports')
-        .select('payment_status, laporan_siswa')
-        .eq('session_id', sessionId)
-        .maybeSingle()
+      try {
+        const res = await fetch(`/api/check-laporan/${sessionId}`)
+        const json = await res.json()
+        const data = json.data
 
-      if (!active) return
-      if (data?.payment_status === 'paid' && data.laporan_siswa) {
+        if (!active) return
+        if (data?.payment_status === 'paid' && data.laporan_siswa) {
         setLaporanLengkap(data.laporan_siswa as MVPDecision)
         setCheckingLaporan(false)
         return
+      } catch (err) {
+        console.error('Polling error:', err)
       }
       attempts += 1
       if (attempts >= maxAttempts) {
