@@ -9,10 +9,10 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
 function getPremiumPrompt(): string {
   try {
-    const promptPath = path.join(process.cwd(), 'lib', 'prompts', 'premium-report-v1.md')
+    const promptPath = path.join(process.cwd(), 'lib', 'prompts', 'premium-report-v2.md')
     return fs.readFileSync(promptPath, 'utf8')
   } catch (error) {
-    console.error('Failed to load premium-report-v1.md', error)
+    console.error('Failed to load premium-report-v2.md', error)
     return 'You are a Senior Career Strategy Consultant AI...' // Fallback
   }
 }
@@ -80,97 +80,70 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          executive_summary: {
+          report_type: { type: Type.STRING },
+          version: { type: Type.STRING },
+          user_profile: {
             type: Type.OBJECT,
             properties: {
-              user_identity: { type: Type.STRING },
-              core_direction: { type: Type.STRING },
-              truth_statement: { type: Type.STRING }
+              name: { type: Type.STRING },
+              decision_type: { type: Type.STRING }
             },
-            required: ['user_identity', 'core_direction', 'truth_statement']
+            required: ['name', 'decision_type']
           },
-          cognitive_profile: {
-            type: Type.OBJECT,
-            properties: {
-              thinking_style: { type: Type.STRING },
-              learning_style: { type: Type.STRING },
-              decision_style: { type: Type.STRING },
-              strengths_blindspots: { type: Type.STRING }
-            },
-            required: ['thinking_style', 'learning_style', 'decision_style', 'strengths_blindspots']
-          },
-          career_fit: {
+          sections: {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
               properties: {
-                path_name: { type: Type.STRING },
-                why_it_fits: { type: Type.STRING },
-                thrive_environment: { type: Type.STRING },
-                avoid_environment: { type: Type.STRING }
+                id: { type: Type.STRING },
+                type: { type: Type.STRING },
+                title: { type: Type.STRING },
+                content: { type: Type.STRING },
+                cards: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: { label: { type: Type.STRING }, value: { type: Type.STRING } },
+                    required: ['label', 'value']
+                  }
+                },
+                items: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: { path: { type: Type.STRING }, score: { type: Type.NUMBER }, description: { type: Type.STRING } },
+                    required: ['path', 'score', 'description']
+                  }
+                },
+                tree: {
+                  type: Type.OBJECT,
+                  properties: {
+                    root: { type: Type.STRING },
+                    branches: {
+                      type: Type.ARRAY,
+                      items: {
+                        type: Type.OBJECT,
+                        properties: { label: { type: Type.STRING }, result: { type: Type.STRING } },
+                        required: ['label', 'result']
+                      }
+                    }
+                  },
+                  required: ['root', 'branches']
+                },
+                timeline: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: { period: { type: Type.STRING }, action: { type: Type.STRING } },
+                    required: ['period', 'action']
+                  }
+                }
               },
-              required: ['path_name', 'why_it_fits', 'thrive_environment', 'avoid_environment']
+              required: ['id', 'type', 'title']
             }
-          },
-          path_simulation: {
-            type: Type.OBJECT,
-            properties: {
-              college_scenario: {
-                type: Type.OBJECT,
-                properties: { lifestyle: { type: Type.STRING }, skill_trajectory: { type: Type.STRING }, risks: { type: Type.STRING }, outcome: { type: Type.STRING } },
-                required: ['lifestyle', 'skill_trajectory', 'risks', 'outcome']
-              },
-              work_scenario: {
-                type: Type.OBJECT,
-                properties: { lifestyle: { type: Type.STRING }, skill_trajectory: { type: Type.STRING }, risks: { type: Type.STRING }, outcome: { type: Type.STRING } },
-                required: ['lifestyle', 'skill_trajectory', 'risks', 'outcome']
-              },
-              hybrid_scenario: {
-                type: Type.OBJECT,
-                properties: { lifestyle: { type: Type.STRING }, skill_trajectory: { type: Type.STRING }, risks: { type: Type.STRING }, outcome: { type: Type.STRING } },
-                required: ['lifestyle', 'skill_trajectory', 'risks', 'outcome']
-              }
-            },
-            required: ['college_scenario', 'work_scenario', 'hybrid_scenario']
-          },
-          real_world_outcome: {
-            type: Type.OBJECT,
-            properties: {
-              income_range: { type: Type.STRING },
-              likely_roles: { type: Type.ARRAY, items: { type: Type.STRING } },
-              industry_positioning: { type: Type.STRING },
-              career_ceiling: { type: Type.STRING }
-            },
-            required: ['income_range', 'likely_roles', 'industry_positioning', 'career_ceiling']
-          },
-          risk_analysis: {
-            type: Type.OBJECT,
-            properties: {
-              wrong_direction_impact: { type: Type.STRING },
-              stagnation_causes: { type: Type.STRING },
-              growth_blockers: { type: Type.STRING }
-            },
-            required: ['wrong_direction_impact', 'stagnation_causes', 'growth_blockers']
-          },
-          strategic_roadmap: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                timeline: { type: Type.STRING },
-                action: { type: Type.STRING },
-                skill_focus: { type: Type.STRING },
-                learning_priority: { type: Type.STRING }
-              },
-              required: ['timeline', 'action', 'skill_focus', 'learning_priority']
-            }
-          },
-          final_diagnosis: { type: Type.STRING }
+          }
         },
-        required: [
-          'executive_summary', 'cognitive_profile', 'career_fit', 'path_simulation', 
-          'real_world_outcome', 'risk_analysis', 'strategic_roadmap', 'final_diagnosis'
-        ]
+        required: ['report_type', 'version', 'user_profile', 'sections']
       }
     }
   })

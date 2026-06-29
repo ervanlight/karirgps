@@ -19,14 +19,40 @@ function renderLaporanHTML(
   miProfile: MICode[],
   wvProfile: WorkValueCode[]
 ): string {
-  const isPremium = 'executive_summary' in laporan;
+  const isPremiumV1 = 'executive_summary' in laporan && !('report_type' in laporan)
+  const isPremiumV2 = 'report_type' in laporan && laporan.report_type === 'career_intelligence_visual_report'
   
-  const karirArray = isPremium 
-    ? (laporan.career_fit || []).map(c => ({ nama: c.path_name, deskripsi: c.why_it_fits, jalur_masuk: c.thrive_environment }))
-    : (laporan.karir || []);
+  let karirArray: { nama: string, deskripsi: string, jalur_masuk?: string }[] = []
+  let rekomendasiUtama = 'Jalur Khusus'
+  let alasan = ''
+
+  if (isPremiumV2) {
+    const v2 = laporan as any
+    const execSummary = v2.sections?.find((s: any) => s.id === 'executive_summary')?.content
+    const careerPaths = v2.sections?.find((s: any) => s.id === 'career_paths')?.items || []
     
-  const rekomendasiUtama = isPremium ? laporan.executive_summary.core_direction : (laporan.rekomendasi_utama || 'Jalur Khusus');
-  const alasan = isPremium ? laporan.executive_summary.truth_statement : (laporan.alasan || '');
+    rekomendasiUtama = v2.user_profile?.decision_type || 'Rekomendasi Optimal'
+    alasan = execSummary || ''
+    karirArray = careerPaths.map((c: any) => ({
+      nama: c.path,
+      deskripsi: c.description,
+      jalur_masuk: 'Berdasarkan roadmap & timeline'
+    }))
+  } else if (isPremiumV1) {
+    const v1 = laporan as any
+    rekomendasiUtama = v1.executive_summary?.core_direction || 'Rekomendasi Optimal'
+    alasan = v1.executive_summary?.truth_statement || ''
+    karirArray = (v1.career_fit || []).map((c: any) => ({
+      nama: c.path_name,
+      deskripsi: c.why_it_fits,
+      jalur_masuk: c.thrive_environment
+    }))
+  } else {
+    const old = laporan as any
+    rekomendasiUtama = old.rekomendasi_utama || 'Jalur Khusus'
+    alasan = old.alasan || ''
+    karirArray = old.karir || []
+  }
 
   const karirHTML = karirArray.map((k, i) => `
     <div style="margin-bottom:20px;padding:16px 18px;background:#F8F7F4;border-radius:8px;border-left:3px solid #1D9E75;">
@@ -106,8 +132,17 @@ export async function kirimLaporan({
 
   const topCode = hollandCode.slice(0, 2).map(c => RIASEC_LABELS[c]).join(' + ')
 
-  const isPremium = 'executive_summary' in laporan;
-  const rekomendasiUtama = isPremium ? laporan.executive_summary.core_direction : (laporan.rekomendasi_utama || 'Jalur Khusus');
+  const isPremiumV1 = 'executive_summary' in laporan && !('report_type' in laporan)
+  const isPremiumV2 = 'report_type' in laporan && laporan.report_type === 'career_intelligence_visual_report'
+  
+  let rekomendasiUtama = 'Jalur Khusus'
+  if (isPremiumV2) {
+    rekomendasiUtama = (laporan as any).user_profile?.decision_type || 'Rekomendasi Optimal'
+  } else if (isPremiumV1) {
+    rekomendasiUtama = (laporan as any).executive_summary?.core_direction || 'Rekomendasi Optimal'
+  } else {
+    rekomendasiUtama = (laporan as any).rekomendasi_utama || 'Jalur Khusus'
+  }
 
   const payload = {
     from: `KarirGPS <${FROM_EMAIL}>`,

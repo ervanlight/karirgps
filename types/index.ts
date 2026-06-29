@@ -168,6 +168,28 @@ export interface PremiumReportV1 {
   final_diagnosis: string
 }
 
+// --- NEW V2 PREMIUM REPORT (DYNAMIC VISUAL SECTIONS) ---
+export interface PremiumReportSection {
+  id: string
+  type: 'text_block' | 'visual_card' | 'visual_ranking' | 'tree_diagram' | 'timeline' | 'warning_block'
+  title: string
+  content?: string
+  cards?: { label: string; value: string }[]
+  items?: { path: string; score: number; description: string }[]
+  tree?: { root: string; branches: { label: string; result: string }[] }
+  timeline?: { period: string; action: string }[]
+}
+
+export interface PremiumReportV2 {
+  report_type: 'career_intelligence_visual_report'
+  version: '2.0'
+  user_profile: {
+    name: string
+    decision_type: string
+  }
+  sections: PremiumReportSection[]
+}
+
 export interface OldMVPDecision {
   pesan_pembuka?: string          // Hook emosional pembuka, 1-2 kalimat tajam dan personal
   profil_naratif?: string         // Refleksi kepribadian 2-3 paragraf, tulis seperti mentor
@@ -185,7 +207,7 @@ export interface OldMVPDecision {
   alternative_scenario?: string   // Skenario jalan alternatif jika plan A gagal
 }
 
-export type MVPDecision = OldMVPDecision | PremiumReportV1
+export type MVPDecision = OldMVPDecision | PremiumReportV1 | PremiumReportV2
 
 // --- DATABASE TYPES (Supabase) ---
 export interface DbUser {
