@@ -69,13 +69,13 @@ export default function DashboardPage() {
       if (!active) return
       const paidSet = new Set((reports || []).filter((r) => r.payment_status === 'paid').map((r) => r.session_id))
 
-      setSessions(testSessions.map((s) => ({
+      setSessions(testSessions.map((s, index) => ({
         id: s.id,
         created_at: s.created_at,
         status: s.status,
         paid: paidSet.has(s.id),
         freeReportReady: !!(s.profil_data as any)?.free_report,
-        generatingFreeReport: !(s.profil_data as any)?.free_report,
+        generatingFreeReport: index === 0 ? !(s.profil_data as any)?.free_report : false,
       })))
       setLoading(false)
     }
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                           </div>
                         ) : !s.freeReportReady && !s.generatingFreeReport ? (
                           <button onClick={() => setSessions(prev => prev.map(p => p.id === s.id ? {...p, generatingFreeReport: true} : p))} className="w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold bg-surface-100 text-ink hover:bg-surface-200 transition-colors">
-                            Gagal menyusun. Coba Lagi
+                            Generate Laporan Gratis
                           </button>
                         ) : (
                           <Link href={`/hasil?session_id=${s.id}`} onClick={() => useTesStore.getState().setSessionId(s.id)} className={`block w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
