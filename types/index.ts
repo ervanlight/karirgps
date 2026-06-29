@@ -95,6 +95,8 @@ export interface KarirItem {
   nama: string
   deskripsi: string
   jalur_masuk: string
+  fit_score: number // Skor kecocokan 0-100 berdasarkan profil (nyata, bukan fake)
+  emoji: string     // Emoji representasi karir (misal: 🩺 🎨 💻)
 }
 
 export interface RoadmapItem {
@@ -108,8 +110,16 @@ export interface RisikoItem {
 }
 
 export interface MVPDecision {
+  // 🪞 PERSONAL MIRROR — bagian yang bikin user "wow, ini gue banget"
+  pesan_pembuka: string          // Hook emosional pembuka, 1-2 kalimat tajam dan personal
+  profil_naratif: string         // Refleksi kepribadian 2-3 paragraf, tulis seperti mentor
+  kekuatan: string[]             // 3-4 kekuatan alami berdasarkan data, bukan generik
+
+  // 🎯 KEPUTUSAN UTAMA
   rekomendasi_utama: 'Kuliah' | 'Kerja' | 'Hybrid'
-  alasan: string
+  alasan: string                 // Reasoning dalam format narasi, bukan poin-poin kaku
+
+  // 🧭 PILIHAN & RENCANA
   karir: KarirItem[]
   roadmap: RoadmapItem[]
   risiko_antisipasi: RisikoItem[]

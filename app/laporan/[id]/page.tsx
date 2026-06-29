@@ -4,7 +4,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
-import { RIASEC_COLOR, WV_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID, HOLLAND_DESC } from '@/lib/rekomendasi-gratis'
+import { RIASEC_COLOR, WV_COLOR, MI_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID, HOLLAND_DESC } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
 import type { RiasecCode, MICode, WorkValueCode, MVPDecision, ProfilData } from '@/types'
 
@@ -186,6 +186,7 @@ function LaporanContent() {
   const miProfile = profil.d2_mi.mi_profile
   const wvProfile = profil.d3_workvalues.values_profile
   const riasecScores = profil.d1_riasec.skor
+  const miScores = profil.d2_mi.skor
   const wvScores = profil.d3_workvalues.skor
 
   const top2Holland = hollandCode.slice(0, 2) as RiasecCode[]
@@ -255,12 +256,12 @@ function LaporanContent() {
         </div>
       </div>
 
-      {/* SCORE BARS */}
+      {/* SCORE BARS — 3 Dimensi */}
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-1">Dimensi 1: Minat</div>
+          <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-1">Dimensi 1 · Minat</div>
           <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
-            Diukur dengan <strong>Holland Code (RIASEC)</strong> — 6 tipe dasar yang menunjukkan lingkungan kerja dan tugas yang secara alami paling kamu nikmati.
+            <strong>Holland Code (RIASEC)</strong> — 6 tipe minat yang menentukan lingkungan kerja dan tugas yang paling kamu nikmati secara alami.
           </div>
           <div className="space-y-3">
             {riasecSorted.map(([k, v]) => (
@@ -269,15 +270,26 @@ function LaporanContent() {
           </div>
         </div>
         <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
-          <div className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Dimensi 3: Nilai Kerja</div>
+          <div className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Dimensi 3 · Nilai Kerja</div>
           <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
-            Diukur dengan <strong>Work Values</strong> — prinsip dasar yang diam-diam mengendalikan keputusanmu. Ini yang membuatmu merasa betah (atau muak) di tempat kerja.
+            <strong>Work Values</strong> — prinsip kerja yang diam-diam mengendalikan keputusanmu. Ini yang membuatmu betah atau muak di tempat kerja.
           </div>
           <div className="space-y-3">
             {wvSorted.map(([k, v]) => (
               <ScoreBar key={k} label={WV_LABELS[k as WorkValueCode]} skor={v} warna={WV_COLOR[k as WorkValueCode]} />
             ))}
           </div>
+        </div>
+      </div>
+      <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+        <div className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Dimensi 2 · Cara Berpikir</div>
+        <div className="text-[11px] text-ink-light mb-4 leading-relaxed">
+          <strong>Multiple Intelligences</strong> — 8 jenis kecerdasan yang menunjukkan cara berpikirmu yang paling alami dan efektif. Bukan ukuran &quot;sepintar apa kamu&quot;, tapi &quot;kamu pintar di bidang apa&quot;.
+        </div>
+        <div className="grid md:grid-cols-2 gap-x-6">
+          {(Object.entries(miScores) as [MICode, number][]).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
+            <ScoreBar key={k} label={MI_LABELS[k]} skor={v} warna={MI_COLOR[k]} />
+          ))}
         </div>
       </div>
     </div>

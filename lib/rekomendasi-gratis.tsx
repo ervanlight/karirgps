@@ -88,12 +88,20 @@ export function ScoreBar({ label, skor, warna, max = 16 }: { label: string; skor
   )
 }
 
-// ── Paywall feature list ───────────────────────────────────────
+// ── MI Color Map ──────────────────────────────────────────────
+import type { MICode } from '@/types'
+export const MI_COLOR: Record<MICode, string> = {
+  L: '#534AB7', LM: '#1D9E75', SP: '#D4537E',
+  MU: '#BA7517', BK: '#185FA5', N: '#639922',
+  IP: '#E07B39', IA: '#7B61FF',
+}
+
+// ── Paywall feature list (hanya fitur yang benar-benar ada) ────
 export const FITUR_PAID = [
-  'Profil kepribadian naratif 2–3 paragraf — terasa ditulis khusus untukmu',
-  '3 kluster jurusan + reasoning mendalam + kampus yang realistis berdasarkan kondisimu',
-  '5 profesi + gambaran kerja nyata di Indonesia + jalur masuk konkret',
-  'Kekuatan yang perlu dikembangkan + hal yang perlu diwaspadai (jujur, tidak menghakimi)',
-  'Langkah selanjutnya yang disesuaikan dengan tahap dan kondisimu sekarang',
-  'Versi laporan terpisah untuk orang tua — bahasa berbeda, fokus mendukung',
+  'Cermin kepribadian: refleksi 2–3 paragraf yang terasa seperti mentor yang kenal kamu',
+  'Kekuatan alami spesifik yang mungkin belum pernah ada yang memberitahumu',
+  'Tiga jalur karier dengan skor kecocokan nyata (bukan generik)',
+  'Roadmap 4 fase konkret yang bisa kamu mulai besok',
+  'Risiko yang perlu diwaspadai + cara mengatasinya (jujur, tidak menghakimi)',
+  'Pesan pembuka personal — kalimat pertama yang langsung "kena"',
 ]
