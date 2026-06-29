@@ -60,6 +60,7 @@ async function processFile(filePath: string) {
       const response = await ai.models.embedContent({
         model: 'gemini-embedding-2',
         contents: chunk,
+        config: { outputDimensionality: 768 }
       })
       
       const embedding = response.embeddings?.[0]?.values
