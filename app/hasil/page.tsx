@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTesStore } from '@/lib/store'
 import { createClient } from '@/lib/supabase'
 import { buildProfil, RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
-import { RIASEC_COLOR, WV_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID } from '@/lib/rekomendasi-gratis'
+import { RIASEC_COLOR, WV_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID, HOLLAND_DESC } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
 import type { RiasecCode, MICode, WorkValueCode, MVPDecision } from '@/types'
 
@@ -213,6 +213,11 @@ function HasilContent() {
       <div className="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
         <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-5">Gambaran Awal: Jurusan & Profesi</div>
         
+        <p className="text-sm text-ink-light mb-6 leading-relaxed">
+          <strong>Kerja bagus! Mengisi tes panjang seperti ini membuktikan kamu benar-benar peduli dengan masa depanmu.</strong><br/>
+          Sebagai hadiahnya, ini adalah daftar singkat rekomendasi profesi dan kluster jurusan yang paling sejajar dengan kekuatan alimiahmu. 
+        </p>
+        
         <div className="mb-6">
           <div className="text-xs font-semibold text-ink mb-3">Top 3 Kluster Jurusan</div>
           {jurusan.map(([nama, desc]) => (
@@ -247,7 +252,7 @@ function HasilContent() {
           </div>
           <div className="space-y-3">
             {riasecSorted.map(([k, v]) => (
-              <ScoreBar key={k} label={RIASEC_LABELS[k]} skor={v} warna={RIASEC_COLOR[k]} />
+              <ScoreBar key={k} label={HOLLAND_DESC[k].split(':')[0]} skor={v} warna={RIASEC_COLOR[k]} />
             ))}
           </div>
         </div>
@@ -379,7 +384,7 @@ function HasilContent() {
         )}
 
         {/* JIKA BELUM BAYAR -> Tampilkan Hasil Awal + Paywall */}
-        {!laporanLengkap && !checkingLaporan && (
+        {!laporanLengkap && paymentStatus !== 'paid' && !checkingLaporan && (
           <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
             {renderHasilAwal()}
             
