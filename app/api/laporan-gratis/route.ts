@@ -8,7 +8,6 @@ import { BRAND_VOICE } from '@/lib/knowledge/brand-voice'
 import { STYLE_GUIDE } from '@/lib/knowledge/style-guide'
 
 export const maxDuration = 30
-export const runtime = 'edge'
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!
