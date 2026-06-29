@@ -1,6 +1,7 @@
 'use client'
 import type { MVPDecision } from '@/types'
 import Link from 'next/link'
+import { useTesStore } from '@/lib/store'
 
 interface LaporanLengkapProps {
   laporan: MVPDecision
@@ -286,6 +287,7 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
           </button>
           <Link
             href="/tes/d1"
+            onClick={() => useTesStore.getState().reset()}
             className="w-full sm:w-auto bg-surface-50 border border-surface-200 text-ink font-semibold rounded-xl px-6 py-3.5 hover:bg-white hover:border-surface-300 transition-all"
           >
             Ulangi Tes dari Awal

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { useTesStore } from '@/lib/store'
 
 interface SessionRow {
   id: string
@@ -173,7 +174,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest">Riwayat Tes</h2>
             {sessions.length > 0 && (
-              <Link href="/tes/d1" className="text-sm font-semibold text-brand-600 hover:text-brand-700 hover:underline">
+              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="text-sm font-semibold text-brand-600 hover:text-brand-700 hover:underline">
                 + Tes Baru
               </Link>
             )}
@@ -186,7 +187,7 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-lg font-bold text-ink mb-2">Belum ada aktivitas tes</h3>
               <p className="text-ink-light mb-6">Mulai tes pertama untuk memetakan potensimu.</p>
-              <Link href="/tes/d1" className="inline-block bg-brand-600 text-white rounded-full px-8 py-3 text-sm font-semibold hover:bg-brand-700 hover:-translate-y-0.5 transition-all shadow-soft">
+              <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="inline-block bg-brand-600 text-white rounded-full px-8 py-3 text-sm font-semibold hover:bg-brand-700 hover:-translate-y-0.5 transition-all shadow-soft">
                 Mulai Tes Sekarang
               </Link>
             </div>

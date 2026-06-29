@@ -480,8 +480,8 @@ function HasilContent() {
 
         {/* RESTART */}
         <div className="text-center mt-12 no-print">
-          <Link href="/tes/d1" className="text-sm font-semibold text-ink-light hover:text-ink transition-colors">
-            ← Ulangi Tes dari Awal
+          <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="text-sm font-semibold text-ink-light hover:text-ink transition-colors">
+            Mulai Tes Baru
           </Link>
         </div>
 

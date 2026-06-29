@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
 import { RIASEC_COLOR, WV_COLOR, MI_COLOR, getProfilText, getRekomendasi, ScoreBar, FITUR_PAID, HOLLAND_DESC } from '@/lib/rekomendasi-gratis'
 import LaporanLengkap from '@/components/hasil/LaporanLengkap'
+import { useTesStore } from '@/lib/store'
 import type { RiasecCode, MICode, WorkValueCode, MVPDecision, ProfilData } from '@/types'
 
 type Status = 'loading' | 'not_found' | 'ready'
@@ -175,7 +176,7 @@ function LaporanContent() {
         <p className="text-sm text-ink-light mb-6 max-w-sm">
           Link ini mungkin tidak valid, atau laporan ini bukan milik akun yang sedang login.
         </p>
-        <Link href="/tes/d1" className="inline-block bg-brand-600 text-white rounded-full px-8 py-3 text-sm font-semibold hover:bg-brand-700 transition-all">
+        <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="inline-block bg-brand-600 text-white rounded-full px-8 py-3 text-sm font-semibold hover:bg-brand-700 transition-all">
           Mulai Tes Baru
         </Link>
       </div>
@@ -480,8 +481,8 @@ function LaporanContent() {
         )}
 
         <div className="text-center mt-12 no-print">
-          <Link href="/tes/d1" className="text-sm font-semibold text-ink-light hover:text-ink transition-colors">
-            ← Ulangi Tes dari Awal
+          <Link href="/tes/d1" onClick={() => useTesStore.getState().reset()} className="text-sm font-semibold text-ink-light hover:text-ink transition-colors">
+            Mulai Tes Baru
           </Link>
         </div>
       </main>
