@@ -238,16 +238,26 @@ function HasilContent() {
           
           {/* Decision */}
           <div className="text-center mb-8 border-b border-surface-200 pb-8">
-            <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">🎯 Hasil Karier Kamu</div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight text-balance leading-tight">
+            <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">🎯 Arah Terbaik Untukmu</div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight text-balance leading-tight mb-6">
               {freeReport.decision}
             </h2>
+            {/* Identity-Shock Hook (Moved to top for immediate impact) */}
+            <div className="bg-gradient-to-br from-brand-50 to-white border border-brand-200/60 rounded-2xl p-6 shadow-sm inline-block w-full text-left">
+              <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></span>
+                Sistem Membaca Polamu
+              </div>
+              <h3 className="text-lg md:text-xl font-bold text-ink italic leading-snug">
+                &ldquo;{freeReport.viral_hook}&rdquo;
+              </h3>
+            </div>
           </div>
 
           {/* Personality Insight */}
           <div className="mb-8">
             <div className="text-xs font-bold text-ink uppercase tracking-widest mb-2 flex items-center gap-2">
-              <span className="text-base">🧠</span> YANG KAMU SEBENARNYA TIPE:
+              <span className="text-base">🧠</span> PROFIL KEPRIBADIAN:
             </div>
             <p className="text-base text-ink-light leading-relaxed">
               {freeReport.personality_insight}
@@ -298,20 +308,14 @@ function HasilContent() {
             </p>
           </div>
 
-          {/* Viral Hook */}
-          <div className="text-center bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-inner">
-            <div className="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-3">🔥 INI YANG PALING MENGGAMBARKAN KAMU:</div>
-            <h3 className="text-lg md:text-xl font-bold text-brand-800 italic leading-snug">
-              &ldquo;{freeReport.viral_hook}&rdquo;
-            </h3>
-          </div>
+          {/* Removed original Viral Hook position */}
         </div>
 
         {/* VIRAL SHARE BUTTONS */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button onClick={handleShare} className="flex-1 bg-ink text-white rounded-2xl px-6 py-4 text-sm font-bold hover:bg-brand-600 hover:-translate-y-1 hover:shadow-lg transition-all flex items-center justify-center gap-2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-            Coba lihat hasil karier kamu
+            Cocokkah ini dengan asliku? Tanya temanmu.
           </button>
           <button onClick={handleShare} className="flex-1 bg-white border-2 border-surface-200 text-ink rounded-2xl px-6 py-4 text-sm font-bold hover:border-ink hover:bg-surface-50 transition-all flex items-center justify-center gap-2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>

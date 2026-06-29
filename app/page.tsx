@@ -52,16 +52,16 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-ink mb-6 leading-[1.15] text-balance">
-            Menentukan arah setelah SMA <span className="text-gradient">tidak harus membingungkan.</span>
+            Merasa bingung setelah lulus? <span className="text-gradient">Itu wajar.</span>
           </h1>
 
           <p className="text-lg md:text-xl text-ink-light mb-12 max-w-2xl mx-auto leading-relaxed">
-            Pahami potensi alamimu, temukan jalur yang paling realistis dengan kondisimu, dan buat keputusan masa depan dengan lebih tenang.
+            Tidak perlu nebak-nebak masa depanmu. Ceritakan sedikit tentang dirimu, dan biarkan AI kami memetakan jalur kuliah atau kerja yang paling masuk akal untuk potensimu—tanpa takut salah langkah.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full sm:w-auto">
             <Link href="/auth/register" className="w-full sm:w-auto bg-brand-600 text-white rounded-full px-8 py-4 text-base font-semibold hover:bg-brand-700 hover:-translate-y-1 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(99,102,241,0.6)]">
-              Mulai Analisis Karier
+              Mulai Sesi Mentoring (Gratis)
             </Link>
             <a href="#cara-kerja" className="w-full sm:w-auto bg-white border border-surface-200 text-ink rounded-full px-8 py-4 text-base font-medium hover:bg-surface-50 hover:border-surface-300 transition-all duration-300">
               Lihat cara kerja
@@ -73,9 +73,9 @@ export default function LandingPage() {
       {/* 2. PROBLEM AWARENESS SECTION */}
       <section className="py-20 bg-white relative z-10 border-y border-surface-200/60">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-ink mb-6 tracking-tight">Merasa salah arah adalah hal yang wajar.</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-ink mb-6 tracking-tight">Lebih dari 60% siswa SMA/SMK merasa salah jurusan.</h2>
           <p className="text-lg text-ink-light leading-relaxed mb-10">
-            Banyak siswa bingung setelah lulus karena merasa tidak punya bakat khusus, takut salah memilih jurusan kuliah, atau bimbang antara langsung bekerja atau melanjutkan studi. KarirGPS hadir untuk mengurai kebingungan tersebut secara logis.
+            Mari pastikan kamu bukan salah satunya. KarirGPS bukan sekadar tes psikologi biasa, melainkan sistem mentor pintar yang membantu mengurai kebingunganmu secara logis—apakah sebaiknya langsung bekerja, kuliah, atau mengambil jalur kombinasi.
           </p>
         </div>
       </section>
@@ -90,9 +90,9 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { n: '1', title: 'Isi kondisi kamu', desc: 'Jawab pertanyaan ringan seputar minat, cara belajarmu, dan prioritas hidupmu tanpa ada jawaban benar atau salah.' },
-              { n: '2', title: 'Sistem menganalisis', desc: 'Mesin kami akan memetakan kecenderungan terkuatmu dan mencari benang merah yang mungkin tidak kamu sadari.' },
-              { n: '3', title: 'Dapatkan rekomendasi', desc: 'Terima panduan terstruktur tentang pilihan yang paling masuk akal untuk masa depanmu.' },
+              { n: '1', title: 'Ceritakan Kondisimu', desc: 'Ini bukan ujian. Cukup jawab pertanyaan ringan seputar minat dan cara belajarmu secara jujur.' },
+              { n: '2', title: 'Analisis Tersembunyi', desc: 'Sistem kami akan mencari pola terkuat dalam dirimu yang mungkin selama ini tidak kamu sadari.' },
+              { n: '3', title: 'Peta Masa Depan', desc: 'Terima rekomendasi konkret dan mutlak, bukan sekadar teori yang membingungkan.' },
             ].map((s, i) => (
               <div key={i} className="flex flex-col text-center p-8 bg-white border border-surface-200 rounded-3xl hover:shadow-soft transition-all duration-300">
                 <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-50 flex items-center justify-center text-2xl font-bold text-brand-600 mb-6 shadow-sm">

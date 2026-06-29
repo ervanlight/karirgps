@@ -19,7 +19,7 @@ export default function TesD3Page() {
       dimensi={3}
       judul="Prioritas Karir"
       subjudul="Dari sekian karir yang cocok denganmu — versi yang mana yang akan membuatmu benar-benar puas? Inilah yang ingin kita cari tahu."
-      intro="Bagian ini sedikit berbeda. Semua pilihan mungkin terasa bagus, tapi kami ingin tahu apa yang paling kamu prioritaskan."
+      intro="Pola pikirmu cukup unik. Tapi di dunia nyata, prioritas menentukan segalanya. Apa yang paling penting buatmu?"
       hrefBack="/tes/d2"
       hrefNext="/tes/d4"
       labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}

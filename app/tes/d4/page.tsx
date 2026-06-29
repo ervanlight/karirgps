@@ -38,7 +38,7 @@ export default function TesD4Page() {
       dimensi={4}
       judul="Kondisi Nyata"
       subjudul="Agar rekomendasi yang kami berikan benar-benar bisa kamu jalani, bukan cuma bagus di atas kertas."
-      intro="Tujuh pertanyaan terakhir ini bukan tes. Kami hanya ingin tahu kondisimu sekarang supaya hasil yang keluar nanti realistis untukmu."
+      intro="Satu langkah lagi. Agar rekomendasi ini tidak hanya bagus di atas kertas, ceritakan sedikit tentang kondisi nyatamu saat ini."
       hrefBack="/tes/d3"
       hrefNext="/hasil"
       labelNext={totalAnswered > 0 ? `Selesai & Lihat Hasil (${totalAnswered}/${totalSoal})` : 'Selesai & Lihat Hasil'}

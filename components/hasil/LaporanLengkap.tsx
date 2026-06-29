@@ -279,6 +279,11 @@ export default function LaporanLengkap({ laporan }: LaporanLengkapProps) {
                 <div className="flex gap-3">
                   <span className="text-red-400 shrink-0 text-lg">⚡</span>
                   <div className="flex-1">
+                    {r.probabilitas && (
+                      <div className="inline-block bg-red-100 text-red-800 text-[10px] font-bold px-2 py-1 rounded mb-2">
+                        {r.probabilitas}
+                      </div>
+                    )}
                     <p className="text-sm font-semibold text-ink leading-relaxed mb-3">{r.risiko}</p>
                     <div className="pt-3 border-t border-red-100">
                       <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-1">Mitigasi:</span>

@@ -85,12 +85,12 @@ TASK:
 Generate the output based on the provided schema.
 
 1. DECISION (Work / College / Hybrid) -> Must be firm, not vague
-2. PERSONALITY INSIGHT (very important) -> describe user behavior pattern (simple language)
-3. REASONING -> why this makes sense
-4. CAREER FIT (3 options only) -> realistic Indonesian context
-5. 6-12 MONTH ROADMAP -> practical steps
-6. RISK STATEMENT -> what happens if wrong decision is taken
-7. VIRAL INSIGHT HOOK -> one sentence that feels like "wow this is me"
+8. PERSONALITY INSIGHT (very important) -> describe user behavior pattern (simple language)
+9. REASONING -> why this makes sense
+10. CAREER FIT (3 options only) -> realistic Indonesian context
+11. 6-12 MONTH ROADMAP -> practical steps
+12. RISK STATEMENT -> what happens if wrong decision is taken
+13. VIRAL INSIGHT HOOK -> "Identity-Shock" sentence. State a bold, highly accurate psychological truth about them based on the data. Example: "Kamu adalah tipe perencana strategis yang butuh bukti sebelum bertindak. Kamu benci teori kosong dan lebih suka melihat hasil nyata."
 
 OUTPUT STYLE (MANDATORY):
 - Indonesian Mentor Mode

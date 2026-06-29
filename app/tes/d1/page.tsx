@@ -20,7 +20,7 @@ export default function TesD1Page() {
       dimensi={1}
       judul="Minat & Ketertarikan"
       subjudul="Langkah pertama ini memetakan bidang apa yang secara alami paling menarik buatmu."
-      intro="Tidak ada jawaban benar atau salah. Jawab dengan jujur sesuai apa yang benar-benar kamu suka, bukan apa yang orang lain anggap keren."
+      intro="Mari mulai dari hal yang paling kamu suka. Tidak ada jawaban yang salah di sini, cukup jujur pada dirimu sendiri."
       hrefBack="/"
       hrefNext="/tes/d2"
       labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}

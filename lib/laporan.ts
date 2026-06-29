@@ -176,14 +176,15 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
           // ⚠️ RISIKO
           risiko_antisipasi: {
             type: Type.ARRAY,
-            description: 'Analisis Skenario Kegagalan: Tepat 3 skenario nyata yang bisa merusak roadmap ini',
+            description: 'Analisis Skenario Kegagalan: Tepat 3 skenario nyata yang bisa merusak roadmap ini. Buat senyata mungkin untuk memicu loss aversion (kesadaran akan risiko).',
             items: {
               type: Type.OBJECT,
               properties: {
                 risiko: { type: Type.STRING, description: 'Risiko kegagalan spesifik dan fatal yang mungkin terjadi' },
+                probabilitas: { type: Type.STRING, description: 'Estimasi probabilitas terjadinya risiko ini (Contoh: "Tingkat Risiko: TINGGI (78%)" atau "MENENGAH (45%)")' },
                 solusi: { type: Type.STRING, description: 'Mitigasi konkret untuk mencegah skenario kegagalan ini' },
               },
-              required: ['risiko', 'solusi']
+              required: ['risiko', 'probabilitas', 'solusi']
             }
           },
           alternative_scenario: {

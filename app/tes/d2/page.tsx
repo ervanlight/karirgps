@@ -19,7 +19,7 @@ export default function TesD2Page() {
       dimensi={2}
       judul="Cara Berpikirmu"
       subjudul="Ini bukan tentang apa yang kamu minati, tapi bagaimana kamu memproses dunia. Ini yang sering membedakan dua orang dengan minat sama ke arah karir yang berbeda."
-      intro="Bagian pertama sudah selesai. Sekarang kita lihat sesuatu yang sedikit berbeda — bagaimana cara kamu berpikir sehari-hari."
+      intro="Menarik. Minatmu sudah mulai terlihat. Sekarang, mari kita lihat bagaimana otakmu memproses masalah..."
       hrefBack="/tes/d1"
       hrefNext="/tes/d3"
       labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}

@@ -109,6 +109,7 @@ export interface RoadmapItem {
 
 export interface RisikoItem {
   risiko: string
+  probabilitas?: string
   solusi: string
 }
 
