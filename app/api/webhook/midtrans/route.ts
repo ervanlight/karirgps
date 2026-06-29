@@ -68,12 +68,12 @@ export async function POST(request: NextRequest) {
 
       const { data: existingReport } = await supabase
         .from('reports')
-        .select('id, payment_status')
+        .select('id, payment_status, laporan_siswa')
         .eq('session_id', sessionId)
         .maybeSingle()
 
-      if (existingReport?.payment_status === 'paid') {
-        return NextResponse.json({ status: 'ok', action: 'already_paid' })
+      if (existingReport?.payment_status === 'paid' && existingReport?.laporan_siswa) {
+        return NextResponse.json({ status: 'ok', action: 'already_paid_and_generated' })
       }
 
       const { data: sessionData, error: sessionError } = await supabase
