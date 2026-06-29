@@ -64,7 +64,7 @@ export default function LandingPage() {
             {/* Trust Chips */}
             <div className="flex flex-wrap items-center gap-4 text-[13px] font-semibold text-ink-light">
               <div className="flex items-center gap-1.5"><svg className="text-brand-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Mulai gratis</div>
-              <div className="flex items-center gap-1.5"><svg className="text-brand-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Bayar sekali</div>
+              <div className="flex items-center gap-1.5"><svg className="text-brand-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Hasil instan</div>
               <div className="flex items-center gap-1.5"><svg className="text-brand-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Cocok untuk SMA/SMK</div>
             </div>
           </div>
@@ -196,10 +196,10 @@ export default function LandingPage() {
           </div>
 
           {/* Grid Container */}
-          <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* Benefit 1: Wide Card */}
-            <div className="md:col-span-2 bg-white p-8 md:p-10 rounded-3xl border border-surface-200 shadow-sm flex flex-col justify-center">
+            <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-3xl border border-surface-200 shadow-sm flex flex-col justify-center">
               <div className="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mb-6">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 8v8"/></svg>
               </div>
@@ -231,18 +231,18 @@ export default function LandingPage() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
               <h3 className="text-xl font-bold text-ink mb-3">Risiko Kegagalan</h3>
-              <p className="text-ink-light text-sm leading-[1.8]">Simulasi *blind-spot* atau risiko utama jika kamu memaksakan jalur yang salah.</p>
+              <p className="text-ink-light text-sm leading-[1.8]">Simulasi risiko utama jika kamu memaksakan jalur yang salah.</p>
             </div>
 
-            {/* Benefit 5: Wide Premium Card */}
-            <div className="md:col-span-2 bg-ink p-8 md:p-10 rounded-3xl border border-ink shadow-float text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/20 blur-3xl rounded-full"></div>
+            {/* Benefit 5: Square Premium Card */}
+            <div className="bg-ink p-8 md:p-10 rounded-3xl border border-ink shadow-float text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/20 blur-3xl rounded-full"></div>
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-white/10 border border-white/20 text-brand-300 rounded-xl flex items-center justify-center mb-6">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <h3 className="text-2xl font-bold mb-3">Roadmap 6–12 Bulan</h3>
-                <p className="text-white/80 text-base leading-[1.8] max-w-lg">Panduan *step-by-step* untuk 12 bulan ke depan. Kamu akan tahu harus fokus belajar apa bulan ini, dan persiapan apa untuk bulan berikutnya.</p>
+                <h3 className="text-xl font-bold mb-3">Roadmap 12 Bulan</h3>
+                <p className="text-white/80 text-sm leading-[1.8]">Panduan step-by-step untuk 12 bulan ke depan yang jelas dan aplikatif.</p>
               </div>
             </div>
 
