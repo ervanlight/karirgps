@@ -13,6 +13,8 @@ interface TesLayoutProps {
   labelNext?: string
   onNext?: () => void
   canProceed?: boolean
+  answered?: number
+  total?: number
 }
 
 const DIMENSI_META = [
@@ -26,10 +28,15 @@ export default function TesLayout({
   children, dimensi, judul, subjudul, intro,
   hrefBack, hrefNext, labelNext = 'Lanjutkan',
   onNext, canProceed = true,
+  answered = 0, total = 1,
 }: TesLayoutProps) {
   const router = useRouter()
   const meta = DIMENSI_META[dimensi - 1]
-  const progress = (dimensi / 4) * 100
+  
+  // Calculate dynamic progress
+  const baseProgress = ((dimensi - 1) / 4) * 100
+  const localProgress = total > 0 ? (answered / total) * 25 : 0 // Each dimension is 25% of the total test
+  const progress = Math.min(100, baseProgress + localProgress)
 
   function handleNext() {
     if (onNext) onNext()

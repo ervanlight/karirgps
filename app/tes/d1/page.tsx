@@ -24,6 +24,8 @@ export default function TesD1Page() {
       hrefBack="/"
       hrefNext="/tes/d2"
       labelNext={totalAnswered > 0 ? `Lanjutkan (${totalAnswered}/${totalSoal})` : 'Lanjutkan'}
+      answered={totalAnswered}
+      total={totalSoal}
     >
       {/* BLOK A */}
       <div className="mb-8">

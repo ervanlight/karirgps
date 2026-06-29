@@ -44,6 +44,8 @@ export default function TesD4Page() {
       labelNext={totalAnswered > 0 ? `Selesai & Lihat Hasil (${totalAnswered}/${totalSoal})` : 'Selesai & Lihat Hasil'}
       onNext={handleNext}
       canProceed={canProceed}
+      answered={totalAnswered}
+      total={totalSoal}
     >
       <div className="space-y-8">
         {D4_PERTANYAAN.map((p, i) => {
