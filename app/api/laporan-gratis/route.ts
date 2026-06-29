@@ -4,21 +4,17 @@ import { GoogleGenAI, Type, Schema } from '@google/genai'
 import type { ProfilData } from '@/types'
 import { RIASEC_LABELS, MI_LABELS, WV_LABELS } from '@/lib/scoring'
 
-import fs from 'fs'
-import path from 'path'
+import { freeReportPrompt } from '@/lib/prompts/free-report'
+
+export const maxDuration = 30
+export const runtime = 'edge'
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!
 })
 
 function getFreePrompt(): string {
-  try {
-    const promptPath = path.join(process.cwd(), 'lib', 'prompts', 'free-report-v1.md')
-    return fs.readFileSync(promptPath, 'utf8')
-  } catch (error) {
-    console.error('Failed to load free-report-v1.md', error)
-    return 'You are a Senior Career Mentor AI...' // Fallback
-  }
+  return freeReportPrompt
 }
 
 // Schema for Gemini Structured Output
@@ -83,7 +79,7 @@ export async function POST(req: Request) {
     const promptText = `PROFIL USER:\n- Jurusan: ${jurusan}\n- Minat: ${minat}\n- Gaya belajar: ${gayaBelajar}\n- Preferensi: ${preferensi}\n- Nilai: ${nilai}`
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-pro',
       contents: promptText,
       config: {
         systemInstruction: getFreePrompt(),
