@@ -9,8 +9,8 @@ interface SkalaItemProps {
 
 export default function SkalaItem({ id, pernyataan, nilai, onSelect }: SkalaItemProps) {
   return (
-    <div className="mb-14 pb-8 border-b border-surface-200/50 last:border-0 transition-opacity">
-      <div className="text-base md:text-xl text-ink font-bold leading-relaxed mb-8 text-center text-balance">
+    <div className="bg-white border border-surface-200 rounded-2xl p-6 md:p-8 mb-6 shadow-sm hover:shadow-soft transition-shadow">
+      <div className="text-base md:text-lg text-ink font-medium leading-relaxed mb-6 text-center text-balance">
         "{pernyataan}"
       </div>
       

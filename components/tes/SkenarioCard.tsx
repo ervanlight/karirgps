@@ -19,8 +19,8 @@ export default function SkenarioCard({
   nomor, pertanyaan, konteks, opsi, selected, onSelect,
 }: SkenarioCardProps) {
   return (
-    <div className="mb-14 pb-8 border-b border-surface-200/50 last:border-0 transition-opacity">
-      <div className="text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-4">
+    <div className="mb-10 bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-soft">
+      <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">
         Skenario {nomor}
       </div>
       

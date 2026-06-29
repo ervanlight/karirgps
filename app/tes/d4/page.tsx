@@ -49,9 +49,9 @@ export default function TesD4Page() {
         {D4_PERTANYAAN.map((p, i) => {
           const value = d4_konteks[p.id as keyof typeof d4_konteks]
           return (
-            <div key={p.id} className="mb-14 pb-8 border-b border-surface-200/50 last:border-0 transition-opacity">
-              <div className="text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-4">
-                Pertanyaan {i + 1} dari {totalSoal}{p.multiple ? ' · Boleh pilih lebih dari satu' : ''}
+            <div key={p.id} className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-soft">
+              <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">
+                Pertanyaan {i + 1} dari {totalSoal}{p.multiple ? ' · Pilih yang sesuai' : ''}
               </div>
               <h3 className="text-lg md:text-xl font-bold text-ink mb-2 leading-relaxed">
                 {p.label}
