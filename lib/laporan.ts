@@ -37,7 +37,7 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
   const promptData = `PROFIL SISWA:\n\n${JSON.stringify(profil, null, 2)}${grounding}`
   
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-pro',
+    model: 'gemini-2.5-flash',
     contents: promptData,
     config: {
       systemInstruction: SYSTEM_PROMPT_MVP,

@@ -110,48 +110,15 @@ export async function POST(request: NextRequest) {
         .update({ status: 'paid' })
         .eq('id', sessionId)
 
-      // 2. Tentukan jalur eksekusi AI (Lokal vs GitHub Actions)
-      if (isDevSimulation) {
-        // LOKAL DEV: Bebas dari Vercel 10s timeout, eksekusi langsung di sini
-        console.log('🛠️ [DEV] Menjalankan AI Generation secara inline (karena lokal)...')
-        try {
-          const profil = sessionData.profil_data as ProfilData
-          const laporanSiswa = await generateDecisionMVP(profil)
-          await supabase.from('reports').update({ laporan_siswa: laporanSiswa }).eq('session_id', sessionId)
-          console.log('🛠️ [DEV] AI Generation sukses.')
-        } catch (e) {
-          console.error('🛠️ [DEV] AI Generation gagal:', e)
-        }
-      } else {
-        // PRODUCTION (VERCEL): Memanggil GitHub Actions (Background Worker)
-        // Mencegah Vercel 504 Timeout Error
-        const GITHUB_PAT = process.env.GITHUB_PAT
-        if (GITHUB_PAT) {
-          console.log('🚀 Memicu GitHub Actions Worker untuk background AI generation...')
-          try {
-            const ghRes = await fetch('https://api.github.com/repos/ervanlight/karirgps/dispatches', {
-              method: 'POST',
-              headers: {
-                'Accept': 'application/vnd.github.v3+json',
-                'Authorization': `token ${GITHUB_PAT}`,
-                'User-Agent': 'KarirGPS-Vercel'
-              },
-              body: JSON.stringify({
-                event_type: 'generate_report',
-                client_payload: { session_id: sessionId }
-              })
-            })
-            if (!ghRes.ok) {
-              console.error('GitHub Actions trigger failed:', await ghRes.text())
-            } else {
-              console.log('🚀 GitHub Actions berhasil dipicu.')
-            }
-          } catch (e) {
-             console.error('GitHub fetch failed:', e)
-          }
-        } else {
-          console.error('❌ GITHUB_PAT belum di-set di environment Vercel! Background worker tidak akan jalan.')
-        }
+      // 2. Jalankan AI Generation secara inline (Gemini 2.5 Flash sangat cepat, 1-3 detik, aman dari Vercel 10s timeout)
+      console.log('🚀 Menjalankan AI Generation...')
+      try {
+        const profil = sessionData.profil_data as ProfilData
+        const laporanSiswa = await generateDecisionMVP(profil)
+        await supabase.from('reports').update({ laporan_siswa: laporanSiswa }).eq('session_id', sessionId)
+        console.log('✅ AI Generation sukses.')
+      } catch (e) {
+        console.error('❌ AI Generation gagal:', e)
       }
 
       return NextResponse.json({ status: 'ok', action: 'paid_and_dispatched' })
