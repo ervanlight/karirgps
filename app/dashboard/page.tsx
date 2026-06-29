@@ -12,6 +12,7 @@ interface SessionRow {
   paid: boolean
   freeReportReady: boolean
   generatingFreeReport: boolean
+  errorMsg?: string
 }
 
 export default function DashboardPage() {
@@ -104,7 +105,7 @@ export default function DashboardPage() {
             // If it's a 429 error, user might need to retry, but let's just make it ready so they can click and see the error on /hasil or we can handle it here.
             // Actually, if we want them to retry here, we can set generatingFreeReport to false.
             setSessions(prev => prev.map(s => 
-              s.id === sessionId ? { ...s, freeReportReady: !!data.report, generatingFreeReport: false } : s
+              s.id === sessionId ? { ...s, freeReportReady: !!data.report, generatingFreeReport: false, errorMsg: data.error } : s
             ))
           }
         }
@@ -293,9 +294,14 @@ export default function DashboardPage() {
                             <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> AI sedang menyusun laporan...
                           </div>
                         ) : !s.freeReportReady && !s.generatingFreeReport ? (
-                          <button onClick={() => setSessions(prev => prev.map(p => p.id === s.id ? {...p, generatingFreeReport: true} : p))} className="w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold bg-surface-100 text-ink hover:bg-surface-200 transition-colors">
-                            Generate Laporan Gratis
-                          </button>
+                          <div className="flex flex-col items-center md:items-end gap-2 w-full md:w-auto">
+                            <button onClick={() => setSessions(prev => prev.map(p => p.id === s.id ? {...p, generatingFreeReport: true, errorMsg: undefined} : p))} className="w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold bg-surface-100 text-ink hover:bg-surface-200 transition-colors">
+                              Generate Laporan Gratis
+                            </button>
+                            {s.errorMsg && (
+                              <p className="text-xs text-brand-600 font-medium max-w-xs text-center md:text-right">{s.errorMsg}</p>
+                            )}
+                          </div>
                         ) : (
                           <Link href={`/hasil?session_id=${s.id}`} onClick={() => useTesStore.getState().setSessionId(s.id)} className={`block w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
                             s.paid 

@@ -116,7 +116,8 @@ ${STYLE_GUIDE}
       }
     })
 
-    const resultText = response.text || ''
+    let resultText = response.text || ''
+    resultText = resultText.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
     const reportData = JSON.parse(resultText)
 
     // Ensure array is capped to 3
