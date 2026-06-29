@@ -70,6 +70,8 @@ export async function POST(request: NextRequest) {
         .from('reports')
         .select('id, payment_status, laporan_siswa')
         .eq('session_id', sessionId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle()
 
       if (existingReport?.payment_status === 'paid' && existingReport?.laporan_siswa) {

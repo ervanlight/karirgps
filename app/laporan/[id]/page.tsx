@@ -66,6 +66,8 @@ function LaporanContent() {
         .from('reports')
         .select('payment_status, laporan_siswa')
         .eq('session_id', sessionId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle()
 
       if (!active) return
