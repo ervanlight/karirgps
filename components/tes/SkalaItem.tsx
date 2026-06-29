@@ -9,8 +9,8 @@ interface SkalaItemProps {
 
 export default function SkalaItem({ id, pernyataan, nilai, onSelect }: SkalaItemProps) {
   return (
-    <div className="bg-white border border-surface-200 rounded-2xl p-6 md:p-8 mb-6 shadow-sm hover:shadow-soft transition-shadow">
-      <div className="text-base md:text-lg text-ink font-medium leading-relaxed mb-6">
+    <div className="mb-14 pb-8 border-b border-surface-200/50 last:border-0 transition-opacity">
+      <div className="text-base md:text-xl text-ink font-bold leading-relaxed mb-8 text-center text-balance">
         "{pernyataan}"
       </div>
       
@@ -26,10 +26,10 @@ export default function SkalaItem({ id, pernyataan, nilai, onSelect }: SkalaItem
             <button
               key={n}
               onClick={() => onSelect(id, n)}
-              className={`flex-1 h-12 md:h-14 rounded-xl text-sm md:text-base font-bold transition-all duration-200 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
+              className={`flex-1 h-14 md:h-16 rounded-2xl text-base md:text-lg font-bold transition-all duration-300 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
                 isSelected
-                  ? 'bg-brand-600 text-white shadow-md -translate-y-1'
-                  : 'bg-surface-50 text-ink-light border border-surface-200 hover:bg-surface-100 hover:text-ink hover:border-surface-300'
+                  ? 'bg-brand-600 text-white shadow-md scale-105'
+                  : 'bg-white text-ink-light border border-surface-200 hover:bg-surface-100 hover:text-ink hover:scale-105'
               }`}
             >
               {n}

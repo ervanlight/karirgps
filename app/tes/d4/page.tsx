@@ -49,16 +49,16 @@ export default function TesD4Page() {
         {D4_PERTANYAAN.map((p, i) => {
           const value = d4_konteks[p.id as keyof typeof d4_konteks]
           return (
-            <div key={p.id} className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-soft">
-              <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">
-                Pertanyaan {i + 1} dari {totalSoal}{p.multiple ? ' · Pilih yang sesuai' : ''}
+            <div key={p.id} className="mb-14 pb-8 border-b border-surface-200/50 last:border-0 transition-opacity">
+              <div className="text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-4">
+                Pertanyaan {i + 1} dari {totalSoal}{p.multiple ? ' · Boleh pilih lebih dari satu' : ''}
               </div>
               <h3 className="text-lg md:text-xl font-bold text-ink mb-2 leading-relaxed">
                 {p.label}
               </h3>
               
               {p.hint && (
-                <p className="text-sm md:text-base text-ink-light mb-6 leading-relaxed italic border-l-2 border-surface-200 pl-4">
+                <p className="text-sm md:text-base text-ink-light mb-6 leading-relaxed bg-white/50 p-4 rounded-2xl">
                   {p.hint}
                 </p>
               )}
@@ -72,28 +72,26 @@ export default function TesD4Page() {
                     <button
                       key={o.kode}
                       onClick={() => handleSelect(p.id, o.kode, !!p.multiple)}
-                      className={`w-full text-left p-4 md:p-5 rounded-2xl transition-all duration-200 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
+                      className={`w-full text-left p-4 md:p-5 rounded-3xl transition-all duration-300 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
                         selected
-                          ? 'bg-brand-50 border-2 border-brand-500 shadow-sm'
-                          : 'bg-surface-50 border-2 border-transparent hover:bg-surface-100 hover:border-surface-200'
+                          ? 'bg-brand-600 text-white shadow-md -translate-y-0.5'
+                          : 'bg-white hover:bg-surface-100 text-ink border border-surface-200'
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`mt-0.5 shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                          selected ? 'border-brand-500 bg-brand-500' : 'border-surface-300 bg-white'
+                        <div className={`mt-1 shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          selected ? 'border-white bg-transparent' : 'border-surface-300 bg-white'
                         }`}>
                           {selected && (
-                            <svg width="12" height="12" viewBox="0 0 14 14" fill="white">
-                              <path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 5.1-5.1L12 4.5l-6.5 6z" />
-                            </svg>
+                            <div className="w-2.5 h-2.5 bg-white rounded-full" />
                           )}
                         </div>
                         <div>
-                          <span className={`block font-bold text-sm md:text-base mb-1 ${selected ? 'text-brand-700' : 'text-ink'}`}>
+                          <span className={`block font-bold text-sm md:text-base mb-1 ${selected ? 'text-white' : 'text-ink'}`}>
                             {o.label}
                           </span>
                           {o.deskripsi && (
-                            <span className={`block text-xs md:text-sm leading-relaxed ${selected ? 'text-brand-600' : 'text-ink-light'}`}>
+                            <span className={`block text-xs md:text-sm leading-relaxed ${selected ? 'text-white/80' : 'text-ink-light'}`}>
                               {o.deskripsi}
                             </span>
                           )}

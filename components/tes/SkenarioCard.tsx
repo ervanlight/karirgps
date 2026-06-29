@@ -19,8 +19,8 @@ export default function SkenarioCard({
   nomor, pertanyaan, konteks, opsi, selected, onSelect,
 }: SkenarioCardProps) {
   return (
-    <div className="mb-10 bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-soft">
-      <div className="text-xs font-bold text-brand-600 uppercase tracking-widest mb-3">
+    <div className="mb-14 pb-8 border-b border-surface-200/50 last:border-0 transition-opacity">
+      <div className="text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-4">
         Skenario {nomor}
       </div>
       
@@ -29,7 +29,7 @@ export default function SkenarioCard({
       </h3>
       
       {konteks && (
-        <p className="text-sm md:text-base text-ink-light mb-6 leading-relaxed italic border-l-2 border-surface-200 pl-4">
+        <p className="text-sm md:text-base text-ink-light mb-6 leading-relaxed bg-white/50 p-4 rounded-2xl">
           {konteks}
         </p>
       )}
@@ -41,20 +41,18 @@ export default function SkenarioCard({
             <button
               key={o.kode}
               onClick={() => onSelect(o.kode)}
-              className={`w-full text-left p-4 md:p-5 rounded-2xl text-sm md:text-base leading-relaxed transition-all duration-200 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
+              className={`w-full text-left p-4 md:p-5 rounded-3xl text-sm md:text-base leading-relaxed transition-all duration-300 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 ${
                 isSelected
-                  ? 'bg-brand-50 border-2 border-brand-500 text-brand-700 font-medium shadow-sm'
-                  : 'bg-surface-50 border-2 border-transparent hover:bg-surface-100 hover:border-surface-200 text-ink'
+                  ? 'bg-brand-600 text-white shadow-md -translate-y-0.5'
+                  : 'bg-white hover:bg-surface-100 text-ink border border-surface-200'
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className={`mt-0.5 shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                  isSelected ? 'border-brand-500 bg-brand-500' : 'border-surface-300 bg-white'
+                <div className={`mt-1 shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  isSelected ? 'border-white bg-transparent' : 'border-surface-300 bg-white'
                 }`}>
                   {isSelected && (
-                    <svg width="12" height="12" viewBox="0 0 14 14" fill="white">
-                      <path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 5.1-5.1L12 4.5l-6.5 6z" />
-                    </svg>
+                    <div className="w-2.5 h-2.5 bg-white rounded-full" />
                   )}
                 </div>
                 <span>{o.teks}</span>
