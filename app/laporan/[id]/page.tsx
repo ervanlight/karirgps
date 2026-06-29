@@ -95,9 +95,10 @@ function LaporanContent() {
 
         if (!active) return
         if (data?.payment_status === 'paid' && data.laporan_siswa) {
-        setLaporanLengkap(data.laporan_siswa as MVPDecision)
-        setCheckingLaporan(false)
-        return
+          setLaporanLengkap(data.laporan_siswa as MVPDecision)
+          setCheckingLaporan(false)
+          return
+        }
       } catch (err) {
         console.error('Polling error:', err)
       }
