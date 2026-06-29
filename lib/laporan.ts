@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from '@google/genai'
-import { ambilKandidatJurusan, ambilKandidatProfesi } from '@/lib/db-knowledge'
+import { ambilKandidatJurusan, ambilKandidatProfesi, fetchRagContext } from '@/lib/db-knowledge'
 import { KOMBINASI_RIASEC_MI, KOMBINASI_RIASEC_WV } from '@/lib/scoring'
 import type { ProfilData, MVPDecision } from '@/types'
 
@@ -55,15 +55,17 @@ CONTOH KALIMAT YANG SALAH (jangan dipakai):
 - "Anda direkomendasikan untuk..." ❌`
 
 async function buildGroundingContext(profil: ProfilData): Promise<string> {
-  const [jurusanKandidat, profesiKandidat] = await Promise.all([
+  const [jurusanKandidat, profesiKandidat, ragContext] = await Promise.all([
     ambilKandidatJurusan(profil),
     ambilKandidatProfesi(profil),
+    fetchRagContext(profil)
   ])
 
   const parts: string[] = []
 
   if (jurusanKandidat) parts.push(`KANDIDAT JURUSAN (berdasarkan database KarirGPS):\n${jurusanKandidat}`)
   if (profesiKandidat) parts.push(`KANDIDAT PROFESI (berdasarkan database KarirGPS):\n${profesiKandidat}`)
+  if (ragContext) parts.push(ragContext)
 
   // Tambahkan kombinasi RIASEC×MI yang relevan
   const topRiasec = profil.d1_riasec.holland_code.slice(0, 2)

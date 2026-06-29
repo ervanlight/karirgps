@@ -1,5 +1,8 @@
 import { createAdminClient } from '@/lib/supabase'
+import { GoogleGenAI } from '@google/genai'
 import type { ProfilData } from '@/types'
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
 // ============================================================
 // DATABASE PENGETAHUAN — Jurusan, Kampus, Profesi
@@ -60,8 +63,45 @@ export async function ambilKandidatJurusan(profil: ProfilData, limit = 8): Promi
       const gaji = j.rata_gaji_awal ? ` | Gaji awal: ${j.rata_gaji_awal}` : ''
       return `- ${j.nama} (${j.rumpun_ilmu}): ${j.deskripsi_singkat || ''}${gaji}${kampus}`
     }).join('\n')
-  } catch {
+  } catch (error) {
+    console.error('Error in ambilKandidatJurusan:', error)
     return null
+  }
+}
+
+// ============================================================
+// VECTOR RAG: Pencarian konteks dinamis dari dokumen Markdown
+// ============================================================
+export async function fetchRagContext(profil: ProfilData): Promise<string> {
+  try {
+    // 1. Ubah profil utama siswa menjadi query text
+    const queryText = `Karakteristik siswa dengan minat utama ${profil.d1_riasec.holland_code.join(', ')} dan kecerdasan ${profil.d2_mi.mi_profile.join(', ')}. Prioritas kerja ${profil.d3_workvalues.values_profile.join(', ')}.`
+    
+    // 2. Minta embedding dari Gemini
+    const embedRes = await ai.models.embedContent({
+      model: 'text-embedding-004',
+      contents: queryText
+    })
+    const embedding = embedRes.embeddings?.[0]?.values
+    if (!embedding) return ''
+
+    // 3. Cari 3 potongan pengetahuan paling relevan di Supabase
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('match_knowledge_chunks', {
+      query_embedding: embedding,
+      match_threshold: 0.5,
+      match_count: 3
+    })
+
+    if (error || !data || data.length === 0) return ''
+
+    // 4. Susun konteks
+    const chunks = data.map((row: any) => row.content).join('\n\n')
+    return `\n\nPENGETAHUAN TAMBAHAN (Dari RAG Knowledge Base KarirGPS):\n${chunks}`
+
+  } catch (err) {
+    console.error('Error fetching RAG context:', err)
+    return ''
   }
 }
 
