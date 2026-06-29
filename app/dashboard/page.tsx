@@ -10,6 +10,8 @@ interface SessionRow {
   created_at: string
   status: string
   paid: boolean
+  freeReportReady: boolean
+  generatingFreeReport: boolean
 }
 
 export default function DashboardPage() {
@@ -47,7 +49,7 @@ export default function DashboardPage() {
 
       const { data: testSessions } = await supabase
         .from('test_sessions')
-        .select('id, created_at, status')
+        .select('id, created_at, status, profil_data')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -72,12 +74,54 @@ export default function DashboardPage() {
         created_at: s.created_at,
         status: s.status,
         paid: paidSet.has(s.id),
+        freeReportReady: !!(s.profil_data as any)?.free_report,
+        generatingFreeReport: !(s.profil_data as any)?.free_report,
       })))
       setLoading(false)
     }
     load()
     return () => { active = false }
   }, [router])
+
+  // Background fetch for free report if not ready
+  useEffect(() => {
+    const unreadySession = sessions.find(s => !s.freeReportReady && s.generatingFreeReport)
+    if (!unreadySession) return
+
+    let active = true
+
+    async function generateFreeReport(sessionId: string) {
+      try {
+        const res = await fetch('/api/laporan-gratis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId })
+        })
+        const data = await res.json()
+        if (active) {
+          if (data.report || data.error) {
+            // Either success or error (like 429), we stop the loading state
+            // If it's a 429 error, user might need to retry, but let's just make it ready so they can click and see the error on /hasil or we can handle it here.
+            // Actually, if we want them to retry here, we can set generatingFreeReport to false.
+            setSessions(prev => prev.map(s => 
+              s.id === sessionId ? { ...s, freeReportReady: !!data.report, generatingFreeReport: false } : s
+            ))
+          }
+        }
+      } catch (err) {
+        console.error('Failed generating free report in background', err)
+        if (active) {
+          setSessions(prev => prev.map(s => 
+            s.id === sessionId ? { ...s, generatingFreeReport: false } : s
+          ))
+        }
+      }
+    }
+
+    generateFreeReport(unreadySession.id)
+
+    return () => { active = false }
+  }, [sessions])
 
   async function handleSaveNama(e: React.FormEvent) {
     e.preventDefault()
@@ -243,13 +287,25 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       
-                      <Link href={`/laporan/${s.id}`} className={`w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
-                        s.paid 
-                          ? 'bg-brand-50 text-brand-700 hover:bg-brand-100' 
-                          : 'bg-ink text-white hover:bg-brand-600 hover:shadow-lg'
-                      }`}>
-                        {s.paid ? 'Buka Laporan' : 'Buka & Upgrade'}
-                      </Link>
+                      <div className="flex-1">
+                        {!s.freeReportReady && s.generatingFreeReport ? (
+                          <div className="w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold bg-amber-50 text-amber-700 flex justify-center items-center gap-2 border border-amber-100">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> AI sedang menyusun laporan...
+                          </div>
+                        ) : !s.freeReportReady && !s.generatingFreeReport ? (
+                          <button onClick={() => setSessions(prev => prev.map(p => p.id === s.id ? {...p, generatingFreeReport: true} : p))} className="w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold bg-surface-100 text-ink hover:bg-surface-200 transition-colors">
+                            Gagal menyusun. Coba Lagi
+                          </button>
+                        ) : (
+                          <Link href={`/hasil?session_id=${s.id}`} onClick={() => useTesStore.getState().setSessionId(s.id)} className={`block w-full md:w-auto text-center px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
+                            s.paid 
+                              ? 'bg-brand-50 text-brand-700 hover:bg-brand-100' 
+                              : 'bg-ink text-white hover:bg-brand-600 hover:shadow-lg'
+                          }`}>
+                            {s.paid ? 'Buka Laporan' : 'Buka Hasil'}
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

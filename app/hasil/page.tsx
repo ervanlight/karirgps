@@ -29,6 +29,7 @@ function HasilContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const paymentStatus = searchParams.get('status')
+  const sessionIdParam = searchParams.get('session_id')
   const store = useTesStore()
   
   const [paying, setPaying] = useState(false)
@@ -45,8 +46,6 @@ function HasilContent() {
   const [laporanTimedOut, setLaporanTimedOut] = useState(false)
   
   const [freeReport, setFreeReport] = useState<FreeReportV2Parsed | null>(null)
-  const [loadingFreeReport, setLoadingFreeReport] = useState(false)
-  const [freeReportError, setFreeReportError] = useState('')
 
   // TAB STATE
   const [activeTab, setActiveTab] = useState<'awal' | 'lengkap' | 'ortu'>('lengkap')
@@ -71,10 +70,31 @@ function HasilContent() {
       if (!active) return
       setUserEmail(user.email ?? null)
 
-      if (store.session_id) {
+      if (sessionIdParam && !store.session_id) {
+        store.setSessionId(sessionIdParam)
+      }
+
+      if (store.session_id || sessionIdParam) {
+        // If we only have URL param, we need to fetch the session from DB to get profil_data
+        const sid = store.session_id || sessionIdParam
+        const { data: sessionData } = await supabase
+          .from('test_sessions')
+          .select('profil_data')
+          .eq('id', sid)
+          .single()
+        
+        if (sessionData) {
+          if (!sessionData.profil_data?.free_report) {
+            router.push('/dashboard')
+            return
+          } else {
+            setFreeReport(sessionData.profil_data.free_report)
+          }
+        }
         setSessionReady(true)
         return
       }
+
       if (creatingSession.current) return
       creatingSession.current = true
 
@@ -98,50 +118,20 @@ function HasilContent() {
       
       store.setSessionId(data.id)
       setSessionReady(true)
+
+      // Jika laporan gratis belum ada, arahkan ke dashboard agar di-generate di sana
+      if (!data.profil_data?.free_report) {
+        router.push('/dashboard')
+        return
+      } else {
+        setFreeReport(data.profil_data.free_report)
+      }
     }
     ensureSession()
     return () => { active = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Fetch Free Report Data via Gemini
-  useEffect(() => {
-    if (!sessionReady || !store.session_id || freeReport) return
-    let active = true
-
-    async function fetchFreeReport() {
-      setLoadingFreeReport(true)
-      setFreeReportError('')
-      try {
-        const res = await fetch('/api/laporan-gratis', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: store.session_id })
-        })
-        const data = await res.json()
-        if (active) {
-          if (data.report) {
-            setFreeReport(data.report)
-          } else {
-            setFreeReportError(data.error || 'Terjadi kendala saat generate laporan gratis.')
-          }
-        }
-      } catch(err) {
-        console.error('Failed fetching free report', err)
-        if (active) setFreeReportError('Koneksi terputus. Gagal memuat laporan gratis.')
-      } finally {
-        if (active) setLoadingFreeReport(false)
-      }
-    }
-    fetchFreeReport()
-
-    return () => { active = false }
-  }, [sessionReady, store.session_id, freeReport])
-
-  const retryFreeReport = () => {
-    setFreeReport(null)
-    setFreeReportError('')
-  }
 
 
   // Polling for Paid Report
@@ -269,42 +259,7 @@ function HasilContent() {
   }
 
   const renderHasilAwal = () => {
-    if (freeReportError && !loadingFreeReport) {
-      return (
-        <div className="flex flex-col items-center justify-center py-20 gap-4 animate-fade-up">
-          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-2xl mb-2">
-            ⚠️
-          </div>
-          <h3 className="text-lg font-bold text-ink">Gagal Memuat Laporan</h3>
-          <p className="text-sm text-ink-light text-center max-w-sm mb-4">
-            {freeReportError}
-          </p>
-          <button onClick={retryFreeReport} className="bg-ink text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-brand-600 transition-colors">
-            Coba Lagi
-          </button>
-        </div>
-      )
-    }
-
-    if (loadingFreeReport || !freeReport) {
-      return (
-        <div className="flex flex-col items-center justify-center py-24 gap-8 animate-fade-in relative min-h-[50vh]">
-          {/* Radar/Pulse effect */}
-          <div className="relative flex items-center justify-center w-24 h-24 mb-2">
-            <div className="absolute inset-0 bg-brand-500/20 rounded-full animate-ping" style={{ animationDuration: '2s' }}></div>
-            <div className="absolute inset-2 bg-brand-500/30 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }}></div>
-            <div className="absolute inset-4 bg-brand-500/40 rounded-full animate-pulse"></div>
-            <div className="relative w-12 h-12 bg-white rounded-full shadow-xl flex items-center justify-center z-10 border border-brand-100">
-               <svg className="w-6 h-6 text-brand-600 animate-[spin_3s_linear_infinite]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-            </div>
-          </div>
-          <div className="text-sm font-medium text-ink-light text-center max-w-sm">
-            <strong className="block text-ink text-lg mb-2">Membedah DNA Kariermu...</strong>
-            <p className="animate-pulse leading-relaxed">Mensintesis profil kepribadian, gaya belajar, dan nilai kerjamu menjadi satu peta jalan yang jelas.</p>
-          </div>
-        </div>
-      )
-    }
+    if (!freeReport) return null;
 
     const userName = userEmail ? userEmail.split('@')[0] : 'Sobat'
 

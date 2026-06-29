@@ -52,15 +52,17 @@ export default function LandingHero() {
           <div className="absolute inset-0 bg-brand-500/10 blur-[100px] rounded-full scale-100 pointer-events-none"></div>
           
           <div className="relative mx-auto max-w-[320px] lg:max-w-sm transform rotate-1 hover:rotate-0 transition-transform duration-700 select-none">
-            {/* iPhone Hardware Frame */}
+            {/* iPhone 15 Pro Titanium Hardware Frame */}
             <div className="relative">
-              {/* Side Buttons */}
-              <div className="absolute -left-[14px] top-24 w-1.5 h-12 bg-slate-800 rounded-l-md border-y border-l border-slate-700"></div>
-              <div className="absolute -left-[14px] top-40 w-1.5 h-12 bg-slate-800 rounded-l-md border-y border-l border-slate-700"></div>
-              <div className="absolute -right-[14px] top-32 w-1.5 h-16 bg-slate-800 rounded-r-md border-y border-r border-slate-700"></div>
+              {/* Side Buttons (Titanium) */}
+              <div className="absolute -left-[14px] top-24 w-1.5 h-12 bg-slate-400 rounded-l-md border-y border-l border-slate-300 shadow-inner"></div>
+              <div className="absolute -left-[14px] top-40 w-1.5 h-12 bg-slate-400 rounded-l-md border-y border-l border-slate-300 shadow-inner"></div>
+              <div className="absolute -right-[14px] top-32 w-1.5 h-16 bg-slate-400 rounded-r-md border-y border-r border-slate-300 shadow-inner"></div>
               
-              {/* Main Body */}
-              <div className="border-[12px] border-slate-900 rounded-[3rem] bg-slate-900 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative ring-2 ring-slate-700">
+              {/* Main Body (Titanium Edge + Black Bezel) */}
+              <div className="rounded-[3rem] bg-black p-[12px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative ring-1 ring-slate-400 border-[3px] border-slate-300 overflow-hidden">
+                {/* Glare effect on the edge */}
+                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none rounded-[3rem]"></div>
                 
                 {/* Dynamic Island */}
                 <div className="absolute top-2 inset-x-0 h-7 bg-black rounded-full w-28 mx-auto z-20 flex justify-end items-center px-3 shadow-inner">
@@ -68,7 +70,9 @@ export default function LandingHero() {
                 </div>
                 
                 {/* Phone Screen Content */}
-                <div className="p-5 lg:p-6 pt-14 h-[600px] overflow-hidden bg-slate-50 relative rounded-[2.2rem]">
+                <div className="p-5 lg:p-6 pt-14 h-[600px] overflow-hidden bg-slate-50 relative rounded-[2.2rem] border border-black/10">
+                  {/* Screen Glare */}
+                  <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-gradient-to-br from-white/10 to-transparent pointer-events-none transform -rotate-12 translate-x-1/4 -translate-y-1/4 z-10"></div>
                 
                 {/* Mockup Header */}
                 <div className="flex items-center justify-between mb-6">
