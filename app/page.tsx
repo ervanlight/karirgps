@@ -155,12 +155,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. SOCIAL / TRUST SECTION (LIGHT) */}
-      <section className="py-16 bg-white border-b border-surface-200 relative z-10 text-center">
-        <div className="max-w-3xl mx-auto px-6">
-          <p className="text-ink-light font-medium text-lg">
-            Dibuat secara khusus untuk membantu siswa SMA/SMK di Indonesia menemukan arah kariernya dengan lebih percaya diri.
-          </p>
+      {/* 5. FREE VS PREMIUM TEASER */}
+      <section className="py-20 bg-surface-50 border-b border-surface-200 relative z-10">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-sm font-bold text-brand-600 uppercase tracking-widest mb-3">Pilih Jalurmu</h2>
+            <h3 className="text-3xl md:text-4xl font-bold text-ink tracking-tight">Dua Cara Menemukan Arah</h3>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Free */}
+            <div className="bg-white rounded-3xl p-8 border border-surface-200 shadow-sm hover:shadow-soft transition-all">
+              <div className="text-xl font-extrabold text-ink mb-2">Free Version</div>
+              <p className="text-sm text-ink-light mb-6">Insight awal yang tajam untuk memvalidasi instingmu.</p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex gap-3 text-sm text-ink"><span className="text-brand-500">✓</span> Keputusan utama (Kerja/Kuliah)</li>
+                <li className="flex gap-3 text-sm text-ink"><span className="text-brand-500">✓</span> 3 Rekomendasi karier dasar</li>
+                <li className="flex gap-3 text-sm text-ink"><span className="text-brand-500">✓</span> Roadmap simpel</li>
+              </ul>
+            </div>
+            {/* Premium */}
+            <div className="bg-gradient-to-br from-ink to-ink/90 rounded-3xl p-8 border border-surface-300 shadow-xl relative overflow-hidden text-white">
+              <div className="absolute top-0 right-0 bg-brand-500 text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-widest">Recommended</div>
+              <div className="text-xl font-extrabold text-white mb-2">Premium Blueprint</div>
+              <p className="text-sm text-white/70 mb-6">Simulasi hidup lengkap sebagai pegangan 3 tahun ke depan.</p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex gap-3 text-sm text-white/90"><span className="text-brand-400">✓</span> Deep personality mapping</li>
+                <li className="flex gap-3 text-sm text-white/90"><span className="text-brand-400">✓</span> Life Trajectory Simulation (3-5 Thn)</li>
+                <li className="flex gap-3 text-sm text-white/90"><span className="text-brand-400">✓</span> Proyeksi Rentang Gaji (Riil)</li>
+                <li className="flex gap-3 text-sm text-white/90"><span className="text-brand-400">✓</span> Analisis Skenario Kegagalan (Failure Risk)</li>
+                <li className="flex gap-3 text-sm text-white/90"><span className="text-brand-400">✓</span> Plan B: Alternative Path</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

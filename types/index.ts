@@ -99,6 +99,7 @@ export interface KarirItem {
   jalur_masuk: string
   fit_score: number // Skor kecocokan 0-100 berdasarkan profil (nyata, bukan fake)
   emoji: string     // Emoji representasi karir (misal: 🩺 🎨 💻)
+  income_range: string // Rentang gaji riil di Indonesia, e.g. "Rp 4.5 Jt - Rp 7 Jt"
 }
 
 export interface RoadmapItem {
@@ -119,12 +120,14 @@ export interface MVPDecision {
 
   // 🎯 KEPUTUSAN UTAMA
   rekomendasi_utama: 'Kuliah' | 'Kerja' | 'Hybrid'
+  confidence_score: number       // AI confidence level 0-100%
   alasan: string                 // Reasoning dalam format narasi, bukan poin-poin kaku
 
   // 🧭 PILIHAN & RENCANA
   karir: KarirItem[]
-  roadmap: RoadmapItem[]
-  risiko_antisipasi: RisikoItem[]
+  roadmap: RoadmapItem[]         // Life trajectory (3-5 tahun)
+  risiko_antisipasi: RisikoItem[] // Skenario kegagalan
+  alternative_scenario: string   // Skenario jalan alternatif jika plan A gagal
 }
 
 // --- DATABASE TYPES (Supabase) ---

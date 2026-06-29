@@ -135,6 +135,10 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
             type: Type.STRING,
             description: 'Hanya isi dengan: Kuliah, Kerja, atau Hybrid'
           },
+          confidence_score: {
+            type: Type.NUMBER,
+            description: 'Tingkat keyakinan AI atas keputusan ini (0-100%). Harus realistis berdasarkan kekuatan sinyal dari profil D1-D4. Jangan selalu 95+ jika sinyalnya ambigu.'
+          },
           alasan: {
             type: Type.STRING,
             description: 'Narasi 2-3 paragraf yang menjelaskan MENGAPA ini keputusan terbaik untuk siswa ini secara spesifik. Bercerita, bukan menjelaskan. Hubungkan dengan profil, kondisi, dan potensi nyata siswa. Pisahkan paragraf dengan \\n\\n.'
@@ -149,21 +153,22 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
                 nama: { type: Type.STRING, description: 'Nama karir/profesi yang spesifik' },
                 deskripsi: { type: Type.STRING, description: '2-3 kalimat yang menjelaskan apa yang dikerjakan dan mengapa cocok untuk siswa ini secara spesifik — bukan deskripsi generik' },
                 jalur_masuk: { type: Type.STRING, description: 'Jalur masuk yang realistis sesuai kondisi D4 siswa (SNBT/mandiri/bootcamp/kerja langsung/dll)' },
-                fit_score: { type: Type.NUMBER, description: 'Skor kecocokan 0-100 berdasarkan overlap antara profil D1+D2+D3 siswa dengan kebutuhan karir ini. Jujur — jangan semua di atas 85.' },
-                emoji: { type: Type.STRING, description: 'Satu emoji yang merepresentasikan bidang karir ini (misal: 🩺 untuk kedokteran, 💻 untuk IT, 🎨 untuk desain)' },
+                fit_score: { type: Type.NUMBER, description: 'Skor kecocokan 0-100 berdasarkan overlap profil D1+D2+D3 dengan kebutuhan karir. Jangan semua > 85.' },
+                emoji: { type: Type.STRING, description: 'Satu emoji representatif (misal: 🩺, 💻, 🎨)' },
+                income_range: { type: Type.STRING, description: 'Estimasi rentang gaji riil profesi ini di Indonesia (misal: "Rp 4 Jt - Rp 7 Jt" atau "Rp 7 Jt - Rp 15 Jt"). Harus realistis.' },
               },
-              required: ['nama', 'deskripsi', 'jalur_masuk', 'fit_score', 'emoji']
+              required: ['nama', 'deskripsi', 'jalur_masuk', 'fit_score', 'emoji', 'income_range']
             }
           },
           // 🗺️ ROADMAP
           roadmap: {
             type: Type.ARRAY,
-            description: 'Tepat 4 fase roadmap (misal: Bulan 1-2, Bulan 3-4, Bulan 5-6, Setelah 6 Bulan)',
+            description: 'Tepat 3-5 fase roadmap karir yang mensimulasikan alur hidup 3-5 tahun ke depan (misal: Tahun 1 (Kuliah), Tahun 2-3 (Magang), Tahun 4 (Lulus & Kerja))',
             items: {
               type: Type.OBJECT,
               properties: {
-                fase: { type: Type.STRING, description: 'Label fase waktu yang jelas, contoh: Bulan 1-2' },
-                kegiatan: { type: Type.STRING, description: '2-3 langkah konkret yang bisa langsung dilakukan, pisahkan dengan \\n. Harus actionable dan realistis sesuai kondisi siswa.' },
+                fase: { type: Type.STRING, description: 'Label fase waktu yang jelas, contoh: Tahun 1 (Masa Transisi)' },
+                kegiatan: { type: Type.STRING, description: '2-3 langkah konkret di fase tersebut, pisahkan dengan \\n. Harus actionable dan simulatif.' },
               },
               required: ['fase', 'kegiatan']
             }
@@ -171,18 +176,22 @@ export async function generateDecisionMVP(profil: ProfilData): Promise<MVPDecisi
           // ⚠️ RISIKO
           risiko_antisipasi: {
             type: Type.ARRAY,
-            description: 'Tepat 3 risiko nyata yang perlu diwaspadai jika salah mengambil langkah',
+            description: 'Analisis Skenario Kegagalan: Tepat 3 skenario nyata yang bisa merusak roadmap ini',
             items: {
               type: Type.OBJECT,
               properties: {
-                risiko: { type: Type.STRING, description: 'Risiko spesifik yang relevan dengan profil dan kondisi siswa ini — bukan risiko generik' },
-                solusi: { type: Type.STRING, description: 'Solusi konkret dan realistis untuk mencegah atau mengatasi risiko ini' },
+                risiko: { type: Type.STRING, description: 'Risiko kegagalan spesifik dan fatal yang mungkin terjadi' },
+                solusi: { type: Type.STRING, description: 'Mitigasi konkret untuk mencegah skenario kegagalan ini' },
               },
               required: ['risiko', 'solusi']
             }
+          },
+          alternative_scenario: {
+            type: Type.STRING,
+            description: 'Skenario Jalan Alternatif: Jika Plan A hancur (misal: tidak lulus ujian, kehabisan biaya, dll), apa Plan B yang masuk akal dan aman untuk siswa ini? Tulis 1-2 paragraf padat.'
           }
         },
-        required: ['pesan_pembuka', 'profil_naratif', 'kekuatan', 'rekomendasi_utama', 'alasan', 'karir', 'roadmap', 'risiko_antisipasi']
+        required: ['pesan_pembuka', 'profil_naratif', 'kekuatan', 'rekomendasi_utama', 'confidence_score', 'alasan', 'karir', 'roadmap', 'risiko_antisipasi', 'alternative_scenario']
       }
     }
   })

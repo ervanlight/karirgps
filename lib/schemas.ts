@@ -4,6 +4,9 @@ export const KarirItemSchema = z.object({
   nama: z.string().min(1),
   deskripsi: z.string().min(10),
   jalur_masuk: z.string().min(5),
+  fit_score: z.number().min(0).max(100),
+  emoji: z.string(),
+  income_range: z.string(),
 })
 
 export const RoadmapItemSchema = z.object({
@@ -18,10 +21,13 @@ export const RisikoItemSchema = z.object({
 
 export const MVPDecisionSchema = z.object({
   rekomendasi_utama: z.enum(['Kuliah', 'Kerja', 'Hybrid']),
+  confidence_score: z.number().min(0).max(100),
   alasan: z.string().min(20),
+  personality_mapping: z.string(),
   karir: z.array(KarirItemSchema).length(3, 'karir harus tepat 3 item'),
-  roadmap: z.array(RoadmapItemSchema).min(2).max(4),
+  roadmap: z.array(RoadmapItemSchema).min(3).max(5),
   risiko_antisipasi: z.array(RisikoItemSchema).min(1).max(3),
+  alternative_scenario: z.string(),
 })
 
 export type MVPDecisionParsed = z.infer<typeof MVPDecisionSchema>
