@@ -7,7 +7,7 @@ import { freeReportPrompt } from '@/lib/prompts/free-report'
 import { BRAND_VOICE } from '@/lib/knowledge/brand-voice'
 import { STYLE_GUIDE } from '@/lib/knowledge/style-guide'
 
-export const maxDuration = 30
+export const maxDuration = 60
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!
@@ -101,7 +101,7 @@ ${STYLE_GUIDE}
 `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-1.5-flash',
       contents: promptText,
       config: {
         systemInstruction: getFreePrompt(),
