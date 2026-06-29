@@ -145,6 +145,11 @@ function HasilContent() {
         if (!active) return
 
         if (data?.payment_status === 'paid' && data.laporan_siswa) {
+          if ((data.laporan_siswa as any)._error) {
+            setCheckingLaporan(false)
+            setPayError('Sistem AI mengalami kendala saat memproses laporanmu. Harap hubungi admin.')
+            return
+          }
           setLaporanLengkap(data.laporan_siswa as MVPDecision)
           setCheckingLaporan(false)
           return

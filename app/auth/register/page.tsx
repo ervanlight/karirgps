@@ -40,6 +40,13 @@ function RegisterForm() {
       setError(error.message || 'Gagal membuat akun. Coba lagi.')
       setLoading(false)
     } else {
+      // Fire and forget welcome email trigger
+      fetch('/api/auth/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      }).catch(console.error)
+      
       router.push(next)
     }
   }
