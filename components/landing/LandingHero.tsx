@@ -52,15 +52,23 @@ export default function LandingHero() {
           <div className="absolute inset-0 bg-brand-500/10 blur-[100px] rounded-full scale-100 pointer-events-none"></div>
           
           <div className="relative mx-auto max-w-[320px] lg:max-w-sm transform rotate-1 hover:rotate-0 transition-transform duration-700 select-none">
-            {/* iPhone Frame */}
-            <div className="border-[10px] border-surface-900 rounded-[3rem] bg-white overflow-hidden shadow-2xl relative">
-              {/* iPhone Notch */}
-              <div className="absolute top-0 inset-x-0 h-7 bg-surface-900 rounded-b-2xl w-36 mx-auto z-10 flex justify-center items-end pb-1.5">
-                <div className="w-12 h-1.5 bg-surface-700 rounded-full"></div>
-              </div>
+            {/* iPhone Hardware Frame */}
+            <div className="relative">
+              {/* Side Buttons */}
+              <div className="absolute -left-[14px] top-24 w-1.5 h-12 bg-slate-800 rounded-l-md border-y border-l border-slate-700"></div>
+              <div className="absolute -left-[14px] top-40 w-1.5 h-12 bg-slate-800 rounded-l-md border-y border-l border-slate-700"></div>
+              <div className="absolute -right-[14px] top-32 w-1.5 h-16 bg-slate-800 rounded-r-md border-y border-r border-slate-700"></div>
               
-              {/* Phone Screen Content */}
-              <div className="p-5 lg:p-6 pt-12 h-[600px] overflow-hidden bg-white">
+              {/* Main Body */}
+              <div className="border-[12px] border-slate-900 rounded-[3rem] bg-slate-900 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative ring-2 ring-slate-700">
+                
+                {/* Dynamic Island */}
+                <div className="absolute top-2 inset-x-0 h-7 bg-black rounded-full w-28 mx-auto z-20 flex justify-end items-center px-3 shadow-inner">
+                   <div className="w-3 h-3 rounded-full bg-slate-800 border border-slate-700/50"></div>
+                </div>
+                
+                {/* Phone Screen Content */}
+                <div className="p-5 lg:p-6 pt-14 h-[600px] overflow-hidden bg-slate-50 relative rounded-[2.2rem]">
                 
                 {/* Mockup Header */}
                 <div className="flex items-center justify-between mb-6">
