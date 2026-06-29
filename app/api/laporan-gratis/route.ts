@@ -90,7 +90,7 @@ Generate the output based on the provided schema.
 10. CAREER FIT (3 options only) -> realistic Indonesian context
 11. 6-12 MONTH ROADMAP -> practical steps
 12. RISK STATEMENT -> what happens if wrong decision is taken
-13. VIRAL INSIGHT HOOK -> "Identity-Shock" sentence. State a bold, highly accurate psychological truth about them based on the data. Example: "Kamu adalah tipe perencana strategis yang butuh bukti sebelum bertindak. Kamu benci teori kosong dan lebih suka melihat hasil nyata."
+13. VIRAL INSIGHT HOOK -> Tulis 1 kalimat mutlak yang membongkar sifat asli siswa secara psikologis. Gunakan pola kontradiksi: "[Sifat yang terlihat di luar], tapi sebenarnya [Kebenaran yang disembunyikan/Kekuatan uniknya]". Kalimat ini harus memicu reaksi "Sial, kok AI ini tahu banget gue kayak gini?!".
 
 OUTPUT STYLE (MANDATORY):
 - Indonesian Mentor Mode

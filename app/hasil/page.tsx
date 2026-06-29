@@ -435,25 +435,23 @@ function HasilContent() {
             
             {/* PAYWALL UPSELL (Only show when Free Report is loaded) */}
             {!loadingFreeReport && freeReport && (
-              <div className="mt-8 bg-gradient-to-b from-brand-600 to-brand-700 rounded-3xl p-8 shadow-xl text-white">
-                <div className="text-brand-100 text-xs font-bold uppercase tracking-widest mb-2">Buka Laporan Lengkap (Vector AI)</div>
-                <h2 className="text-2xl font-bold mb-3">Ini baru permukaannya.</h2>
-                <p className="text-brand-50 text-sm leading-relaxed mb-8 max-w-md">
-                  Buka hasil analisis super mendalam yang ditulis oleh AI Expert berdasarkan Knowledge Graph spesifik untuk profil kondisimu (Keuangan, Nilai Rapor, Ketakutan).
+              <div className="mt-8 bg-gradient-to-b from-ink to-ink/90 rounded-3xl p-8 shadow-2xl text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-widest">Penting Untuk Masa Depanmu</div>
+                <div className="text-brand-400 text-xs font-bold uppercase tracking-widest mb-2">Asuransi Keputusan Kariermu</div>
+                <h2 className="text-2xl font-bold mb-3">Arahmu sudah benar. Tapi apakah aman?</h2>
+                <p className="text-white/70 text-sm leading-relaxed mb-8 max-w-md">
+                  Arah karier yang tepat bisa hancur tanpa persiapan matang. Buka laporan simulasi AI yang membongkar <strong>titik buta (blind spots)</strong> kamu, probabilitas kegagalan, dan strategi Plan B jika skenario terburuk terjadi.
                 </p>
 
                 <div className="grid gap-3 mb-8">
-                  {FITUR_PAID.map(f => (
-                    <div key={f} className="flex gap-3 items-start">
-                      <div className="w-5 h-5 rounded-full bg-brand-500/50 flex items-center justify-center shrink-0 mt-0.5 text-xs">✓</div>
-                      <span className="text-sm text-brand-50 font-medium">{f}</span>
-                    </div>
-                  ))}
+                  <div className="flex gap-3 items-start"><span className="text-red-400 mt-0.5 text-xs">⚠️</span><span className="text-sm text-white/90 font-medium">Prediksi 3 skenario kegagalan paling fatal (dengan persentase %)</span></div>
+                  <div className="flex gap-3 items-start"><span className="text-emerald-400 mt-0.5 text-xs">✓</span><span className="text-sm text-white/90 font-medium">Plan B / Jalan Alternatif jika skenario awal hancur</span></div>
+                  <div className="flex gap-3 items-start"><span className="text-emerald-400 mt-0.5 text-xs">✓</span><span className="text-sm text-white/90 font-medium">Proyeksi rentang gaji riil (Rp) di Indonesia</span></div>
                 </div>
 
                 <div className="bg-white/10 rounded-2xl p-6 backdrop-blur-sm border border-white/20 text-center">
                   <div className="text-3xl font-extrabold mb-1">Rp 59.000</div>
-                  <div className="text-xs text-brand-100 mb-5">Sekali bayar · Dikirim ke email · Akses selamanya</div>
+                  <div className="text-xs text-brand-100 mb-5">Bayar 1x · Kepastian selamanya</div>
                   
                   <button
                     onClick={handleBayar}
