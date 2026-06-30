@@ -10,6 +10,9 @@ import type { RiasecCode, MICode, WorkValueCode } from '@/types'
 const RESEND_API_KEY = process.env.RESEND_API_KEY!
 const FROM_EMAIL = process.env.EMAIL_FROM || 'laporan@karirgps.id'
 const RESEND_URL = 'https://api.resend.com/emails'
+// Link di dalam email harus mengarah ke URL situs yang sebenarnya hidup.
+// Selama domain custom belum dipasang, ini = URL vercel.app (dari env).
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://karirgps.id'
 
 // ── HTML Templates ─────────────────────────────────────────────
 
@@ -115,7 +118,7 @@ function renderLaporanHTML(
     <div style="text-align:center;padding:20px 0;border-top:0.5px solid #E0DDD6;">
       <div style="font-size:12px;color:#888;line-height:1.6;">
         Lihat roadmap lengkapmu di dashboard <br>
-        <a href="https://karirgps.id/dashboard" style="color:#1D9E75;text-decoration:none;">karirgps.id</a>
+        <a href="${BASE_URL}/dashboard" style="color:#1D9E75;text-decoration:none;">Buka Dashboard</a>
       </div>
     </div>
 
@@ -208,7 +211,7 @@ export async function kirimWelcome(toEmail: string): Promise<void> {
             Akunmu sudah aktif. Kamu bisa langsung mulai tes — atau kembali kapan saja.<br>
             Hasilmu akan tersimpan otomatis setelah selesai.
           </p>
-          <a href="https://karirgps.id/tes/d1" style="display:inline-block;margin-top:16px;background:#1D9E75;color:white;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:500;">
+          <a href="${BASE_URL}/tes/d1" style="display:inline-block;margin-top:16px;background:#1D9E75;color:white;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:500;">
             Mulai tes sekarang
           </a>
           <p style="font-size:12px;color:#999;margin-top:24px;">
