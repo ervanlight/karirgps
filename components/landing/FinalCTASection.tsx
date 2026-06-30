@@ -8,11 +8,11 @@ export default function FinalCTASection() {
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         
-        <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight text-balance">
+        <h2 className="text-3xl md:text-5xl font-extrabold text-ink tracking-tight mb-6 leading-tight text-balance">
           Satu analisis untuk langkah awalmu.
         </h2>
         
-        <p className="text-lg text-slate-700 leading-[1.8] mb-10 max-w-xl mx-auto text-balance">
+        <p className="text-lg text-ink leading-[1.8] mb-10 max-w-xl mx-auto text-balance">
           Kamu tidak harus tahu semua jawabannya sekarang. Mulai saja dari merapikan apa yang sudah ada di kepalamu menjadi sebuah arah yang jelas.
         </p>
         
@@ -26,7 +26,7 @@ export default function FinalCTASection() {
           </Link>
         </div>
         
-        <p className="mt-8 text-sm text-slate-500 font-medium">
+        <p className="mt-8 text-sm text-ink-light font-medium">
           Dibutuhkan waktu sekitar 5 menit untuk mengisi asesmen.
         </p>
 

@@ -33,6 +33,8 @@ interface ProfesiRow {
   mi_fit: string[]
   nilai_fit: string[]
   trend_ai_impact: string | null
+  jenjang_masuk?: string[] | null
+  sertifikasi_terkait?: string[] | null
 }
 
 function skor(fitHolland: string[], fitMi: string[], fitNilai: string[], hollandCode: string[], miProfile: string[], wvProfile: string[]): number {
@@ -105,17 +107,26 @@ export async function fetchRagContext(profil: ProfilData): Promise<string> {
   }
 }
 
-export async function ambilKandidatProfesi(profil: ProfilData, limit = 10): Promise<string | null> {
+export async function ambilKandidatProfesi(profil: ProfilData, limit = 10, vokasiOnly = false): Promise<string | null> {
   try {
     const supabase = createAdminClient()
-    const { data, error } = await supabase.from('profesi').select('nama, deskripsi_singkat, gaji_entry_range, skill_utama, holland_fit, mi_fit, nilai_fit, trend_ai_impact')
+    const { data, error } = await supabase.from('profesi').select('nama, deskripsi_singkat, gaji_entry_range, skill_utama, holland_fit, mi_fit, nilai_fit, trend_ai_impact, jenjang_masuk, sertifikasi_terkait')
     if (error || !data || data.length === 0) return null
 
     const hollandCode = profil.d1_riasec.holland_code
     const miProfile = profil.d2_mi.mi_profile
     const wvProfile = profil.d3_workvalues.values_profile
 
-    const ranked = (data as ProfesiRow[])
+    // Mode 'kerja'/'hybrid': hanya pertimbangkan profesi yang realistis dimasuki
+    // dari SMA/SMK langsung (kolom jenjang_masuk dari migrasi 004). Kalau kolom
+    // belum terisi data (migrasi belum jalan/seed belum diperbarui), fallback
+    // ke semua data daripada mengembalikan kosong total -- gagal lembut.
+    const pool = (data as ProfesiRow[]).filter((p) => p.jenjang_masuk && p.jenjang_masuk.length > 0)
+    const sumberData = vokasiOnly && pool.length > 0
+      ? pool.filter((p) => p.jenjang_masuk!.some((j) => j === 'SMA' || j === 'SMK'))
+      : (data as ProfesiRow[])
+
+    const ranked = sumberData
       .map((p) => ({ p, s: skor(p.holland_fit, p.mi_fit, p.nilai_fit, hollandCode, miProfile, wvProfile) }))
       .filter((r) => r.s > 0)
       .sort((a, b) => b.s - a.s)
@@ -126,7 +137,8 @@ export async function ambilKandidatProfesi(profil: ProfilData, limit = 10): Prom
     return ranked.map(({ p }) => {
       const gaji = p.gaji_entry_range ? ` | Gaji entry: ${p.gaji_entry_range}` : ''
       const ai = p.trend_ai_impact ? ` | Dampak AI: ${p.trend_ai_impact}` : ''
-      return `- ${p.nama}: ${p.deskripsi_singkat || ''}${gaji}${ai}`
+      const sertifikasi = p.sertifikasi_terkait?.length ? ` | Sertifikasi: ${p.sertifikasi_terkait.join(', ')}` : ''
+      return `- ${p.nama}: ${p.deskripsi_singkat || ''}${gaji}${ai}${sertifikasi}`
     }).join('\n')
   } catch {
     return null

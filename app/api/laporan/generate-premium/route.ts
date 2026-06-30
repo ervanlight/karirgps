@@ -5,8 +5,9 @@ import { generateDecisionMVP, generateParentReport } from '@/lib/laporan'
 import { kirimLaporan } from '@/lib/email'
 import type { ProfilData, PremiumReportV3, ParentReport } from '@/types'
 
-// Maksimal 60 detik di Vercel Hobby, cukup untuk Gemini 2.5 Pro (Flash untuk parent report sangat cepat)
-export const maxDuration = 60
+// Generate laporan siswa (Claude, output panjang) + laporan orang tua + simpan + kirim email
+// bisa makan 120-220 detik. Butuh ceiling besar (Vercel Pro, maks 300s) -- 60s pasti timeout.
+export const maxDuration = 290
 
 export async function POST(request: NextRequest) {
   try {

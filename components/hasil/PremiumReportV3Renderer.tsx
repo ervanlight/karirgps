@@ -99,34 +99,74 @@ export default function PremiumReportV3Renderer({ laporan }: { laporan: PremiumR
       </div>
 
       {/* ═══════════════════════════════════════════════════
-          SECTION 4: JURUSAN & KAMPUS
+          SECTION 4: JURUSAN & KAMPUS (mode kuliah/hybrid)
       ═══════════════════════════════════════════════════ */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-surface-200">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-brand-50 rounded-2xl flex items-center justify-center text-xl">🎓</div>
-          <div>
-            <h3 className="text-base font-bold text-ink">Rekomendasi Jurusan Realistis</h3>
-            <p className="text-xs text-ink-light">Disesuaikan dengan kondisi keuangan dan lokasimu</p>
+      {laporan.jurusan && laporan.jurusan.length > 0 && (
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-surface-200">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-brand-50 rounded-2xl flex items-center justify-center text-xl">🎓</div>
+            <div>
+              <h3 className="text-base font-bold text-ink">Rekomendasi Jurusan Realistis</h3>
+              <p className="text-xs text-ink-light">Disesuaikan dengan kondisi keuangan dan lokasimu</p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {laporan.jurusan.map((j, i) => (
+              <div key={i} className="bg-surface-50 p-5 rounded-2xl border border-surface-200 flex flex-col h-full">
+                <div className="text-[10px] font-bold text-brand-600 uppercase mb-1">Rekomendasi #{i+1}</div>
+                <h4 className="text-lg font-extrabold text-ink leading-tight mb-3">{j.nama}</h4>
+                <p className="text-sm text-ink-light leading-relaxed mb-4 flex-1">
+                  {j.reasoning}
+                </p>
+                <div className="bg-white p-3 rounded-xl border border-surface-100">
+                  <div className="text-[10px] font-bold text-ink-light uppercase mb-1">Opsi Kampus</div>
+                  <div className="text-sm font-semibold text-ink leading-snug mb-2">{j.kampus_rekomendasi}</div>
+                  <div className="text-[10px] font-bold text-ink-light uppercase mb-1 mt-3">Persaingan</div>
+                  <div className="text-xs text-ink bg-surface-100 px-2 py-1 rounded inline-block">{j.keketatan}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {laporan.jurusan.map((j, i) => (
-            <div key={i} className="bg-surface-50 p-5 rounded-2xl border border-surface-200 flex flex-col h-full">
-              <div className="text-[10px] font-bold text-brand-600 uppercase mb-1">Rekomendasi #{i+1}</div>
-              <h4 className="text-lg font-extrabold text-ink leading-tight mb-3">{j.nama}</h4>
-              <p className="text-sm text-ink-light leading-relaxed mb-4 flex-1">
-                {j.reasoning}
-              </p>
-              <div className="bg-white p-3 rounded-xl border border-surface-100">
-                <div className="text-[10px] font-bold text-ink-light uppercase mb-1">Opsi Kampus</div>
-                <div className="text-sm font-semibold text-ink leading-snug mb-2">{j.kampus_rekomendasi}</div>
-                <div className="text-[10px] font-bold text-ink-light uppercase mb-1 mt-3">Persaingan</div>
-                <div className="text-xs text-ink bg-surface-100 px-2 py-1 rounded inline-block">{j.keketatan}</div>
-              </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════
+          SECTION 4B: JALUR VOKASI / KERJA LANGSUNG (mode kerja/hybrid)
+      ═══════════════════════════════════════════════════ */}
+      {laporan.jalur_vokasi && laporan.jalur_vokasi.length > 0 && (
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-surface-200">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-teal-50 rounded-2xl flex items-center justify-center text-xl">🛠️</div>
+            <div>
+              <h3 className="text-base font-bold text-ink">Jalur Kerja Langsung yang Realistis</h3>
+              <p className="text-xs text-ink-light">Tanpa kuliah dulu — lengkap dengan cara masuk & sertifikasi pendukung</p>
             </div>
-          ))}
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {laporan.jalur_vokasi.map((v, i) => (
+              <div key={i} className="bg-surface-50 p-5 rounded-2xl border border-surface-200 flex flex-col h-full">
+                <div className="text-[10px] font-bold text-teal-600 uppercase mb-1">Jalur #{i + 1}</div>
+                <h4 className="text-lg font-extrabold text-ink leading-tight mb-3">{v.nama}</h4>
+                <p className="text-sm text-ink-light leading-relaxed mb-4 flex-1">{v.gambaran_nyata}</p>
+                <div className="bg-white p-3 rounded-xl border border-surface-100 space-y-3">
+                  <div>
+                    <div className="text-[10px] font-bold text-ink-light uppercase mb-1">Cara Masuk</div>
+                    <div className="text-sm font-medium text-ink leading-snug">{v.cara_masuk}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-ink-light uppercase mb-1">Sertifikasi Pendukung</div>
+                    <div className="text-sm font-medium text-ink leading-snug">{v.sertifikasi_pendukung}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-teal-700 uppercase mb-1">Potensi Naik Kelas</div>
+                    <div className="text-sm font-medium text-ink leading-snug">{v.potensi_naik_kelas}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ═══════════════════════════════════════════════════
           SECTION 5: PROFESI & JALUR

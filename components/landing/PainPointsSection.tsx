@@ -36,23 +36,23 @@ export default function PainPointsSection() {
   ]
 
   return (
-    <section className="py-16 md:py-24 bg-slate-50 border-y border-slate-200">
+    <section className="py-16 md:py-24 bg-surface-50 border-y border-surface-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           {painPoints.map((p, i) => (
-            <div key={i} className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mb-5">
+            <div key={i} className="h-full rounded-2xl border border-surface-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-surface-100 text-ink rounded-xl flex items-center justify-center mb-5">
                 {p.icon}
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight">{p.title}</h3>
-              <p className="text-slate-600 text-sm leading-[1.7]">{p.desc}</p>
+              <h3 className="text-xl font-bold text-ink mb-2 leading-tight">{p.title}</h3>
+              <p className="text-ink-light text-sm leading-[1.7]">{p.desc}</p>
             </div>
           ))}
         </div>
 
         <div className="mt-10 md:mt-12 text-center max-w-2xl mx-auto">
-          <p className="text-base md:text-lg font-medium text-slate-700 leading-relaxed">
+          <p className="text-base md:text-lg font-medium text-ink leading-relaxed">
             KarirGPS membantu mengubah kebingungan itu menjadi arah yang lebih jelas dan bisa langsung ditindaklanjuti.
           </p>
         </div>

@@ -35,6 +35,24 @@ interface TesStore extends TesSession {
   reset: () => void
 }
 
+// ============================================================
+// Mencegah jawaban tes "bocor" antar akun di perangkat yang sama
+// (mis. komputer keluarga/sekolah dipakai bergantian). Store ini
+// persist ke localStorage tanpa terikat user — kalau user yang login
+// beda dari yang terakhir kali pakai perangkat ini, reset dulu supaya
+// akun baru tidak mewarisi jawaban orang lain.
+// ============================================================
+const LAST_UID_KEY = 'karirgps-last-uid'
+
+export function ensureFreshSessionForUser(userId: string) {
+  if (typeof window === 'undefined') return
+  const lastUid = window.localStorage.getItem(LAST_UID_KEY)
+  if (lastUid !== userId) {
+    useTesStore.getState().reset()
+    window.localStorage.setItem(LAST_UID_KEY, userId)
+  }
+}
+
 const initialState: TesSession = {
   d1_skenario: {},
   d1_skala: {},

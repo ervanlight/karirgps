@@ -7,11 +7,11 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-int
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://karirgps.id'),
   title: {
-    default: 'KarirGPS — Tes Minat Bakat & Bimbingan Pilih Jurusan untuk Siswa SMA',
+    default: 'KarirGPS — Tes Minat Bakat & Bimbingan Pilih Jurusan/Karier untuk Siswa SMA & SMK',
     template: '%s · KarirGPS',
   },
-  description: 'Tes minat bakat online untuk siswa SMA Indonesia. Kenali RIASEC, kecerdasan, dan nilai kerjamu lalu dapatkan rekomendasi jurusan dan profesi yang relevan dengan kondisimu — bukan template generik.',
-  keywords: ['tes minat bakat', 'pilih jurusan', 'bimbingan karir', 'tes RIASEC', 'jurusan kuliah', 'tes bakat SMA', 'konseling karir siswa'],
+  description: 'Tes minat bakat online untuk siswa SMA & SMK Indonesia. Kenali RIASEC, kecerdasan, dan nilai kerjamu lalu dapatkan rekomendasi jurusan kuliah ATAU jalur kerja langsung yang relevan dengan kondisimu — bukan template generik.',
+  keywords: ['tes minat bakat', 'pilih jurusan', 'bimbingan karir', 'tes RIASEC', 'jurusan kuliah', 'tes bakat SMA', 'tes bakat SMK', 'konseling karir siswa', 'jalur kerja lulusan SMK'],
   openGraph: {
     title: 'KarirGPS — Tes Minat Bakat & Bimbingan Pilih Jurusan',
     description: 'Kenali cara berpikir dan nilai kerjamu, lalu dapatkan rekomendasi jurusan & profesi yang relevan dengan kondisi nyatamu.',

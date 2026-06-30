@@ -6,25 +6,25 @@ export default function ReportPreviewSection() {
           
           {/* Left: Explanatory Copy */}
           <div className="lg:col-span-5">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.25]">
-              Hasil yang mudah dipahami, senyata produk digital.
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-ink mb-6 leading-[1.25]">
+              Hasilnya gampang dibaca — bukan dokumen panjang yang bikin tambah bingung.
             </h2>
-            <p className="text-base text-slate-600 leading-[1.8] mb-8">
-              KarirGPS merangkum datamu ke dalam *dashboard* visual. Tidak ada lagi hasil tes yang berbentuk dokumen teks panjang dan membingungkan.
+            <p className="text-base text-ink-light leading-[1.8] mb-8">
+              Semua rangkuman jadi tampilan yang jelas: arahnya apa, kenapa, dan langkah berikutnya gimana. Tinggal dibaca, bukan ditafsirkan sendiri.
             </p>
-            
+
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3">
                 <div className="w-5 h-5 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <span className="text-sm text-slate-700 leading-snug">Visualisasi persentase kecocokan yang presisi</span>
+                <span className="text-sm text-ink leading-snug">Persentase kecocokan yang jelas, bukan label kabur</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-5 h-5 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <span className="text-sm text-slate-700 leading-snug">Target profesi dan pendidikan yang spesifik</span>
+                <span className="text-sm text-ink leading-snug">Target jurusan atau jalur kerja yang spesifik</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-5 h-5 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center shrink-0 mt-0.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <span className="text-sm text-slate-700 leading-snug">Timeline eksekusi bulan per bulan</span>
+                <span className="text-sm text-ink leading-snug">Langkah per bulan, bukan saran abstrak</span>
               </li>
             </ul>
           </div>

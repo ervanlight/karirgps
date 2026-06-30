@@ -76,17 +76,29 @@ export const ProfesiRekomendasiSchema = z.object({
   catatan: z.string().optional(),
 })
 
+export const JalurVokasiItemSchema = z.object({
+  nama: z.string(),
+  gambaran_nyata: z.string(),
+  cara_masuk: z.string(),
+  sertifikasi_pendukung: z.string(),
+  potensi_naik_kelas: z.string(),
+})
+
 export const PremiumReportV3Schema = z.object({
+  jalur_fokus: z.enum(['kuliah', 'kerja', 'hybrid']).optional(),
   profil_singkat: z.string(),
   pembuka: z.string(),
   profil_kepribadian: z.string(),
   nilai_kerja: z.string(),
-  jurusan: z.array(JurusanRekomendasiSchema).length(3),
+  jurusan: z.array(JurusanRekomendasiSchema).min(2).max(3).optional(),
+  jalur_vokasi: z.array(JalurVokasiItemSchema).min(2).max(5).optional(),
   profesi: z.array(ProfesiRekomendasiSchema).length(5),
   kekuatan: z.array(z.string()).min(2).max(3),
   perlu_diwaspadai: z.array(z.string()).length(2),
   langkah_selanjutnya: z.string(),
   penutup: z.string(),
+}).refine((data) => !!data.jurusan || !!data.jalur_vokasi, {
+  message: 'Laporan harus berisi jurusan (mode kuliah/hybrid) atau jalur_vokasi (mode kerja/hybrid)',
 })
 
 export type PremiumReportV3Parsed = z.infer<typeof PremiumReportV3Schema>

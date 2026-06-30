@@ -3,6 +3,7 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { useTesStore } from '@/lib/store'
 
 export default function RegisterPage() {
   return (
@@ -40,6 +41,10 @@ function RegisterForm() {
       setError(error.message || 'Gagal membuat akun. Coba lagi.')
       setLoading(false)
     } else {
+      // Akun baru harus selalu mulai bersih -- jangan warisi jawaban tes
+      // dari akun lain yang mungkin pernah dipakai di perangkat ini.
+      useTesStore.getState().reset()
+
       // Fire and forget welcome email trigger
       fetch('/api/auth/welcome', {
         method: 'POST',

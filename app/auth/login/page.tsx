@@ -3,6 +3,7 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { ensureFreshSessionForUser } from '@/lib/store'
 
 export default function LoginPage() {
   return (
@@ -26,12 +27,15 @@ function LoginForm() {
     setError('')
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError('Kata sandi salah atau email tidak terdaftar. Periksa kembali dan coba lagi.')
       setLoading(false)
     } else {
+      // Kalau akun yang login beda dari yang terakhir dipakai di perangkat ini,
+      // bersihkan dulu jawaban tes yang masih nyangkut di localStorage.
+      if (data.user) ensureFreshSessionForUser(data.user.id)
       router.push(searchParams.get('next') || '/dashboard')
     }
   }

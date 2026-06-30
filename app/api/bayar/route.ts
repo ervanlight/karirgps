@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const orderId = `KG-${session_id}-${Math.floor(Date.now() / 1000)}`
     const transactionParams = {
       transaction_details: {
-        order_id: `KARIRGPS-${session_id}-${Date.now()}`,
+        order_id: orderId,
         gross_amount: 99000,
       },
       customer_details: {
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       item_details: [
         {
           id: 'laporan-lengkap',
-          price: 59000,
+          price: 99000,
           quantity: 1,
           name: 'Laporan KarirGPS Lengkap',
           category: 'Edtech',

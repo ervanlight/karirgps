@@ -1,7 +1,11 @@
 # KarirGPS — Handoff untuk sesi/chat baru
 
 ## Konteks project
-Platform tes bakat & rekomendasi jurusan untuk siswa SMA Indonesia. Next.js 14 (App Router) + Supabase (DB & Auth) + Anthropic Claude (generate laporan AI) + Midtrans Snap (pembayaran) + Resend (email).
+Platform tes bakat & rekomendasi jurusan/karier untuk lulusan SMA & SMK Indonesia. Next.js 14 (App Router) + Supabase (DB & Auth) + **Claude (Anthropic) `claude-sonnet-4-6`** untuk semua generate laporan (siswa, gratis, orang tua — lihat `lib/claude-client.ts` dan `lib/laporan.ts`) + Midtrans Snap (pembayaran) + Resend (email).
+
+**Riwayat engine AI** (supaya sesi baru tidak bingung): awalnya Anthropic Claude → sempat pindah ke Google Gemini (overhaul V3) → balik lagi ke Claude karena API key Gemini berulang kali kena `limit: 0` di free tier (masalah akun Google, sudah dicoba project baru tetap sama). `GEMINI_API_KEY` di `.env.local` sekarang HANYA dipakai untuk embedding RAG (`lib/db-knowledge.ts`), bukan generate laporan. Isi `ANTHROPIC_API_KEY` di `.env.local` untuk generate laporan berfungsi.
+
+Sejak overhaul "SMK & Conditional Report Engine" (lihat `lib/knowledge/decision-engine.ts`), laporan premium tidak lagi selalu berbentuk "3 jurusan kuliah" — engine menentukan `jalur_fokus` (`kuliah`/`kerja`/`hybrid`) secara deterministik dari jawaban D4 SEBELUM memanggil AI, supaya siswa yang memilih kerja langsung (banyak di antaranya lulusan SMK) mendapat laporan berisi jalur kerja entry-level + sertifikasi, bukan dipaksa rekomendasi kuliah. Lihat `lib/prompts/README.md` untuk peta lengkap "metode pikir" sistem ini dan definisi eksplisit free vs paid.
 
 - **Lokasi kode**: `D:\Aplikasiku\KarirGPS\karirgps`
 - **Repo GitHub**: https://github.com/ervanlight/karirgps
@@ -10,7 +14,43 @@ Platform tes bakat & rekomendasi jurusan untuk siswa SMA Indonesia. Next.js 14 (
 - **Midtrans**: masih SANDBOX (lihat `MIDTRANS_SERVER_KEY` di Vercel env vars / `.env.local` — JANGAN ditulis di file ini). Webhook URL sudah disetel di https://dashboard.sandbox.midtrans.com/settings/config_info → Payment Notification URL = `https://karirgps-ervans-projects-5bd9c2a5.vercel.app/api/webhook/midtrans`
 
 ## Status saat ini: FUNGSIONAL end-to-end
-Alur lengkap sudah berhasil divalidasi: Register/Login (wajib) → isi tes D1-D4 → halaman hasil (ringkasan gratis dihitung lokal) → klik "Bayar Rp 59.000" → Midtrans Snap popup → bayar (sandbox) → webhook generate laporan AI lengkap → **laporan tampil otomatis di halaman /hasil + tombol Download PDF** → (seharusnya) email terkirim via Resend.
+Alur lengkap sudah berhasil divalidasi: Register/Login (wajib) → isi tes D1-D4 (termasuk pertanyaan asal sekolah SMA/SMK) → halaman hasil (ringkasan gratis dihitung lokal) → klik "Bayar Rp 99.000" → Midtrans Snap popup → bayar (sandbox) → webhook tandai paid → `/api/laporan/generate-premium` generate laporan AI lengkap (mode-aware: kuliah/kerja/hybrid) → **laporan tampil otomatis di halaman /hasil & /laporan/[id] + tombol Download PDF** → (seharusnya) email terkirim via Resend.
+
+## FASE 4 (DevPlan) — UI/UX Audit & Bug Fixing — SELESAI
+
+Audit menyeluruh tampilan dari landing page sampai alur login → tes → bayar → laporan, plus QA fungsional dengan klik sungguhan via browser.
+
+**Bug kritis yang ditemukan & DIPERBAIKI** (pembayaran sungguhan rusak total sebelum ini):
+- `app/api/bayar/route.ts` — `gross_amount` Midtrans 99000 tapi `item_details.price` masih 59000 (mismatch harga, lazim ditolak Midtrans), DAN `order_id` yang benar-benar dikirim ke Midtrans masih pakai format lama `KARIRGPS-{session_id}-{Date.now()}` (>50 karakter, sudah didokumentasikan di HANDOFF sebagai "selalu ditolak Midtrans") — padahal variabel `orderId` dengan format benar sudah dihitung di baris sebelumnya tapi tidak pernah dipakai. **Diverifikasi langsung**: panggilan nyata ke Midtrans Sandbox sebelum fix akan gagal; setelah fix, dapat token & redirect_url valid (HTTP 200).
+- `lib/store.ts` — jawaban tes (Zustand persist ke localStorage) tidak pernah direset saat akun baru register atau akun lain login di perangkat yang sama → akun baru bisa mewarisi jawaban tes akun sebelumnya (risiko nyata di komputer sekolah/keluarga yang dipakai bergantian). Fix: `ensureFreshSessionForUser()` di `lib/store.ts`, dipanggil dari `app/auth/login/page.tsx` (reset kalau user id beda dari terakhir login di device ini) dan `app/auth/register/page.tsx` (selalu reset, akun baru harus selalu bersih). **Diverifikasi**: akun baru sekarang mulai dari 0/6 dan 0/12 jawaban, bukan mewarisi progres lama.
+
+**Landing page — dirombak supaya tidak terasa "jualan" di awal**:
+- Harga Rp 59.000 (sudah basi, seharusnya 99.000) dihapus total dari homepage atas permintaan eksplisit — sekarang harga baru muncul kontekstual di `/hasil` setelah user dapat nilai dari versi gratis (pola free-mium standar: jangan pimpin dengan angka harga sebelum kredibilitas terbentuk).
+- Section "SocialProof" sebelumnya menampilkan statistik (10k+ siswa, 92%, 3.5k+) dan testimoni bernama sebagai fakta — padahal produk belum live (Midtrans masih sandbox, belum ada user sungguhan). Diubah jadi eksplisit ditandai "Contoh ilustratif ... bukan kutipan pengguna terverifikasi" supaya tidak menyesatkan.
+- Inkonsistensi desain: sebagian besar landing section (Navbar, PainPoints, Steps, Benefits, SocialProof, FAQ, FinalCTA, Footer) pakai warna Tailwind generik (`slate-*`) padahal ada design token sendiri (`ink`/`surface`/`brand` di `tailwind.config.ts`) yang cuma dipakai di Hero. Disamakan semua ke token brand (mockup perangkat di Hero/ReportPreview sengaja dibiarkan pakai warna netral, itu memang seharusnya terlihat seperti screenshot asli).
+- Copy yang kedengaran generik/SaaS ("EduTech Decision Engine", "Sistem akan memilihkan...", "Career Decision Engine") ditulis ulang lebih dekat ke brand voice "kakak yang jujur" yang sudah didefinisikan untuk laporan AI (`lib/knowledge/brand-voice.ts`) — sebelumnya landing page dan laporan AI punya suara yang berbeda.
+
+**Catatan dev environment**: dev server (`npm run dev`) sempat berkali-kali masuk state corrupt ("Cannot find module './787.js'", chunk 404) setelah banyak hot-reload berturut-turut dalam sesi panjang — itu bug tooling Next.js dev di Windows, bukan bug aplikasi. Solusinya selalu: stop server, `rm -rf .next`, start ulang.
+
+## FASE 3 (DevPlan) — SMK & Conditional Report Engine — SELESAI, diverifikasi sebagian (lihat blocker di bawah)
+Dikerjakan dalam satu sesi: audit menyeluruh atas `assets/knowledge/`, `architecture/`, `lib/knowledge/`, `lib/prompts/` (warisan sesi sebelumnya, V3 Overhaul), lalu dimatangkan jadi platform yang membedakan jalur kuliah vs kerja langsung — penting untuk lulusan SMK yang tidak semuanya mau kuliah.
+
+**Yang ditambahkan:**
+- `lib/soal-d4.ts` + `types/index.ts`: pertanyaan baru `asal_sekolah` (SMA/SMK) dan `jurusan_smk` (15 jurusan SMK populer, tampil kondisional via `showIf`). Lihat `app/tes/d4/page.tsx` untuk pola filter pertanyaan aktif.
+- `lib/knowledge/anxiety-framework.ts`: 2 `AnxietyType` baru — `SMK_JALUR_GANDA`, `SMK_SKILL_VS_GELAR`.
+- `lib/knowledge/decision-engine.ts` (BARU): `tentukanJalurFokus()` — fungsi deterministik (non-AI) yang menentukan mode laporan (`kuliah`/`kerja`/`hybrid`) dari jawaban D4, dipanggil di `lib/laporan.ts` SEBELUM prompt dibangun. Sudah diuji standalone via tsx (lihat hasil di riwayat sesi ini): SMA+PTN → kuliah, SMK+KERJA → kerja, SMK+campuran → hybrid.
+- `lib/prompts/premium-report-v3.ts`: jadi `buildPremiumPrompt(mode)` — mode `kerja` mengganti blok "jurusan kuliah" dengan `jalur_vokasi` (entry career ladder + sertifikasi + jalur naik karier tanpa kuliah dulu).
+- `lib/db-knowledge.ts`: `ambilKandidatProfesi()` dapat parameter `vokasiOnly` — saat mode kerja/hybrid, hanya kandidat dengan `jenjang_masuk` mencakup SMA/SMK yang dipakai (kolom dari `supabase-migration-004-vokasi.sql`, **sudah dijalankan** oleh user di Supabase SQL Editor). Diverifikasi langsung query ke Supabase: 30 dari 47 profesi reachable dari SMA/SMK.
+- `components/hasil/PremiumReportV3Renderer.tsx`: render kondisional blok jurusan vs jalur_vokasi.
+- Basis pengetahuan diperluas BESAR: jurusan 10→40 (file baru di `assets/knowledge/majors/`, termasuk 4 program D3/D4 vokasi), kampus 20→30 (+ politeknik negeri), profesi 20→47 (27 di antaranya entry-level reachable dari SMA/SMK, dengan `sertifikasi_terkait`). Semua sudah di-import/seed ke Supabase production project (satu-satunya DB yang ada, tidak ada DB lokal terpisah).
+- `lib/prompts/README.md` (BARU): dokumen tunggal yang menjelaskan kenapa sistem ini bukan "cuma prompt" (anxiety detection + decision engine + DB grounding + RAG = IP yang tidak bisa di-copy-paste), dan definisi eksplisit free vs paid. **Baca ini duluan** kalau lanjut development di engine laporan.
+- Efisiensi token: `STYLE_GUIDE` dipangkas dari UI-microcopy lengkap (~73 baris) ke versi khusus narasi (~17 baris); `KOMBINASI_TABLES` sekarang hanya disisipkan kalau grounding database+RAG kosong, bukan selalu-include.
+- Cleanup: `lib/prompts/premium-report-v1.md`/`v2.md` (tidak terpakai) dipindah ke `lib/prompts/archive/`; `components/hasil/PremiumLockCard.tsx` (dead code, harga basi Rp 59.000) dihapus.
+
+**BLOCKER yang belum selesai — perlu user beresin:**
+API key Gemini di `.env.local` (`GEMINI_API_KEY`) kena `limit: 0` untuk **semua** model yang dicoba (`gemini-2.5-pro` maupun `gemini-2.0-flash`) — bukan rate limit sementara, tapi free-tier quota = 0 untuk seluruh project/API key ini. Ini soal billing/akun Google, bukan soal kode. Akibatnya: laporan gratis & premium **belum bisa divalidasi dengan generate AI sungguhan** di sesi ini — semua bagian non-AI (form D4 baru, decision engine, filter database, build, UI) sudah diverifikasi jalan benar, tapi output JSON dari Gemini untuk mode kuliah vs kerja belum pernah dilihat langsung.
+- Untuk lanjut: aktifkan billing di https://aistudio.google.com/apikey atau Google Cloud Console untuk project API key ini, atau ganti ke API key lain yang punya kuota gemini-2.5-pro, lalu test ulang via `/dashboard` → "Generate Laporan Gratis", dan simulasi bayar (tombol dev-simulate sudah ada di `/hasil` dan `/laporan/[id]`, hanya aktif saat `NODE_ENV=development`).
+- Setelah kuota beres, jalankan ulang `npm run dev`, buat 2 akun uji (satu jalur PTN/SMA, satu jalur KERJA/SMK), dan bandingkan apakah laporan premium-nya benar-benar beda struktur (jurusan vs jalur_vokasi) — itu bukti akhir bahwa conditional report engine bekerja end-to-end, bukan cuma di level kode.
 
 ## Bug yang sudah diperbaiki (jangan diulang!)
 1. `app/tes/d4/page.tsx` dulu isinya copy-paste LandingPage — sudah diganti form Konteks Personal asli (7 pertanyaan dari `lib/soal-d4.ts`).

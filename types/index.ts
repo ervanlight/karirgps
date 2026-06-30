@@ -17,6 +17,11 @@ export type WorkValueScores = Record<WorkValueCode, number>
 
 // --- DIMENSI 4: KONTEKS PERSONAL ---
 export type TahapCode = 'SMA10' | 'SMA11' | 'SMA12' | 'LULUS' | 'MABA'
+export type AsalSekolahCode = 'SMA' | 'SMK'
+export type JurusanSmkCode =
+  | 'TKJ' | 'RPL' | 'AKL' | 'MULTIMEDIA' | 'TATA_BOGA' | 'TATA_BUSANA'
+  | 'PERHOTELAN' | 'OTOMOTIF' | 'ELEKTRONIKA' | 'FARMASI' | 'KEPERAWATAN'
+  | 'AGRIBISNIS' | 'DESAIN_GRAFIS' | 'ADM_PERKANTORAN' | 'PEMASARAN' | 'LAINNYA'
 export type DomisiliCode =
   | 'JABODETABEK'
   | 'JAWA_BESAR'
@@ -34,6 +39,8 @@ export type MobilitasCode = 'TERBUKA' | 'PREFERENSI' | 'TETAP'
 
 export interface KonteksPersonal {
   tahap: TahapCode
+  asal_sekolah: AsalSekolahCode
+  jurusan_smk?: JurusanSmkCode
   domisili: DomisiliCode
   jalur: JalurCode[]
   kondisi_biaya: KondisiBiayaCode
@@ -209,13 +216,28 @@ export type ProfesiRekomendasi = {
   catatan?: string
 }
 
+export type JalurVokasiItem = {
+  nama: string                   // nama posisi/jalur entry-level yang realistis
+  gambaran_nyata: string         // apa yang dikerjakan sehari-hari + di mana biasanya tersedia
+  cara_masuk: string             // jalur masuk realistis dari latar SMK/SMA (lamaran, magang, tes kerja)
+  sertifikasi_pendukung: string  // sertifikasi/kursus singkat yang menaikkan daya saing
+  potensi_naik_kelas: string     // jalur naik karier dari posisi ini tanpa kuliah dulu
+}
+
+// 'kuliah': fokus 3 jurusan kuliah. 'kerja': fokus jalur_vokasi (tanpa kuliah dulu).
+// 'hybrid': tampilkan keduanya secara proporsional. Ditentukan oleh
+// lib/knowledge/decision-engine.ts SEBELUM laporan di-generate.
+export type JalurFokusReport = 'kuliah' | 'kerja' | 'hybrid'
+
 export type PremiumReportV3 = {
   report_type: 'premium_report_v3'
+  jalur_fokus?: JalurFokusReport
   profil_singkat: string
   pembuka: string
   profil_kepribadian: string
   nilai_kerja: string
-  jurusan: JurusanRekomendasi[]
+  jurusan?: JurusanRekomendasi[]      // hadir saat jalur_fokus 'kuliah' atau 'hybrid'
+  jalur_vokasi?: JalurVokasiItem[]    // hadir saat jalur_fokus 'kerja' atau 'hybrid'
   profesi: ProfesiRekomendasi[]
   kekuatan: string[]
   perlu_diwaspadai: string[]

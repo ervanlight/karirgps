@@ -9,11 +9,16 @@ export default function TesD4Page() {
   const router = useRouter()
   const { d4_konteks, setD4, hitungSemua } = useTesStore()
 
-  const totalAnswered = D4_PERTANYAAN.filter((p) => {
+  const pertanyaanAktif = D4_PERTANYAAN.filter((p) => {
+    if (!('showIf' in p) || !p.showIf) return true
+    return d4_konteks[p.showIf.id as keyof typeof d4_konteks] === p.showIf.kode
+  })
+
+  const totalAnswered = pertanyaanAktif.filter((p) => {
     const v = d4_konteks[p.id as keyof typeof d4_konteks]
     return p.multiple ? Array.isArray(v) && v.length > 0 : !!v
   }).length
-  const totalSoal = D4_PERTANYAAN.length
+  const totalSoal = pertanyaanAktif.length
   const canProceed = totalAnswered === totalSoal
 
   function handleSelect(pertanyaanId: string, kode: string, multiple: boolean) {
@@ -48,7 +53,7 @@ export default function TesD4Page() {
       total={totalSoal}
     >
       <div className="space-y-8">
-        {D4_PERTANYAAN.map((p, i) => {
+        {pertanyaanAktif.map((p, i) => {
           const value = d4_konteks[p.id as keyof typeof d4_konteks]
           return (
             <div key={p.id} className="bg-white border border-surface-200 rounded-3xl p-6 md:p-8 shadow-sm transition-shadow hover:shadow-soft">

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-server'
-import { GoogleGenAI, Type, Schema } from '@google/genai'
+import { getClaudeClient, CLAUDE_MODEL, extractJsonText } from '@/lib/claude-client'
 import type { ProfilData } from '@/types'
 import { getAnxietyContext } from '@/lib/knowledge/anxiety-framework'
 import { freeReportPrompt } from '@/lib/prompts/free-report'
@@ -8,49 +8,6 @@ import { BRAND_VOICE } from '@/lib/knowledge/brand-voice'
 import { STYLE_GUIDE } from '@/lib/knowledge/style-guide'
 
 export const maxDuration = 60
-
-// Gunakan API Key jamak jika ada (dipisah koma) untuk mengelabui rate limit, atau fallback ke 1 key
-const apiKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean)
-
-function getAvailableAiClient() {
-  const randomKey = apiKeys[Math.floor(Math.random() * apiKeys.length)]
-  return new GoogleGenAI({ apiKey: randomKey })
-}
-
-function getFreePrompt(): string {
-  return freeReportPrompt
-}
-
-// Schema for Gemini Structured Output
-const freeReportSchemaGenAI: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    pembuka_personal: { type: Type.STRING, description: "1 kalimat pembuka yang langsung 'kena' dan empatik" },
-    identity_mirror: { type: Type.STRING, description: "3-4 kalimat refleksi psikologis mendalam (gaya belajar, pengambilan keputusan, nilai kerja). Harus terasa seperti cermin." },
-    career_direction: { type: Type.STRING, description: "Firm decision: Kuliah, Kerja, or Hybrid" },
-    direction_reasoning: { type: Type.STRING, description: "2-3 kalimat alasan strategis di balik arah tersebut, hubungkan dengan kondisi nyata mereka (biaya/akademik)." },
-    career_options: { 
-      type: Type.ARRAY, 
-      items: { 
-        type: Type.OBJECT,
-        properties: {
-          nama: { type: Type.STRING },
-          deskripsi_singkat: { type: Type.STRING }
-        },
-        required: ["nama", "deskripsi_singkat"]
-      }, 
-      description: "Tepat 3 opsi karir yang sangat spesifik" 
-    },
-    roadmap: { type: Type.STRING, description: "2-3 kalimat langkah konkret untuk 6 bulan ke depan" },
-    key_risk: { type: Type.STRING, description: "1-2 kalimat menyoroti blind spot psikologis atau strategis yang harus diwaspadai" },
-    insight_moment: { type: Type.STRING, description: "1 kalimat puitis dan powerful yang memvalidasi potensi atau struggle mereka" },
-    premium_curious_gap: { type: Type.STRING, description: "1-2 kalimat secara halus menyinggung bahwa simulasi 5 tahun dan jurusan spesifik ada di laporan premium" }
-  },
-  required: [
-    "pembuka_personal", "identity_mirror", "career_direction", "direction_reasoning", "career_options", 
-    "roadmap", "key_risk", "insight_moment", "premium_curious_gap"
-  ]
-}
 
 export async function POST(req: Request) {
   try {
@@ -71,22 +28,25 @@ export async function POST(req: Request) {
     if (error || !session) return NextResponse.json({ error: 'Session not found' }, { status: 404 })
 
     const profilData = session.profil_data as ProfilData
-    
+
     if (profilData.free_report) {
       return NextResponse.json({ report: profilData.free_report })
     }
 
     const anxiety = getAnxietyContext(profilData.d4_konteks)
 
-    const promptText = `---
+    // System prompt statis (instruksi laporan gratis + brand voice + style guide)
+    // sama persis di setiap panggilan -- di-cache lewat cache_control supaya
+    // hemat token (lihat lib/prompts/README.md).
+    const systemPrompt = `${freeReportPrompt}
+
 IDENTITAS & TONE VOICE (WAJIB DIIKUTI)
 ${BRAND_VOICE}
 
 STYLE GUIDE BAHASA (WAJIB DIIKUTI)
-${STYLE_GUIDE}
----
+${STYLE_GUIDE}`
 
-[DATA PROFIL SISWA]
+    const userContent = `[DATA PROFIL SISWA]
 - D1 (RIASEC): ${profilData.d1_riasec.holland_code.join('')} (${profilData.d1_riasec.deskripsi_primer}, ${profilData.d1_riasec.deskripsi_sekunder})
 - D2 (MI): ${profilData.d2_mi.mi_profile.join(', ')} (${profilData.d2_mi.deskripsi_primer}, ${profilData.d2_mi.deskripsi_sekunder})
 - D3 (Work Values): ${profilData.d3_workvalues.values_profile.join(', ')} (${profilData.d3_workvalues.deskripsi_primer}, ${profilData.d3_workvalues.deskripsi_sekunder})
@@ -101,24 +61,17 @@ ${STYLE_GUIDE}
 [KONTEKS KEGELISAHAN/ANXIETY USER]
 - Primary Anxiety: ${anxiety.primaryAnxiety}
 - Secondary Anxiety: ${anxiety.secondaryAnxiety || 'N/A'}
-- Analisis Konteks: ${anxiety.contextDescription}
-`;
+- Analisis Konteks: ${anxiety.contextDescription}`
 
-    const ai = getAvailableAiClient()
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
-      contents: promptText,
-      config: {
-        systemInstruction: getFreePrompt(),
-        responseMimeType: 'application/json',
-        responseSchema: freeReportSchemaGenAI,
-        temperature: 0.7
-      }
+    const client = getClaudeClient()
+    const response = await client.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 2000,
+      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: userContent }],
     })
 
-    let resultText = response.text || ''
-    resultText = resultText.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
-    const reportData = JSON.parse(resultText)
+    const reportData = JSON.parse(extractJsonText(response))
 
     // Ensure array is capped to 3
     if (Array.isArray(reportData.career_options)) {
@@ -139,9 +92,9 @@ ${STYLE_GUIDE}
     return NextResponse.json({ report: reportData })
   } catch (error: any) {
     console.error('Laporan Gratis Error:', error)
-    if (error?.status === 429 || error?.message?.includes('Quota exceeded') || error?.message?.includes('429')) {
-      return NextResponse.json({ 
-        error: 'Trafik AI sedang penuh (Limit Google tercapai). Harap tunggu sekitar 1 menit, lalu klik Coba Lagi.' 
+    if (error?.status === 429) {
+      return NextResponse.json({
+        error: 'Trafik AI sedang penuh. Harap tunggu sekitar 1 menit, lalu klik Coba Lagi.'
       }, { status: 429 })
     }
     return NextResponse.json({ error: 'Gagal memproses laporan gratis. Coba beberapa saat lagi.' }, { status: 500 })
